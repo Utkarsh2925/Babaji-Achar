@@ -1159,15 +1159,15 @@ const AppContent: React.FC = () => {
 
                       {/* PhonePe Button */}
                       <a
-                        href={`upi://pay?pa=8005112529@ybl&pn=BabajiAchar&am=${cartValues.finalTotal}&tn=Order for ${user?.name || 'Guest'}&cu=INR`}
+                        href={`upi://pay?pa=9555809329@ybl&pn=BabajiAchar&am=${cartValues.finalTotal}&tn=Order for ${user?.name || 'Guest'}&cu=INR`}
                         className="bg-white border-2 border-stone-200 hover:border-[#5f259f] p-4 rounded-xl flex items-center justify-center gap-3 shadow-sm transition-all active:scale-95"
                       >
                         <span className="font-black text-[#5f259f] text-xl">PhonePe</span>
                       </a>
 
-                      {/* GPay Button */}
+                      {/* GPay Button - Updated to reliable VPA */}
                       <a
-                        href={`upi://pay?pa=ish29102003@okicici&pn=BabajiAchar&am=${cartValues.finalTotal}&tn=Order for ${user?.name || 'Guest'}&cu=INR`}
+                        href={`upi://pay?pa=9555809329@ybl&pn=BabajiAchar&am=${cartValues.finalTotal}&tn=Order for ${user?.name || 'Guest'}&cu=INR`}
                         className="bg-white border-2 border-stone-200 hover:border-[#EA4335] p-4 rounded-xl flex items-center justify-center gap-3 shadow-sm transition-all active:scale-95"
                       >
                         <span className="font-black text-stone-600 text-xl group-hover:text-[#EA4335]"><span className="text-[#4285F4]">G</span><span className="text-[#EA4335]">P</span><span className="text-[#FBBC05]">a</span><span className="text-[#34A853]">y</span></span>
@@ -1205,7 +1205,7 @@ const AppContent: React.FC = () => {
                   setCurrentOrder(newOrder);
                   setCart([]);
                   navigate('SUCCESS');
-                }} className="w-full bg-orange-800 text-white py-5 rounded-2xl font-black text-xl shadow-xl hover:bg-orange-950 transition-all active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap mt-8">Place Order <CheckCircle2 size={24} /></button>
+                }} className="w-full bg-orange-800 text-white py-5 rounded-2xl font-black text-xl shadow-xl hover:bg-orange-950 transition-all active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap mt-8">Step 2: Paid in App? Place Order <CheckCircle2 size={24} /></button>
               </div>
             </div>
           </div>
