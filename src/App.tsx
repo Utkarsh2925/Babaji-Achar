@@ -696,7 +696,7 @@ const AppContent: React.FC = () => {
 
 
 
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-6 sm:gap-8 xl:gap-10 relative z-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 xl:gap-12 relative z-10">
                 {filteredProducts.map(p => {
                   const inStockVariant = p.variants.find(v => v.stock > 0) || p.variants[0];
                   const isAllOutOfStock = p.variants.every(v => v.stock <= 0);
@@ -1198,13 +1198,10 @@ const AppContent: React.FC = () => {
 
                   if (!name || !addr || !pin || !phone || !utr) return alert("Please fill all details");
 
-                  const lastOrderNum = orders.reduce((max, o) => {
-                    const num = parseInt(o.id.split('#')[1] || '0');
-                    return num > max ? num : max;
-                  }, 0);
-                  const nextOrderNumber = lastOrderNum + 1;
+                  // Random 6-digit Order ID
+                  const randomOrderId = Math.floor(100000 + Math.random() * 900000);
                   const newOrder: Order = {
-                    id: `Order #${nextOrderNumber}`,
+                    id: `Order #${randomOrderId}`,
                     date: new Date().toISOString(),
                     status: 'Pending_Payment',
                     items: cart,
