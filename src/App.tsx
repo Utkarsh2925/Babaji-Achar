@@ -6,7 +6,7 @@ import {
   MessageCircle, Package, XCircle, LogIn, Settings, Phone, ArrowRight, Shield,
   ImageIcon, Mail
 } from 'lucide-react';
-import { BRAND_CONFIG, INITIAL_PRODUCTS, GET_ACTIVE_FESTIVAL } from './constants';
+import { BRAND_CONFIG, INITIAL_PRODUCTS, GET_ACTIVE_FESTIVAL, UI_TEXT } from './constants';
 import type { Product, CartItem, Order, OrderStatus, User, Review } from './types';
 
 // --- COMPONENTS ---
@@ -53,29 +53,6 @@ const WhatsAppIcon = ({ size = 24, className = "" }) => (
   </svg>
 );
 
-// --- TRANSLATIONS ---
-const UI_TEXT = {
-  hi: {
-    home: "होम", shop: "दुकान", cart: "कार्ट", checkout: "चेकआउट", back: "वापस", add: "कार्ट में जोड़ें",
-    orderNow: "अभी आर्डर करें", serving: "केवल प्रयागराज में डिलीवरी", delivery: "डिलीवरी", total: "कुल राशि",
-    address: "पता", name: "पूरा नाम", phone: "फोन नंबर", utr: "UTR / ट्रांजैक्शन ID", search: "अचार खोजें...",
-    all: "सभी", mix: "मिश्रित", mango: "आम", aawla: "आंवला", kathal: "कटहल", lemon: "नींबू", chilli: "मिर्च", special: "खास ऑफर",
-    login: "लॉगिन", signup: "साइन अप", account: "खाता", logout: "लॉगआउट",
-    reviews: "ग्राहक समीक्षा", writeReview: "अपनी समीक्षा लिखें", submitReview: "समीक्षा सबमिट करें", noReviews: "अभी तक कोई समीक्षा नहीं है।", verifiedBuyer: "सत्यापित खरीदार", rating: "रेटिंग", comment: "टिप्पणी",
-    trackOrder: "ऑर्डर ट्रैकिंग", adminPanel: "एडमिन डैशबोर्ड", manageOrders: "ऑर्डर प्रबंधित करें", updateStatus: "स्थिति बदलें",
-    suran: "सूरन (जिमीकंद)"
-  },
-  en: {
-    home: "Home", shop: "Shop", cart: "Cart", checkout: "Checkout", back: "Back", add: "Add to Cart",
-    orderNow: "Order Now", serving: "Delivery only in Prayagraj", delivery: "Delivery", total: "Total Amount",
-    address: "Address", name: "Full Name", phone: "Phone Number", utr: "UTR / Transaction ID", search: "Search Pickles...",
-    all: "All", mix: "Mixed", mango: "Mango", aawla: "Aawla", kathal: "Kathal", lemon: "Lemon", chilli: "Chilli", special: "Special Offers",
-    login: "Login", signup: "Sign Up", account: "Account", logout: "Logout",
-    reviews: "Customer Reviews", writeReview: "Write your review", submitReview: "Submit Review", noReviews: "No reviews yet.", verifiedBuyer: "Verified Buyer", rating: "Rating", comment: "Comment",
-    trackOrder: "Order Tracking", adminPanel: "Admin Dashboard", manageOrders: "Manage Orders", updateStatus: "Update Status",
-    suran: "Suran (Yam)"
-  }
-};
 
 import { NotificationProvider, useNotification } from './components/Notifications';
 import Analytics from './components/Analytics';
@@ -140,10 +117,8 @@ const AppContent: React.FC = () => {
   const t = UI_TEXT[lang];
   const festival = useMemo(() => GET_ACTIVE_FESTIVAL(), []);
 
-  // --- UI HELPERS ---
-  // const backgroundIcons = festival ? festival.icons : ['🌶️', '🍋', '🧄', '🥬', '🌿', '🎋', '🍅', '🧂', '🥜', '🧅', '🥕', '🥭', '🌶️', '🍋', '🥭', '🧄', '🌿', '🌰'];
-
   useEffect(() => {
+    // 1. Support Logic (Orders, User, Stores, Products)
     try {
       const savedOrders = localStorage.getItem('bj_orders');
       if (savedOrders) setOrders(JSON.parse(savedOrders));
@@ -163,8 +138,6 @@ const AppContent: React.FC = () => {
       if (savedStores) setStores(JSON.parse(savedStores));
     } catch (e) { console.error("Failed to load stores", e); }
 
-    // Merge Strategy: Always use INITIAL_PRODUCTS for content (images, names), 
-    // but restore STOCK levels from localStorage if available.
     try {
       const savedProducts = localStorage.getItem('bj_products');
       if (savedProducts) {
@@ -175,7 +148,6 @@ const AppContent: React.FC = () => {
             if (savedProd) {
               const mergedVariants = initProd.variants.map(initVar => {
                 const savedVar = savedProd.variants?.find((v: any) => v.id === initVar.id);
-                // Only preserve stock, use code for everything else
                 return savedVar ? { ...initVar, stock: savedVar.stock } : initVar;
               });
               return { ...initProd, variants: mergedVariants };
@@ -183,17 +155,45 @@ const AppContent: React.FC = () => {
             return initProd;
           });
           setProducts(mergedProducts);
-        } else {
-          setProducts(INITIAL_PRODUCTS);
         }
-      } else {
-        setProducts(INITIAL_PRODUCTS);
       }
-    } catch (e) {
-      console.error("Failed to parse saved products", e);
-      setProducts(INITIAL_PRODUCTS);
-    }
+    } catch (e) { console.error("Failed to load products", e); }
+
+    // 2. Extended Hydration (Cart, Lang, Coupon, Stack)
+    try {
+      const savedCart = localStorage.getItem('bj_cart');
+      if (savedCart) setCart(JSON.parse(savedCart));
+    } catch (e) { console.error("Failed to load cart", e); }
+
+    try {
+      const savedLang = localStorage.getItem('bj_lang') as 'hi' | 'en';
+      if (savedLang) setLang(savedLang);
+    } catch (e) { console.error("Failed to load lang", e); }
+
+    try {
+      const savedStack = localStorage.getItem('bj_view_stack');
+      if (savedStack) {
+        const parsedStack = JSON.parse(savedStack);
+        if (Array.isArray(parsedStack) && parsedStack.length > 0) {
+          setViewStack(parsedStack);
+        }
+      }
+    } catch (e) { console.error("Failed to load view stack", e); }
+
+    try {
+      const savedCoupon = localStorage.getItem('bj_coupon');
+      if (savedCoupon) setAppliedCoupon(JSON.parse(savedCoupon));
+    } catch (e) { console.error("Failed to load coupon", e); }
   }, []);
+
+  // --- PERSISTENCE OBSERVERS ---
+  useEffect(() => { localStorage.setItem('bj_cart', JSON.stringify(cart)); }, [cart]);
+  useEffect(() => { localStorage.setItem('bj_lang', lang); }, [lang]);
+  useEffect(() => { localStorage.setItem('bj_view_stack', JSON.stringify(viewStack)); }, [viewStack]);
+  useEffect(() => {
+    if (appliedCoupon) localStorage.setItem('bj_coupon', JSON.stringify(appliedCoupon));
+    else localStorage.removeItem('bj_coupon');
+  }, [appliedCoupon]);
 
   const updateProductVariant = (productId: string, variantId: string, newStock: number) => {
     const updatedProducts = products.map(p => {
@@ -440,11 +440,11 @@ const AppContent: React.FC = () => {
           {/* Floating Offer Icons (Restricted to Banner) */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
             {festival.icons.map((icon, i) => (
-              <span key={i} className="absolute animate-pulse" style={{
-                top: `${Math.random() * 80}%`,
-                left: `${Math.random() * 95}%`,
-                fontSize: Math.random() > 0.5 ? '1.2rem' : '0.8rem',
-                animationDuration: `${2 + Math.random() * 3}s`
+              <span key={i} className="absolute text-orange-200/20 animate-pulse pointer-events-none transition-all duration-1000" style={{
+                top: `${(i * 13) % 80}%`,
+                left: `${(i * 17) % 95}%`,
+                fontSize: i % 2 === 0 ? '1.2rem' : '0.8rem',
+                animationDuration: `${2 + (i % 3)}s`
               }}>{icon}</span>
             ))}
           </div>
@@ -467,8 +467,8 @@ const AppContent: React.FC = () => {
         <div className="absolute inset-0 z-0 pointer-events-none opacity-70 select-none overflow-hidden">
           {['🌶️', '🍋', '🧄', '🥬', '🌿', '🎋', '🍅', '🧂', '🥜', '🧅', '🥕', '🥭'].map((icon, i) => (
             <div key={i} className={`absolute animate-[float_${4 + (i % 5)}s_ease-in-out_infinite] text-${i % 3 === 0 ? '3xl' : '2xl'} opacity-${i % 2 === 0 ? '80' : '60'}`} style={{
-              top: `${Math.random() * 90}%`,
-              left: `${Math.random() * 90}%`,
+              top: `${(i * 23) % 90}%`,
+              left: `${(i * 19) % 90}%`,
               animationDelay: `${i * 200}ms`
             }}>
               {icon}
@@ -699,13 +699,13 @@ const AppContent: React.FC = () => {
                   const isAllOutOfStock = p.variants.every(v => v.stock <= 0);
 
                   return (
-                    <div key={p.id} className="group bg-white/95 backdrop-blur-md rounded-2xl overflow-hidden shadow-lg border border-amber-100 flex flex-col transition-all hover:shadow-2xl hover:-translate-y-2 hover:border-amber-300">
-                      <div className="relative aspect-[4/3] overflow-hidden cursor-pointer" onClick={() => { setSelectedProduct(p); setActiveImage(null); setSelectedVariantId(inStockVariant.id); navigate('DETAILS'); }}>
+                    <div key={p.id} className="group bg-white/95 backdrop-blur-md rounded-[2.5rem] overflow-hidden shadow-lg border border-amber-100 flex flex-col transition-all hover:shadow-2xl hover:-translate-y-2 hover:border-amber-300 p-2">
+                      <div className="relative aspect-square rounded-[2rem] overflow-hidden cursor-pointer" onClick={() => { setSelectedProduct(p); setActiveImage(null); setSelectedVariantId(inStockVariant.id); navigate('DETAILS'); }}>
                         <ImageWithFallback
                           src={p.mainImage}
                           alt={`${p.name[lang]} - 100% Organic Traditional Achar`}
                           loading="lazy"
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 rounded-t-2xl sm:rounded-t-3xl"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         <div className="absolute top-3 left-3 z-10">
@@ -834,8 +834,8 @@ const AppContent: React.FC = () => {
             </button>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-20">
               <div className="space-y-6 sm:space-y-10 max-w-md mx-auto lg:max-w-none">
-                <div className="relative rounded-3xl sm:rounded-[3rem] overflow-hidden border-4 border-white bg-white aspect-square shadow-xl w-3/5 lg:w-1/2 mx-auto">
-                  <ImageWithFallback src={activeImage || selectedProduct.mainImage} alt={selectedProduct.name[lang]} className="w-full h-full object-contain p-4 rounded-3xl sm:rounded-[2.5rem]" />
+                <div className="relative rounded-3xl sm:rounded-[3rem] overflow-hidden border-4 border-white bg-white aspect-square shadow-xl w-3/5 lg:w-1/2 mx-auto p-4">
+                  <ImageWithFallback src={activeImage || selectedProduct.mainImage} alt={selectedProduct.name[lang]} className="w-full h-full object-contain rounded-2xl sm:rounded-[2rem]" />
                 </div>
                 <div className="flex flex-wrap items-center justify-center gap-3">
                   <div onClick={() => setActiveImage(selectedProduct.mainImage)} className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer border-2 shadow-sm transition-all ${(!activeImage || activeImage === selectedProduct.mainImage) ? 'border-orange-600 scale-105' : 'border-white'}`}>
@@ -877,11 +877,11 @@ const AppContent: React.FC = () => {
                   {/* Action Buttons - Side by Side to match Pack Size buttons */}
                   <div className="grid grid-cols-2 gap-4">
                     <button
-                      disabled={selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock! <= 0}
+                      disabled={(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0}
                       onClick={() => { if (!user) return navigate('LOGIN'); const v = selectedProduct.variants.find(x => x.id === selectedVariantId); if (v) { setCart(prev => [...prev, { productId: selectedProduct.id, variantId: v.id, quantity: qty, productName: selectedProduct.name[lang], size: v.size, price: v.mrp, image: activeImage || selectedProduct.mainImage }]); alert('Added to cart!'); } }}
-                      className={`h-32 sm:h-36 border-4 rounded-2xl sm:rounded-3xl font-black text-2xl sm:text-3xl shadow-lg flex flex-col sm:flex-row items-center justify-center gap-2 active:scale-95 transition-all whitespace-nowrap ${selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock! <= 0 ? 'bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed' : 'bg-white text-orange-950 border-orange-200 hover:bg-orange-50 hover:border-orange-300'}`}
+                      className={`h-32 sm:h-36 border-4 rounded-2xl sm:rounded-3xl font-black text-2xl sm:text-3xl shadow-lg flex flex-col sm:flex-row items-center justify-center gap-2 active:scale-95 transition-all whitespace-nowrap ${(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? 'bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed' : 'bg-white text-orange-950 border-orange-200 hover:bg-orange-50 hover:border-orange-300'}`}
                     >
-                      <ShoppingCart size={32} /> {selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock! <= 0 ? (lang === 'hi' ? 'स्टॉक खत्म' : 'Out of Stock') : t.add}
+                      <ShoppingCart size={32} /> {(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? (lang === 'hi' ? 'स्टॉक खत्म' : 'Out of Stock') : t.add}
                     </button>
                     <button
                       onClick={() => {
@@ -896,9 +896,9 @@ const AppContent: React.FC = () => {
                         setCart(prev => [...prev, { productId: selectedProduct.id, variantId: v.id, quantity: qty, productName: selectedProduct.name[lang], size: v.size, price: v.mrp, image: activeImage || selectedProduct.mainImage }]);
                         navigate('CHECKOUT');
                       }}
-                      className={`h-32 sm:h-36 border-4 rounded-2xl sm:rounded-3xl font-black text-2xl sm:text-3xl shadow-lg flex flex-col sm:flex-row items-center justify-center gap-2 active:scale-95 transition-all whitespace-nowrap ${selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock! <= 0 ? 'bg-amber-100 text-amber-900 border-amber-200 hover:bg-amber-200' : 'bg-orange-50 text-orange-900 border-orange-200 hover:bg-orange-100 hover:border-orange-300'}`}
+                      className={`h-32 sm:h-36 border-4 rounded-2xl sm:rounded-3xl font-black text-2xl sm:text-3xl shadow-lg flex flex-col sm:flex-row items-center justify-center gap-2 active:scale-95 transition-all whitespace-nowrap ${(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? 'bg-amber-100 text-amber-900 border-amber-200 hover:bg-amber-200' : 'bg-orange-50 text-orange-900 border-orange-200 hover:bg-orange-100 hover:border-orange-300'}`}
                     >
-                      {selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock! <= 0 ? (lang === 'hi' ? 'निवेदन भेजें' : 'Request Order') : t.orderNow} <ArrowRight size={32} />
+                      {(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? (lang === 'hi' ? 'निवेदन भेजें' : 'Request Order') : t.orderNow} <ArrowRight size={32} />
                     </button>
                   </div>
                 </div>

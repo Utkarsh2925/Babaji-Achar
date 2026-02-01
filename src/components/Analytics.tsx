@@ -29,28 +29,28 @@ const Analytics = () => {
 
         // 2. Google Tag Manager
         if (ANALYTICS_CONFIG.GTM_CONTAINER_ID) {
-            (function (w: any, d: any, s: any, l: any, i: any) {
-                w[l] = w[l] || [];
-                w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
-                var f = d.getElementsByTagName(s)[0],
-                    j = d.createElement(s),
-                    dl = l !== 'dataLayer' ? '&l=' + l : '';
+            (function (w: Window, d: Document, s: string, l: string, i: string) {
+                (w as any)[l] = (w as any)[l] || [];
+                (w as any)[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+                const f = d.getElementsByTagName(s)[0];
+                const j = d.createElement(s) as HTMLScriptElement;
+                const dl = l !== 'dataLayer' ? '&l=' + l : '';
                 j.async = true;
                 j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
-                f.parentNode.insertBefore(j, f);
+                f.parentNode?.insertBefore(j, f);
             })(window, document, 'script', 'dataLayer', ANALYTICS_CONFIG.GTM_CONTAINER_ID);
         }
 
         // 3. Microsoft Clarity
         if (ANALYTICS_CONFIG.CLARITY_PROJECT_ID) {
-            (function (c: any, l: any, a: any, r: any, i: any) {
-                c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments) };
-                const t = l.createElement(r);
-                t.async = 1;
+            (function (c: any, l: Document, a: string, r: string, i: string) {
+                c[a] = c[a] || function (...args: any[]) { (c[a].q = c[a].q || []).push(args) };
+                const t = l.createElement(r) as HTMLScriptElement;
+                t.async = true;
                 t.src = "https://www.clarity.ms/tag/" + i;
                 const y = l.getElementsByTagName(r)[0];
-                y.parentNode.insertBefore(t, y);
-            })(window, document, "clarity", "script", ANALYTICS_CONFIG.CLARITY_PROJECT_ID);
+                y.parentNode?.insertBefore(t, y);
+            })(window as any, document, "clarity", "script", ANALYTICS_CONFIG.CLARITY_PROJECT_ID);
         }
 
         // 4. Google Verification Meta Tag

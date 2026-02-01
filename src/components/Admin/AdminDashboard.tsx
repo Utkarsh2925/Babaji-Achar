@@ -25,6 +25,20 @@ interface AdminDashboardProps {
 
 type AdminView = 'OVERVIEW' | 'ORDERS' | 'PRODUCTS' | 'DATA' | 'STORES';
 
+const NavItem = ({ view, icon: Icon, label, currentView, onClick }: { view: AdminView; icon: any; label: string; currentView: AdminView; onClick: (view: AdminView) => void }) => (
+    <button
+        onClick={() => onClick(view)}
+        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold ${currentView === view
+            ? 'bg-amber-100 text-orange-900 shadow-sm'
+            : 'text-stone-500 hover:bg-stone-50 hover:text-orange-800'
+            } `}
+    >
+        <Icon size={20} />
+        <span>{label}</span>
+        {currentView === view && <ChevronRight size={16} className="ml-auto" />}
+    </button>
+);
+
 const AdminDashboard: React.FC<AdminDashboardProps> = ({
     orders,
     products,
@@ -42,19 +56,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-    const NavItem = ({ view, icon: Icon, label }: { view: AdminView; icon: any; label: string }) => (
-        <button
-            onClick={() => { setCurrentView(view); setIsSidebarOpen(false); }}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold ${currentView === view
-                ? 'bg-amber-100 text-orange-900 shadow-sm'
-                : 'text-stone-500 hover:bg-stone-50 hover:text-orange-800'
-                } `}
-        >
-            <Icon size={20} />
-            <span>{label}</span>
-            {currentView === view && <ChevronRight size={16} className="ml-auto" />}
-        </button>
-    );
+    const handleNavClick = (view: AdminView) => {
+        setCurrentView(view);
+        setIsSidebarOpen(false);
+    };
 
     return (
         <div className="min-h-screen bg-stone-50 flex font-sans">
@@ -83,11 +88,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     </div>
 
                     <nav className="space-y-2 flex-grow">
-                        <NavItem view="OVERVIEW" icon={LayoutDashboard} label="Overview" />
-                        <NavItem view="ORDERS" icon={ShoppingBag} label="Orders" />
-                        <NavItem view="PRODUCTS" icon={Package} label="Products" />
-                        <NavItem view="STORES" icon={MapPin} label="Stores" />
-                        <NavItem view="DATA" icon={Database} label="Data Centre" />
+                        <NavItem view="OVERVIEW" icon={LayoutDashboard} label="Overview" currentView={currentView} onClick={handleNavClick} />
+                        <NavItem view="ORDERS" icon={ShoppingBag} label="Orders" currentView={currentView} onClick={handleNavClick} />
+                        <NavItem view="PRODUCTS" icon={Package} label="Products" currentView={currentView} onClick={handleNavClick} />
+                        <NavItem view="STORES" icon={MapPin} label="Stores" currentView={currentView} onClick={handleNavClick} />
+                        <NavItem view="DATA" icon={Database} label="Data Centre" currentView={currentView} onClick={handleNavClick} />
                     </nav>
 
                     <div className="pt-6 border-t border-stone-100 space-y-2">

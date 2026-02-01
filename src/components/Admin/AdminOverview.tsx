@@ -7,25 +7,25 @@ interface AdminOverviewProps {
     products: Product[];
 }
 
+const StatCard = ({ title, value, icon: Icon, color, subValue }: any) => (
+    <div className="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm flex items-start justify-between">
+        <div>
+            <p className="text-stone-400 font-bold text-xs uppercase tracking-wider mb-2">{title}</p>
+            <h3 className="text-3xl font-black text-stone-900">{value}</h3>
+            {subValue && <p className="text-sm text-stone-500 font-medium mt-2">{subValue}</p>}
+        </div>
+        <div className={`p-3 rounded-xl ${color}`}>
+            <Icon size={24} className="text-white" />
+        </div>
+    </div>
+);
+
 const AdminOverview: React.FC<AdminOverviewProps> = ({ orders, products }) => {
     // Calculate Stats
     const totalRevenue = orders.reduce((acc, order) => acc + order.totalAmount, 0);
     const totalOrders = orders.length;
     const pendingOrders = orders.filter(o => o.status === 'Pending_Payment' || o.status === 'Payment_Received').length;
     const lowStockProducts = products.filter(p => p.variants.some(v => v.stock < 10)).length;
-
-    const StatCard = ({ title, value, icon: Icon, color, subValue }: any) => (
-        <div className="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm flex items-start justify-between">
-            <div>
-                <p className="text-stone-400 font-bold text-xs uppercase tracking-wider mb-2">{title}</p>
-                <h3 className="text-3xl font-black text-stone-900">{value}</h3>
-                {subValue && <p className="text-sm text-stone-500 font-medium mt-2">{subValue}</p>}
-            </div>
-            <div className={`p-3 rounded-xl ${color}`}>
-                <Icon size={24} className="text-white" />
-            </div>
-        </div>
-    );
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">

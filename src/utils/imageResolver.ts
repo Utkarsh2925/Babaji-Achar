@@ -10,8 +10,8 @@ export const imageResolver = (url: string | undefined): string => {
             }
         }
         return url;
-    } catch (e) {
-        return '/images/fallback.jpg';
+    } catch {
+        return 'https://images.unsplash.com/photo-1590505677187-f9615628d068?w=800'; // Heritage pattern fallback
     }
 };
 

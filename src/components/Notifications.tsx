@@ -17,15 +17,15 @@ export const useNotification = () => useContext(NotificationContext);
 export const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
+  const removeToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
   const addToast = useCallback((type: ToastType, message: string, subMessage?: string) => {
     const id = Math.random().toString(36).substr(2, 9);
     setToasts(prev => [...prev, { id, type, message, subMessage }]);
     setTimeout(() => removeToast(id), 5000); // Auto remove after 5s
-  }, []);
-
-  const removeToast = (id: string) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
-  };
+  }, [removeToast]);
 
   return (
     <NotificationContext.Provider value={{ addToast }}>
