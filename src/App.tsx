@@ -4,7 +4,7 @@ import {
   ShoppingCart, User as UserIcon, ChevronRight, Instagram, Trash2, CheckCircle2, QrCode,
   ArrowLeft, MapPin, Plus, Minus, Globe, ShieldCheck, Search, Sparkles, Star, Leaf,
   MessageCircle, Package, XCircle, LogIn, Settings, Phone, ArrowRight, Shield,
-  ImageIcon, Mail, Copy
+  ImageIcon, Mail, Copy, AlertCircle
 } from 'lucide-react';
 import paymentQr from './assets/payment_qr.jpg';
 // import { PaymentService } from './services/PaymentService';
