@@ -1182,16 +1182,16 @@ const AppContent: React.FC = () => {
                 {/* Direct App Links - RESTORED (App Redirect Only - No Auto Fill) */}
                 <div className="grid grid-cols-1 gap-3 mb-8">
                   <p className="font-bold text-stone-800 text-sm uppercase tracking-widest text-center mb-2">{t.orPayViaApp}</p>
-                  {/* Paytm - Generic Launch */}
+                  {/* Paytm */}
                   <a href="paytmmp://" className="bg-white border-2 border-stone-200 hover:border-[#00BAF2] p-3 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95">
                     <span className="font-black text-[#00BAF2] text-lg">{t.paytm}</span>
                   </a>
-                  {/* PhonePe - Generic Launch */}
+                  {/* PhonePe */}
                   <a href="phonepe://" className="bg-white border-2 border-stone-200 hover:border-[#5f259f] p-3 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95">
                     <span className="font-black text-[#5f259f] text-lg">{t.phonepe}</span>
                   </a>
-                  {/* GPay - Generic Launch */}
-                  <a href="gpay://" className="bg-white border-2 border-stone-200 hover:border-[#EA4335] p-3 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95">
+                  {/* GPay - Android Intent Fallback */}
+                  <a href="intent://upi/#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end" className="bg-white border-2 border-stone-200 hover:border-[#EA4335] p-3 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95">
                     <span className="font-black text-stone-600 text-lg"><span className="text-[#4285F4]">G</span><span className="text-[#EA4335]">P</span><span className="text-[#FBBC05]">a</span><span className="text-[#34A853]">y</span></span>
                   </a>
                 </div>

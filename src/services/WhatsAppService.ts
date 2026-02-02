@@ -107,7 +107,7 @@ export const WhatsAppService = {
   sendOrderConfirmation: async (order: Order) => {
     console.group('%c[WhatsApp Bot] 🟢 Trigger: Order Confirmation', 'color: #25D366; font-weight: bold; font-size: 12px');
     console.log(`To: ${order.customerDetails.phone}`);
-    console.log(`Msg: "Shukriya ${order.customerDetails.fullName}! Order #${order.id} pakk gaya hai! 📦 Jald hi milega."`);
+    console.log(`Msg: "🎉 *Order Confirmed!* 🎉%0a%0aHello ${order.customerDetails.fullName},%0aYour order #${order.id} has been successfully placed and confirmed! We're excited for you to enjoy Babaji Achar!%0a%0a*Order Details:*%0a🛒 Items: ${order.items.map(item => `${item.productName} x ${item.quantity}`).join(', ')}%0a%0a💳 *Payment:* ${order.paymentMethod}%0a✅ *Payment:* Completed%0a%0a*Shipping Details:*%0a👤 Name: ${order.customerDetails.fullName}%0a📱 Phone: ${order.customerDetails.phone}%0a📍 Address: ${order.customerDetails.street}, ${order.customerDetails.city}, ${order.customerDetails.pincode}%0a%0a📝 *Note:* Main aapko payment screenshot pradan krta/karti hoon. (I will share payment screenshot).%0a%0a----------------------------------%0a*Total Amount:* ₹${order.totalAmount}%0a----------------------------------`);
     console.groupEnd();
   },
 

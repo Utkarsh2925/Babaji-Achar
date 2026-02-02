@@ -312,7 +312,7 @@ export const UI_TEXT = {
         trackOrder: "ऑर्डर ट्रैकिंग", adminPanel: "एडमिन डैशबोर्ड", manageOrders: "ऑर्डर प्रबंधित करें", updateStatus: "स्थिति बदलें",
         suran: "सूरन (जिमीकंद)",
         // Checkout & Payment
-        scanToPay: "स्कैन करके भुगतान करें", orPayViaApp: "या ऐप से भुगतान करें",
+        scanToPay: "भुगतान करें (Pay Now)", orPayViaApp: "या ऐप से भुगतान करें",
         paymentVerification: "भुगतान सत्यापन", txnId: "UTR / ट्रांजैक्शन ID",
         txnPlaceholder: "जैसे 4352xxxxxxxx", txnRequired: "* ऑटो-वेरिफिकेशन के लिए आवश्यक",
         paytm: "Paytm", phonepe: "PhonePe", gpay: "GPay",
@@ -344,7 +344,7 @@ export const UI_TEXT = {
         trackOrder: "Order Tracking", adminPanel: "Admin Dashboard", manageOrders: "Manage Orders", updateStatus: "Update Status",
         suran: "Suran (Yam)",
         // Checkout & Payment
-        scanToPay: "Scan to Pay", orPayViaApp: "Or Pay via App",
+        scanToPay: "Pay Now", orPayViaApp: "Or Pay via App",
         paymentVerification: "Payment Verification", txnId: "Transaction ID / UTR No.",
         txnPlaceholder: "e.g. 4352xxxxxxxx", txnRequired: "* Required for auto-verification",
         paytm: "Paytm", phonepe: "PhonePe", gpay: "GPay",
