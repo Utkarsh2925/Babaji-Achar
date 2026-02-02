@@ -7,7 +7,7 @@ import {
   ImageIcon, Mail, Copy
 } from 'lucide-react';
 import paymentQr from './assets/payment_qr.jpg';
-import { PaymentService } from './services/PaymentService';
+// import { PaymentService } from './services/PaymentService';
 import { WhatsAppService } from './services/WhatsAppService';
 import { BRAND_CONFIG, INITIAL_PRODUCTS, GET_ACTIVE_FESTIVAL, UI_TEXT } from './constants';
 import type { Product, CartItem, Order, OrderStatus, User, Review } from './types';
@@ -36,6 +36,7 @@ const ImageWithFallback = ({ src, alt, className = "", fallbackSrc = BRAND_CONFI
       <img
         src={imgSrc}
         alt={alt}
+        loading="lazy"
         className={`w-full h-full object-cover transition-opacity duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
         onLoad={() => setIsLoading(false)}
         onError={() => {
@@ -187,15 +188,7 @@ const AppContent: React.FC = () => {
       if (savedLang) setLang(savedLang);
     } catch (e) { console.error("Failed to load lang", e); }
 
-    try {
-      const savedStack = localStorage.getItem('bj_view_stack');
-      if (savedStack) {
-        const parsedStack = JSON.parse(savedStack as string);
-        if (Array.isArray(parsedStack) && parsedStack.length > 0) {
-          setViewStack(parsedStack);
-        }
-      }
-    } catch (e) { console.error("Failed to load view stack", e); }
+
 
     try {
       const savedCoupon = localStorage.getItem('bj_coupon');
@@ -210,7 +203,7 @@ const AppContent: React.FC = () => {
   // --- PERSISTENCE OBSERVERS ---
   useEffect(() => { localStorage.setItem('bj_cart', JSON.stringify(cart)); }, [cart]);
   useEffect(() => { localStorage.setItem('bj_lang', lang); }, [lang]);
-  useEffect(() => { localStorage.setItem('bj_view_stack', JSON.stringify(viewStack)); }, [viewStack]);
+  // REMOVED viewStack persistence to prevent navigation loops
   useEffect(() => {
     if (appliedCoupon) localStorage.setItem('bj_coupon', JSON.stringify(appliedCoupon));
     else localStorage.removeItem('bj_coupon');
@@ -1034,6 +1027,7 @@ const AppContent: React.FC = () => {
         {view === 'CART' && (
           <div className="max-w-4xl mx-auto px-4 py-8 sm:py-16 animate-in fade-in duration-500">
             <button onClick={goBack} className="flex items-center gap-2 text-orange-900 mb-6 font-black uppercase text-sm tracking-widest"><ArrowLeft size={18} /> {t.back}</button>
+            <button onClick={goBack} className="flex items-center gap-2 text-orange-900 mb-6 font-black uppercase text-sm tracking-widest"><ArrowLeft size={18} /> {t.back}</button>
             <h1 className="hindi-font text-4xl sm:text-6xl font-black text-orange-950 mb-8 sm:mb-12">{t.cart}</h1>
             {cart.length === 0 ? (
               <div className="text-center py-16 sm:py-32 bg-white rounded-3xl border border-dashed border-orange-100 shadow-sm"><p className="text-stone-400 font-bold text-lg mb-8">{t.cartEmpty}</p><button onClick={() => setView('HOME')} className="bg-orange-800 text-white px-10 py-4 rounded-xl font-black shadow-md">{t.startShopping}</button></div>
@@ -1392,7 +1386,7 @@ const AppContent: React.FC = () => {
 
         {/* Legal Pages */}
         {(view === 'PRIVACY' || view === 'REFUND' || view === 'TERMS' || view === 'DISCLAIMER') && (
-          <LegalPage type={view} onBack={() => setView('HOME')} />
+          <LegalPage type={view} onBack={goBack} />
         )}
 
       </main>
@@ -1464,10 +1458,10 @@ const AppContent: React.FC = () => {
                 <span className="h-px bg-stone-800/60 flex-grow"></span>
               </h4>
               <ul className="space-y-3 sm:space-y-4 text-sm sm:text-base font-bold text-stone-400">
-                <li className="hover:text-amber-400 transition-colors cursor-pointer" onClick={() => setView('PRIVACY')}>Privacy Policy</li>
-                <li className="hover:text-amber-400 transition-colors cursor-pointer" onClick={() => setView('REFUND')}>Refund Policy</li>
-                <li className="hover:text-amber-400 transition-colors cursor-pointer" onClick={() => setView('TERMS')}>Terms & Conditions</li>
-                <li className="hover:text-amber-400 transition-colors cursor-pointer" onClick={() => setView('DISCLAIMER')}>Disclaimer</li>
+                <li className="hover:text-amber-400 transition-colors cursor-pointer" onClick={() => navigate('PRIVACY')}>Privacy Policy</li>
+                <li className="hover:text-amber-400 transition-colors cursor-pointer" onClick={() => navigate('REFUND')}>Refund Policy</li>
+                <li className="hover:text-amber-400 transition-colors cursor-pointer" onClick={() => navigate('TERMS')}>Terms & Conditions</li>
+                <li className="hover:text-amber-400 transition-colors cursor-pointer" onClick={() => navigate('DISCLAIMER')}>Disclaimer</li>
               </ul>
             </div>
 
