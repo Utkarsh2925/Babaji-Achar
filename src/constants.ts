@@ -328,7 +328,10 @@ export const UI_TEXT = {
         orderSummary: "ऑर्डर का सारांश",
         cartEmpty: "आपकी कार्ट खाली है", startShopping: "खरीदारी शुरू करें",
         tipBulk: "सुझाव: 1kg पैक पर 10% की छूट पाएं!",
-        coupon: "कूपन"
+        coupon: "कूपन",
+        // New Instructions
+        paymentInstructionHeader: "भुगतान निर्देश (Payment Instructions)",
+        paymentInstructionBody: "बैंकिंग सुरक्षा नियमों के कारण, ऐप लिंक राशि ऑटो-फिल नहीं करेंगे। कृपया हमारा नंबर/UPI कॉपी करें और ऐप में मैन्युअल रूप से दर्ज करके भुगतान करें।",
     },
     en: {
         home: "Home", shop: "Shop", cart: "Cart", checkout: "Checkout", back: "Back", add: "Add to Cart",
@@ -356,6 +359,9 @@ export const UI_TEXT = {
         orderSummary: "Order Summary",
         cartEmpty: "Your cart is empty", startShopping: "Start Shopping",
         tipBulk: "Tip: Get 10% OFF on 1kg packs!",
-        coupon: "Coupon"
+        coupon: "Coupon",
+        // New Instructions
+        paymentInstructionHeader: "Payment Instructions",
+        paymentInstructionBody: "Due to banking security rules, App Links will NOT auto-fill the amount. Please COPY our Number/UPI and manually enter it in the App to pay.",
     }
 };

@@ -1188,11 +1188,27 @@ const AppContent: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Direct App Links - REMOVED due to Risk Policy (User Request) */}
+                {/* Direct App Links - RESTORED (App Redirect Only - No Auto Fill) */}
+                <div className="grid grid-cols-1 gap-3 mb-8">
+                  <p className="font-bold text-stone-800 text-sm uppercase tracking-widest text-center mb-2">{t.orPayViaApp}</p>
+                  {/* Paytm - Generic Launch */}
+                  <a href="paytmmp://" className="bg-white border-2 border-stone-200 hover:border-[#00BAF2] p-3 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95">
+                    <span className="font-black text-[#00BAF2] text-lg">{t.paytm}</span>
+                  </a>
+                  {/* PhonePe - Generic Launch */}
+                  <a href="phonepe://" className="bg-white border-2 border-stone-200 hover:border-[#5f259f] p-3 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95">
+                    <span className="font-black text-[#5f259f] text-lg">{t.phonepe}</span>
+                  </a>
+                  {/* GPay - Generic Launch */}
+                  <a href="tez://" className="bg-white border-2 border-stone-200 hover:border-[#EA4335] p-3 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95">
+                    <span className="font-black text-stone-600 text-lg"><span className="text-[#4285F4]">G</span><span className="text-[#EA4335]">P</span><span className="text-[#FBBC05]">a</span><span className="text-[#34A853]">y</span></span>
+                  </a>
+                </div>
+
                 <div className="bg-orange-50 p-4 rounded-xl border border-orange-200 mb-8 text-center">
-                  <p className="text-orange-900 font-bold text-sm mb-2"><AlertCircle size={16} className="inline mr-1" /> Payment Instructions</p>
+                  <p className="text-orange-900 font-bold text-sm mb-2"><AlertCircle size={16} className="inline mr-1" /> {t.paymentInstructionHeader}</p>
                   <p className="text-xs text-stone-600 leading-relaxed font-medium">
-                    Due to banking security policies, please <strong>manually enter</strong> our Number or UPI ID in your payment app (Paytm/PhonePe/GPay) or simply <strong>Scan the QR Code</strong> above.
+                    {t.paymentInstructionBody}
                   </p>
                 </div>
 
