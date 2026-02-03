@@ -1314,7 +1314,7 @@ const AppContent: React.FC = () => {
 
                   }} className="w-full bg-[#3395ff] text-white py-5 rounded-2xl font-black text-xl shadow-lg hover:bg-[#2b84e6] active:scale-95 transition-all flex items-center justify-center gap-3 mb-4 group relative overflow-hidden">
                     <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                    <span className="relative z-10 flex items-center gap-2">Pay ₹{cartValues.finalTotal} via Razorpay <ArrowRight size={20} /></span>
+                    <span className="relative z-10 flex items-center gap-2">Pay ₹{cartValues.finalTotal} <ArrowRight size={20} /></span>
                   </button>
 
                   {/* Trust Badges */}
