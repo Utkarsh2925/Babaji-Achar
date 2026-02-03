@@ -288,8 +288,8 @@ export const INITIAL_PRODUCTS = [
             en: "Baba Ji Hari Mirch Pickle from Bhojnamrit Foods is a spicy Prayagraj famous achar prepared using fresh green chillies. This 100% organic achar delivers a strong natural achar flavor inspired by Prayagraj traditions."
         },
         tagline: { hi: "तीखा और लजीज", en: "Spicy and Delicious" },
-        mainImage: "/images/green_chilli.jpg",
-        galleryImages: ["/images/green_chilli.jpg"],
+        mainImage: "/images/green_chilli_final.jpg",
+        galleryImages: ["/images/green_chilli_final.jpg"],
         ingredients: ["Fresh Green Chillies", "Mustard Oil", "Fennel Seeds", "Yellow Mustard Seeds", "Fenugreek Seeds", "Nigella Seeds", "Turmeric Powder", "Red Chilli Powder", "Asafoetida", "Iodized Salt"],
         isFeatured: false,
         isActive: true,
