@@ -124,7 +124,7 @@ export const INITIAL_PRODUCTS = [
         name: { hi: "मिश्रित अचार", en: "Mixed Pickle" },
         description: {
             hi: "विभिन्न मौसमी सब्जियों और मसालों का बेहतरीन मिश्रण। शुद्ध सरसों के तेल में निर्मित।",
-            en: "A premium blend of seasonal vegetables and traditional spices preserved in pure mustard oil."
+            en: "Baba Ji Mix Pickle from Bhojnamrit Foods is a colorful Prayagraj famous achar made with raw mango, lemon, carrot, and green chilli. This 100% organic achar brings a perfect balance of spice and tang, representing natural achar from Prayagraj."
         },
         tagline: { hi: "पीढ़ियों की परंपरा से बना शुद्ध देसी अचार", en: "Pure Traditional Homemade Pickle" },
         mainImage: "/images/mixed_replacement.jpg",
@@ -133,7 +133,7 @@ export const INITIAL_PRODUCTS = [
             "/images/mixed.jpg",
             "https://images.unsplash.com/photo-1589135340945-df939bcbf41e?q=80&w=800&auto=format&fit=crop"
         ],
-        ingredients: ["Mango", "Carrot", "Chilli", "Lemon", "Mustard Oil", "Hing"],
+        ingredients: ["Raw Mango", "Carrot", "Lemon", "Green Chilli", "Mustard Oil", "Fennel Seeds", "Yellow Mustard Seeds", "Fenugreek Seeds", "Nigella Seeds", "Turmeric Powder", "Red Chilli Powder", "Asafoetida", "Iodized Salt"],
         isFeatured: true,
         isActive: true,
         variants: [
@@ -149,12 +149,12 @@ export const INITIAL_PRODUCTS = [
         name: { hi: "आंवला का अचार", en: "Aawla Pickle" },
         description: {
             hi: "सेहत और स्वाद से भरपूर आंवला का पारंपरिक अचार। विटामिन-सी का खजाना।",
-            en: "Traditional gooseberry pickle, rich in Vitamin C and prepared with heritage recipes."
+            en: "Baba Ji Awla Pickle from Bhojnamrit Foods is a traditional Prayagraj famous achar made from fresh amla and pure mustard oil. This 100% organic achar offers a balanced tangy flavor and represents the natural achar heritage of Prayagraj."
         },
         tagline: { hi: "सेहत और स्वाद का अनोखा संगम", en: "A Perfect Blend of Health and Taste" },
         mainImage: "/images/aawla_update.jpg",
         galleryImages: ["/images/aawla_update.jpg", "/images/aawla.jpg"],
-        ingredients: ["Aawla", "Fennel Seeds", "Mustard Oil", "Spices"],
+        ingredients: ["Fresh Amla", "Mustard Oil", "Fennel Seeds", "Yellow Mustard Seeds", "Fenugreek Seeds", "Nigella Seeds", "Turmeric Powder", "Red Chilli Powder", "Asafoetida", "Iodized Salt"],
         isFeatured: true,
         isActive: true,
         variants: [
@@ -168,12 +168,12 @@ export const INITIAL_PRODUCTS = [
         name: { hi: "कटहल का अचार", en: "Kathal Pickle" },
         description: {
             hi: "मसालेदार और चटपटा कटहल का अचार। मां के हाथों जैसा असली देसी स्वाद।",
-            en: "Spicy and tangy Jackfruit pickle. Authentic homemade taste just like mom's recipe."
+            en: "Baba Ji Kathal Pickle by Bhojnamrit Foods is a rare Prayagraj famous achar made from raw jackfruit with visible natural texture. This 100% organic achar is slow-marinated in mustard oil, offering a rich natural achar taste from Prayagraj."
         },
         tagline: { hi: "स्वाद जो आपको बचपन की याद दिला दे", en: "Taste That Takes You Back Home" },
         mainImage: "/images/kathal_update.jpg",
         galleryImages: ["/images/kathal_update.jpg", "/images/kathal.jpg"],
-        ingredients: ["Jackfruit", "Garlic", "Ginger", "Mustard Oil", "Red Chilli"],
+        ingredients: ["Raw Jackfruit", "Mustard Oil", "Fennel Seeds", "Yellow Mustard Seeds", "Fenugreek Seeds", "Nigella Seeds", "Turmeric Powder", "Red Chilli Powder", "Asafoetida", "Iodized Salt"],
         isFeatured: true,
         isActive: true,
         variants: [
@@ -188,12 +188,12 @@ export const INITIAL_PRODUCTS = [
         name: { hi: "बनारसी भरवा लाल मिर्च", en: "Banarasi Red Chilli" },
         description: {
             hi: "बनारस की मशहूर भरवा लाल मिर्च। मोटे मसालों और अमचूर का भरपूर स्वाद।",
-            en: "Famous Banarasi stuffed red chilli pickle. Bursting with flavor from hand-ground spices."
+            en: "Baba Ji Lal Bharwa Mirch Pickle by Bhojnamrit Foods is a bold and authentic Prayagraj famous achar, made using traditional methods. This 100% organic achar is prepared with hand-selected red chillies and pure mustard oil, delivering a rich, natural achar taste rooted in Prayagraj."
         },
         tagline: { hi: "बनारस का विश्व प्रसिद्ध स्वाद", en: "The World-Famous Taste of Banaras" },
         mainImage: "/images/red_chilli_update.jpg",
         galleryImages: ["/images/red_chilli_update.jpg", "/images/red-chilli.jpg"],
-        ingredients: ["Red Chilli", "Mustard Seeds", "Amchoor", "Mustard Oil", "Hing"],
+        ingredients: ["Fresh Red Stuffed Chillies", "Mustard Oil", "Fennel Seeds", "Yellow Mustard Seeds", "Fenugreek Seeds", "Nigella Seeds", "Turmeric Powder", "Red Chilli Powder", "Asafoetida", "Iodized Salt"],
         isFeatured: true,
         isActive: true,
         variants: [
@@ -208,12 +208,12 @@ export const INITIAL_PRODUCTS = [
         name: { hi: "सूरन (जिमीकंद) का अचार", en: "Suran (Yam) Pickle" },
         description: {
             hi: "देसी सूरन और शुद्ध मसालों से बना पारंपरिक अचार। स्वास्थ्य के लिए लाभदायक।",
-            en: "Traditional Elephant Foot Yam pickle made with authentic spices. Great for digestion."
+            en: "Baba Ji Suran Pickle by Bhojnamrit Foods is a hearty Prayagraj famous achar made from fresh elephant foot yam. Preserved in mustard oil, this 100% organic achar reflects the natural achar legacy of Prayagraj."
         },
         tagline: { hi: "स्वाद और सेहत का खजाना", en: "Treasure of Taste and Health" },
         mainImage: "/images/suran_update.jpg",
         galleryImages: ["/images/suran_update.jpg", "/images/suran.jpg", "https://images.unsplash.com/photo-1620556106606-d089100867a5?auto=format&fit=crop&q=80"],
-        ingredients: ["Elephant Foot Yam", "Mustard Oil", "Spices", "Lemon"],
+        ingredients: ["Fresh Suran", "Mustard Oil", "Fennel Seeds", "Yellow Mustard Seeds", "Fenugreek Seeds", "Nigella Seeds", "Turmeric Powder", "Red Chilli Powder", "Asafoetida", "Iodized Salt"],
         isFeatured: true,
         isActive: true,
         variants: [
@@ -277,6 +277,25 @@ export const INITIAL_PRODUCTS = [
         variants: [
             { id: "v1", size: "250g", mrp: 110, stock: 45 },
             { id: "v2", size: "500g", mrp: 200, stock: 25 }
+        ]
+    },
+    {
+        id: "green-chilli-pickle-01",
+        category: "Chilli",
+        name: { hi: "हरी मिर्च का अचार", en: "Green Chilli Pickle" },
+        description: {
+            hi: "तीखी और चटपटी हरी मिर्च का अचार। ताजा हरी मिर्च से बना।",
+            en: "Baba Ji Hari Mirch Pickle from Bhojnamrit Foods is a spicy Prayagraj famous achar prepared using fresh green chillies. This 100% organic achar delivers a strong natural achar flavor inspired by Prayagraj traditions."
+        },
+        tagline: { hi: "तीखा और लजीज", en: "Spicy and Delicious" },
+        mainImage: "/images/green_chilli.jpg",
+        galleryImages: ["/images/green_chilli.jpg"],
+        ingredients: ["Fresh Green Chillies", "Mustard Oil", "Fennel Seeds", "Yellow Mustard Seeds", "Fenugreek Seeds", "Nigella Seeds", "Turmeric Powder", "Red Chilli Powder", "Asafoetida", "Iodized Salt"],
+        isFeatured: false,
+        isActive: true,
+        variants: [
+            { id: "v1", size: "250g", mrp: 140, stock: 30 },
+            { id: "v2", size: "500g", mrp: 260, stock: 20 }
         ]
     },
     {

@@ -71,6 +71,15 @@ export interface User {
     name: string;
     role: 'ADMIN' | 'USER';
     phone: string;
+    email?: string;
+    gender?: 'male' | 'female' | 'other' | '';
+    address?: {
+        house: string;
+        area: string;
+        city: string;
+        state: string;
+        pincode: string;
+    };
 }
 
 
