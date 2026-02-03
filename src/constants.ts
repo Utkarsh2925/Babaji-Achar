@@ -247,12 +247,12 @@ export const INITIAL_PRODUCTS = [
         name: { hi: "आम का अचार", en: "Mango Pickle" },
         description: {
             hi: "कच्चे आम और शुद्ध सरसों के तेल का लाजवाब संगम। असली बनारसी स्वाद।",
-            en: "Authentic green mangoes preserved in pure mustard oil."
+            en: "Baba Ji Aam Pickle from Bhojnamrit Foods is a classic Prayagraj famous achar made from authentic green mangoes preserved in pure mustard oil. This 100% organic achar delivers the traditional natural achar taste of Prayagraj."
         },
         tagline: { hi: "सदाबहार आम का स्वाद", en: "Evergreen Taste of Mango" },
         mainImage: "/images/mango_replacement.jpg",
         galleryImages: ["/images/mango_replacement.jpg", "/images/mango.jpg"],
-        ingredients: ["Green Mango", "Mustard Oil", "Turmeric", "Hing", "Red Chilli"],
+        ingredients: ["Green Mango", "Mustard Oil", "Fennel Seeds", "Yellow Mustard Seeds", "Fenugreek Seeds", "Nigella Seeds", "Turmeric Powder", "Red Chilli Powder", "Asafoetida", "Iodized Salt"],
         isFeatured: false,
         isActive: true,
         variants: [
@@ -266,12 +266,12 @@ export const INITIAL_PRODUCTS = [
         name: { hi: "नींबू का अचार", en: "Lemon Pickle" },
         description: {
             hi: "खट्टा-मीठा नींबू का अचार। बिना तेल के तैयार।",
-            en: "Sweet and sour lemon pickle, oil-free."
+            en: "Baba Ji Nimbu Pickle from Bhojnamrit Foods is a tangy Prayagraj famous achar made from fresh lemons. This 100% organic achar is oil-free and represents the authentic natural achar tradition of Prayagraj."
         },
         tagline: { hi: "चटपटा और पाचक", en: "Tangy and Digestive" },
         mainImage: "/images/lemon_update.jpg",
         galleryImages: ["/images/lemon_update.jpg", "/images/new_lemon.jpg"],
-        ingredients: ["Lemon", "Ajwain", "Black Salt"],
+        ingredients: ["Fresh Lemon", "Ajwain (Carom Seeds)", "Black Salt", "Turmeric Powder", "Red Chilli Powder", "Fennel Seeds", "Fenugreek Seeds", "Asafoetida", "Iodized Salt"],
         isFeatured: false,
         isActive: true,
         variants: [
@@ -296,26 +296,6 @@ export const INITIAL_PRODUCTS = [
         variants: [
             { id: "v1", size: "250g", mrp: 140, stock: 30 },
             { id: "v2", size: "500g", mrp: 260, stock: 20 }
-        ]
-    },
-    {
-        id: "green-chilli-pickle-01",
-        category: "Chilli",
-        name: { hi: "हरी मिर्च का अचार", en: "Green Chilli Pickle" },
-        description: {
-            hi: "तीखा और चटपटा हरी मिर्च का अचार।",
-            en: "Spicy and pungent green chilli pickle."
-        },
-        tagline: { hi: "हर खाने में तीखापन", en: "Spiciness in Every Meal" },
-        mainImage: "/images/green_chilli_update.jpg",
-        galleryImages: ["/images/green_chilli_update.jpg", "/images/new_mix.jpg", "https://images.unsplash.com/photo-1589669916111-3668079df95d?auto=format&fit=crop&q=80"],
-        ingredients: ["Green Chilli", "Lemon Juice", "Salt", "Mustard Oil"],
-        isFeatured: false,
-        isActive: true,
-        variants: [
-            { id: "v-250", size: "250g", mrp: 100, stock: 60 },
-            { id: "v-500", size: "500g", mrp: 180, stock: 30 },
-            { id: "v-1kg", size: "1kg", mrp: 320, stock: 20 }
         ]
     }
 ];
