@@ -1648,7 +1648,7 @@ const AppContent: React.FC = () => {
 
                     handleCODPayment(cartValues.finalTotal, { fullName: name, phone, street: addr, city: 'Prayagraj', state: 'UP', pincode: pin });
 
-                  }} className="w-full bg-gradient-to-r from-green-600 to-green-700 text-yellow-100 py-5 rounded-2xl font-black text-xl shadow-lg hover:from-green-700 hover:to-green-800 active:scale-95 transition-all flex items-center justify-center gap-3 mb-4 group relative overflow-hidden">
+                  }} className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 text-white py-5 rounded-2xl font-black text-xl shadow-lg hover:from-yellow-600 hover:to-amber-600 active:scale-95 transition-all flex items-center justify-center gap-3 mb-4 group relative overflow-hidden">
 
                     <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                     <span className="relative z-10 flex items-center gap-2">
