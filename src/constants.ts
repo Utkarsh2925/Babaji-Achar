@@ -22,7 +22,7 @@ export const GET_ACTIVE_FESTIVAL = (): FestivalConfig | null => {
         id: 'REPUBLIC_DAY',
         name: 'Republic Day',
         greeting: 'Happy Republic Day! 🇮🇳',
-        offer: 'Free Delivery on Orders above ₹499',
+        offer: 'Free Delivery on Orders above ₹999',
         offerCode: 'JAIHIND',
         colors: { from: 'from-orange-500', to: 'to-green-600', text: 'text-blue-800' },
         icons: ['🇮🇳', '🪷', '🕌', '🏏', '✨', '🐅', '🫡', '🇮🇳'],
@@ -327,7 +327,7 @@ export const UI_TEXT = {
         cityPlaceholder: "शहर (प्रयागराज)", pincodePlaceholder: "पिन कोड",
         orderSummary: "ऑर्डर का सारांश",
         cartEmpty: "आपकी कार्ट खाली है", startShopping: "खरीदारी शुरू करें",
-        tipBulk: "सुझाव: 1kg पैक पर 10% की छूट पाएं!",
+        tipBulk: "सुझाव: पहले ऑर्डर पर 5% की छूट पाएं!",
         coupon: "कूपन",
         // New Instructions
         paymentInstructionHeader: "भुगतान निर्देश (Payment Instructions)",
@@ -359,7 +359,7 @@ export const UI_TEXT = {
         cityPlaceholder: "City (Prayagraj)", pincodePlaceholder: "Pincode",
         orderSummary: "Order Summary",
         cartEmpty: "Your cart is empty", startShopping: "Start Shopping",
-        tipBulk: "Tip: Get 10% OFF on 1kg packs!",
+        tipBulk: "Tip: Get 5% OFF on your first order!",
         coupon: "Coupon",
         // New Instructions
         paymentInstructionHeader: "Payment Instructions",

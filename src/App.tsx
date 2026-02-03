@@ -1202,13 +1202,7 @@ const AppContent: React.FC = () => {
                   <div className="space-y-3 mb-8">
                     <div className="flex justify-between text-base"><span>{t.subtotal}</span><span className="font-bold">₹{cartSubtotal}</span></div>
 
-                    {/* Discount Line */}
-                    {cartValues.bulkDiscount > 0 && (
-                      <div className="flex justify-between text-base text-green-400 animate-pulse">
-                        <span>{t.bulkSavings} (10% on 1kg)</span>
-                        <span className="font-bold">-₹{cartValues.bulkDiscount}</span>
-                      </div>
-                    )}
+                    {/* No bulk discount anymore */}
                     {cartValues.couponDiscount > 0 && (
                       <div className="flex justify-between text-base text-green-400">
                         <span>{t.coupon} ({appliedCoupon?.code})</span>
@@ -1219,7 +1213,7 @@ const AppContent: React.FC = () => {
                     <div className="flex justify-between text-base">
                       <span>{t.deliveryCharges}</span>
                       {cartValues.isFreeDelivery ? (
-                        <span className="font-bold text-green-400">FREE (Orders &gt; ₹499)</span>
+                        <span className="font-bold text-green-400">FREE (Orders &gt; ₹999)</span>
                       ) : (
                         <span className="font-bold">₹50</span>
                       )}
@@ -1282,13 +1276,6 @@ const AppContent: React.FC = () => {
                         <span>{t.deliveryCharges}</span>
                         {cartValues.isFreeDelivery ? <span className="text-green-600">FREE</span> : <span>₹50</span>}
                       </div>
-
-                      {cartValues.bulkDiscount > 0 && (
-                        <div className="flex justify-between text-green-600">
-                          <span>{t.bulkSavings} (10% on 1kg)</span>
-                          <span>-₹{cartValues.bulkDiscount}</span>
-                        </div>
-                      )}
 
                       {cartValues.couponDiscount > 0 && (
                         <div className="flex justify-between text-green-600 items-center">
