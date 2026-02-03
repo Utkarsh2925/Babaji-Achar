@@ -1,3 +1,4 @@
+// Deployed: 2026-02-04 00:15 IST - Force Update
 import React, { useState, useEffect, useMemo } from 'react';
 import organicBadge from './assets/organic_badge_final.png';
 import {
