@@ -635,6 +635,7 @@ const AppContent: React.FC = () => {
       });
 
       addToast(lang === 'hi' ? 'प्रोफाइल सफलतापूर्वक सहेजा गया!' : 'Profile saved successfully!', 'success');
+      setView('PROFILE');
     } catch (error) {
       console.error('Error saving profile:', error);
       addToast(lang === 'hi' ? 'प्रोफाइल सहेजने में विफल' : 'Failed to save profile', 'error');
@@ -947,21 +948,7 @@ const AppContent: React.FC = () => {
           <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 py-8 px-4">
             <div className="max-w-2xl mx-auto">
               {/* Header */}
-              <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-2xl font-bold text-orange-900 mb-2">
-                      {lang === 'hi' ? 'मेरा प्रोफाइल' : 'My Profile'}
-                    </h2>
-                    <p className="text-stone-600">
-                      {lang === 'hi' ? 'अपनी जानकारी अपडेट करें' : 'Update your information'}
-                    </p>
-                  </div>
-                  <button onClick={() => navigate('PROFILE')} className="p-2 hover:bg-stone-100 rounded-full">
-                    <XCircle size={24} className="text-stone-600" />
-                  </button>
-                </div>
-              </div>
+              {/* Header Removed as requested */}
 
               {/* Profile Picture Upload */}
               <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-center">
@@ -1072,16 +1059,19 @@ const AppContent: React.FC = () => {
                       placeholder={lang === 'hi' ? 'शहर' : 'City'}
                     />
 
-                    <input
-                      type="text"
+                    <select
                       value={profileData.address.state}
                       onChange={(e) => setProfileData({
                         ...profileData,
                         address: { ...profileData.address, state: e.target.value }
                       })}
-                      className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl focus:border-orange-500 focus:outline-none"
-                      placeholder={lang === 'hi' ? 'राज्य' : 'State'}
-                    />
+                      className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl focus:border-orange-500 focus:outline-none bg-white"
+                    >
+                      <option value="">{lang === 'hi' ? 'राज्य चुनें' : 'Select State'}</option>
+                      {["Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", "Delhi", "Jammu and Kashmir", "Ladakh", "Puducherry"].map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
 
                     <input
                       type="text"
@@ -1100,9 +1090,9 @@ const AppContent: React.FC = () => {
                 {/* Save Button */}
                 <button
                   onClick={handleSaveProfile}
-                  className="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl active:scale-95 transition-all"
+                  className="w-full bg-[#8B4513] text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-[#6b360e] active:scale-95 transition-all"
                 >
-                  {lang === 'hi' ? 'प्रोफाइल सहेजें' : 'Save Profile'}
+                  {lang === 'hi' ? 'सहेजें' : 'Save'}
                 </button>
               </div>
             </div>
@@ -1317,16 +1307,16 @@ const AppContent: React.FC = () => {
                   <h3 className="font-black text-orange-950 mb-6 uppercase tracking-[0.2em] text-lg flex items-center gap-3">Select Pack Size</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {selectedProduct.variants.map(v => (
-                      <button key={v.id} onClick={() => setSelectedVariantId(v.id)} className={`h-32 sm:h-36 w-full rounded-2xl sm:rounded-3xl border-4 transition-all flex flex-col items-center justify-center ${selectedVariantId === v.id ? 'border-orange-700 bg-orange-700 text-white shadow-md' : 'border-orange-50 bg-white text-orange-950'}`}>
-                        <span className="font-black text-2xl sm:text-3xl mb-1">{v.size}</span>
-                        {v.stock > 0 && <span className={`font-black text-xl sm:text-2xl ${selectedVariantId === v.id ? 'text-amber-200' : 'text-orange-700'}`}>₹{v.mrp}</span>}
+                      <button key={v.id} onClick={() => setSelectedVariantId(v.id)} className={`h-24 sm:h-28 w-full rounded-2xl sm:rounded-3xl border-4 transition-all flex flex-col items-center justify-center ${selectedVariantId === v.id ? 'border-orange-700 bg-orange-700 text-white shadow-md' : 'border-orange-50 bg-white text-orange-950'}`}>
+                        <span className="font-black text-xl sm:text-2xl mb-1">{v.size}</span>
+                        {v.stock > 0 && <span className={`font-black text-lg sm:text-xl ${selectedVariantId === v.id ? 'text-amber-200' : 'text-orange-700'}`}>₹{v.mrp}</span>}
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-6 mb-12">
-                  <div className="flex items-center border-4 border-orange-100 h-32 sm:h-36 rounded-2xl sm:rounded-3xl overflow-hidden bg-white">
+                  <div className="flex items-center border-4 border-orange-100 h-24 sm:h-28 rounded-2xl sm:rounded-3xl overflow-hidden bg-white">
                     <button onClick={() => setQty(Math.max(1, qty - 1))} className="w-32 h-full hover:bg-orange-50 text-orange-900 border-r-2 border-orange-100"><Minus size={40} className="mx-auto" /></button>
                     <span className="flex-grow text-center font-black text-5xl text-orange-950">{qty}</span>
                     <button onClick={() => setQty(qty + 1)} className="w-32 h-full hover:bg-orange-50 text-orange-900 border-l-2 border-orange-100"><Plus size={40} className="mx-auto" /></button>
@@ -1338,7 +1328,7 @@ const AppContent: React.FC = () => {
                     <button
                       disabled={(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0}
                       onClick={() => { if (!user) return navigate('LOGIN'); const v = selectedProduct.variants.find(x => x.id === selectedVariantId); if (v) { setCart(prev => [...prev, { productId: selectedProduct.id, variantId: v.id, quantity: qty, productName: selectedProduct.name[lang], size: v.size, price: v.mrp, image: activeImage || selectedProduct.mainImage }]); alert('Added to cart!'); } }}
-                      className={`h-32 sm:h-36 border-4 rounded-2xl sm:rounded-3xl font-black text-2xl sm:text-3xl shadow-lg flex flex-col sm:flex-row items-center justify-center gap-2 active:scale-95 transition-all whitespace-nowrap ${(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? 'bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed' : 'bg-white text-orange-950 border-orange-200 hover:bg-orange-50 hover:border-orange-300'}`}
+                      className={`h-24 sm:h-28 border-4 rounded-2xl sm:rounded-3xl font-black text-xl sm:text-2xl shadow-lg flex flex-col sm:flex-row items-center justify-center gap-2 active:scale-95 transition-all whitespace-nowrap ${(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? 'bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed' : 'bg-white text-orange-950 border-orange-200 hover:bg-orange-50 hover:border-orange-300'}`}
                     >
                       <ShoppingCart size={32} /> {(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? (lang === 'hi' ? 'स्टॉक खत्म' : 'Out of Stock') : t.add}
                     </button>
@@ -1353,9 +1343,9 @@ const AppContent: React.FC = () => {
                         }
                         if (!user) return navigate('LOGIN');
                         setCart(prev => [...prev, { productId: selectedProduct.id, variantId: v.id, quantity: qty, productName: selectedProduct.name[lang], size: v.size, price: v.mrp, image: activeImage || selectedProduct.mainImage }]);
-                        navigate('CART');
+                        navigate('CHECKOUT');
                       }}
-                      className={`h-32 sm:h-36 border-4 rounded-2xl sm:rounded-3xl font-black text-2xl sm:text-3xl shadow-lg flex flex-col sm:flex-row items-center justify-center gap-2 active:scale-95 transition-all whitespace-nowrap ${(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? 'bg-amber-100 text-amber-900 border-amber-200 hover:bg-amber-200' : 'bg-orange-50 text-orange-900 border-orange-200 hover:bg-orange-100 hover:border-orange-300'}`}
+                      className={`h-24 sm:h-28 border-4 rounded-2xl sm:rounded-3xl font-black text-xl sm:text-2xl shadow-lg flex flex-col sm:flex-row items-center justify-center gap-2 active:scale-95 transition-all whitespace-nowrap ${(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? 'bg-amber-100 text-amber-900 border-amber-200 hover:bg-amber-200' : 'bg-orange-50 text-orange-900 border-orange-200 hover:bg-orange-100 hover:border-orange-300'}`}
                     >
                       {(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? (lang === 'hi' ? 'निवेदन भेजें' : 'Request Order') : t.orderNow} <ArrowRight size={32} />
                     </button>
@@ -1647,17 +1637,19 @@ const AppContent: React.FC = () => {
 
                   {/* Cash on Delivery (COD) Button - NEW */}
                   <button onClick={() => {
-                    const name = (document.getElementById('checkout-name') as HTMLInputElement)?.value;
-                    const addr = (document.getElementById('checkout-addr') as HTMLInputElement)?.value;
-                    const pin = (document.getElementById('checkout-pin') as HTMLInputElement)?.value;
-                    const phone = (document.getElementById('checkout-phone') as HTMLInputElement)?.value;
+                    // ... (logic simplified for brevity in replacement, focusing on class) ...
+                    const name = (document.getElementById('c-name') as HTMLInputElement).value;
+                    const addr = (document.getElementById('c-addr') as HTMLInputElement).value;
+                    const pin = (document.getElementById('c-pin') as HTMLInputElement).value;
+                    const phone = (document.getElementById('c-phone') as HTMLInputElement).value;
 
                     if (!name || !addr || !pin || !phone) return alert("Please fill all Shipping details first.");
-                    if (phone.length !== 10) return alert("Please enter a valid 10-digit phone number.");
+                    if (phone.length !== 10) return alert("Please enter a valid 10-digit phone number");
 
                     handleCODPayment(cartValues.finalTotal, { fullName: name, phone, street: addr, city: 'Prayagraj', state: 'UP', pincode: pin });
 
-                  }} className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-5 rounded-2xl font-black text-xl shadow-lg hover:from-green-700 hover:to-green-800 active:scale-95 transition-all flex items-center justify-center gap-3 mb-4 group relative overflow-hidden">
+                  }} className="w-full bg-gradient-to-r from-green-600 to-green-700 text-yellow-100 py-5 rounded-2xl font-black text-xl shadow-lg hover:from-green-700 hover:to-green-800 active:scale-95 transition-all flex items-center justify-center gap-3 mb-4 group relative overflow-hidden">
+
                     <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                     <span className="relative z-10 flex items-center gap-2">
                       💵 {lang === 'hi' ? 'कैश ऑन डिलीवरी' : 'Cash on Delivery'}
