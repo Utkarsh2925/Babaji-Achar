@@ -547,7 +547,7 @@ const AppContent: React.FC = () => {
       {/* FESTIVAL TOP BANNER */}
       {/* FESTIVAL TOP BANNER */}
       {/* FESTIVAL TOP BANNER */}
-      {festival && (
+      {offersEnabled && festival && (
         <div
           className="w-full py-3 text-white flex items-center justify-center gap-3 shadow-xl relative z-[60] overflow-hidden"
           style={{
@@ -664,13 +664,13 @@ const AppContent: React.FC = () => {
         <div className="flex animate-marquee min-w-full shrink-0 items-center justify-around gap-20">
           <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🚚 Free Delivery above ₹499</span>
           <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🏷️ 10% OFF on 1kg Packs</span>
-          <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🏷️ 1st Order? Use FIRST10 for 10% OFF</span>
+          {offersEnabled && <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🏷️ 1st Order? Use FIRST10 for 10% OFF</span>}
           <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> {t.serving}</span>
         </div>
         <div className="flex animate-marquee min-w-full shrink-0 items-center justify-around gap-20" aria-hidden="true">
           <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🚚 Free Delivery above ₹499</span>
           <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🏷️ 10% OFF on 1kg Packs</span>
-          <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🏷️ 1st Order? Use FIRST10 for 10% OFF</span>
+          {offersEnabled && <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🏷️ 1st Order? Use FIRST10 for 10% OFF</span>}
           <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> {t.serving}</span>
         </div>
       </div>
@@ -1262,7 +1262,30 @@ const AppContent: React.FC = () => {
                 <h3 className="hindi-font text-xl sm:text-2xl font-black text-orange-900 flex items-center gap-2 mb-6"><ShieldCheck size={24} /> {t.scanToPay}</h3>
 
                 {/* Instruction Block */}
+                {/* Instruction Block */}
                 <div className="bg-white p-6 rounded-2xl border-2 border-stone-100 mb-8 text-center shadow-sm">
+                  {/* Razorpay Button */}
+                  <button onClick={() => {
+                    const name = (document.getElementById('c-name') as HTMLInputElement).value;
+                    const addr = (document.getElementById('c-addr') as HTMLInputElement).value;
+                    const pin = (document.getElementById('c-pin') as HTMLInputElement).value;
+                    const phone = (document.getElementById('c-phone') as HTMLInputElement).value;
+
+                    if (!name || !addr || !pin || !phone) return alert("Please fill all Shipping details first.");
+                    if (phone.length !== 10) return alert("Please enter a valid 10-digit phone number");
+
+                    handleRazorpayPayment(cartValues.finalTotal, { fullName: name, phone, street: addr, city: 'Prayagraj', state: 'UP', pincode: pin });
+
+                  }} className="w-full bg-orange-600 text-white py-4 rounded-xl font-black text-lg shadow-lg hover:bg-orange-700 transition-all flex items-center justify-center gap-2 mb-6 animate-pulse">
+                    <Sparkles size={20} /> Pay Online (Cards / UPI)
+                  </button>
+
+                  <div className="flex items-center gap-2 mb-6">
+                    <div className="h-px bg-stone-200 flex-grow"></div>
+                    <span className="text-stone-400 text-xs font-bold uppercase tracking-widest">OR MANUAL</span>
+                    <div className="h-px bg-stone-200 flex-grow"></div>
+                  </div>
+
                   <div className="bg-orange-50 p-4 rounded-xl border border-orange-200 mb-6">
                     <p className="text-orange-900 font-bold text-sm mb-2 uppercase tracking-widest"><AlertCircle size={16} className="inline mr-1" /> {t.paymentInstructionHeader}</p>
                     <p className="text-sm text-stone-700 leading-relaxed font-bold">

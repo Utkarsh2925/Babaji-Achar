@@ -44,7 +44,7 @@ export interface CartItem {
     image: string;
 }
 
-export type OrderStatus = 'Pending' | 'Paid' | 'Pending_Verification' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+export type OrderStatus = 'Pending' | 'Paid' | 'Pending_Verification' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled' | 'Pending_Payment' | 'Payment_Received' | 'Packed';
 
 export interface Order {
     id: string;
