@@ -304,7 +304,7 @@ export const UI_TEXT = {
     hi: {
         home: "होम", shop: "दुकान", cart: "कार्ट", checkout: "चेकआउट", back: "वापस", add: "कार्ट में जोड़ें",
         orderNow: "अभी आर्डर करें", serving: "केवल प्रयागराज में डिलीवरी", delivery: "डिलीवरी", total: "कुल राशि",
-        address: "पता", name: "पूरा नाम", phone: "फोन नंबर", utr: "UTR / ट्रांजैक्शन ID", search: "अचार खोजें...",
+        address: "पता", name: "पूरा नाम", phone: "फोन नंबर", utr: "UTR / ट्रांजैक्शन ID", search: "अचार खोजें...", paymentMethod: "भुगतान का तरीका",
         all: "सभी", mix: "मिश्रित", mango: "आम", aawla: "आंवला", kathal: "कटहल", lemon: "नींबू", chilli: "मिर्च", special: "खास ऑफर",
         login: "लॉगिन", signup: "साइन अप", account: "खाता", logout: "लॉगआउट",
         reviews: "ग्राहक समीक्षा", writeReview: "अपनी समीक्षा लिखें", submitReview: "समीक्षा सबमिट करें", noReviews: "अभी तक कोई समीक्षा नहीं है।", verifiedBuyer: "सत्यापित खरीदार", rating: "रेटिंग", comment: "टिप्पणी",
@@ -336,7 +336,7 @@ export const UI_TEXT = {
     en: {
         home: "Home", shop: "Shop", cart: "Cart", checkout: "Checkout", back: "Back", add: "Add to Cart",
         orderNow: "Order Now", serving: "Delivery only in Prayagraj", delivery: "Delivery", total: "Total Amount",
-        address: "Address", name: "Full Name", phone: "Phone Number", utr: "UTR / Transaction ID", search: "Search Pickles...",
+        address: "Address", name: "Full Name", phone: "Phone Number", utr: "UTR / Transaction ID", search: "Search Pickles...", paymentMethod: "Payment Method",
         all: "All", mix: "Mixed", mango: "Mango", aawla: "Aawla", kathal: "Kathal", lemon: "Lemon", chilli: "Chilli", special: "Special Offers",
         login: "Login", signup: "Sign Up", account: "Account", logout: "Logout",
         reviews: "Customer Reviews", writeReview: "Write your review", submitReview: "Submit Review", noReviews: "No reviews yet.", verifiedBuyer: "Verified Buyer", rating: "Rating", comment: "Comment",

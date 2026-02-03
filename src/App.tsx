@@ -88,7 +88,7 @@ const AppContent: React.FC = () => {
   const { addToast } = useNotification();
 
   const [lang, setLang] = useState<'hi' | 'en'>('hi');
-  const [view, setView] = useState<'HOME' | 'DETAILS' | 'CART' | 'CHECKOUT' | 'SUCCESS' | 'PROFILE' | 'LOGIN' | 'ADMIN' | 'STORES' | 'PRIVACY' | 'REFUND' | 'TERMS' | 'DISCLAIMER'>('HOME');
+  const [view, setView] = useState<'HOME' | 'DETAILS' | 'CART' | 'CHECKOUT' | 'SUCCESS' | 'PROFILE' | 'EDIT_PROFILE' | 'LOGIN' | 'ADMIN' | 'STORES' | 'PRIVACY' | 'REFUND' | 'TERMS' | 'DISCLAIMER'>('HOME');
   // Removed paymentProofType as requested
 
   type Coupon = { code: string; type: 'FLAT' | 'PERCENTAGE'; value: number; freeDelivery?: boolean; };
@@ -943,7 +943,7 @@ const AppContent: React.FC = () => {
           </div>
         )}
 
-        {view === 'PROFILE' && (
+        {view === 'EDIT_PROFILE' && (
           <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 py-8 px-4">
             <div className="max-w-2xl mx-auto">
               {/* Header */}
@@ -957,7 +957,7 @@ const AppContent: React.FC = () => {
                       {lang === 'hi' ? 'अपनी जानकारी अपडेट करें' : 'Update your information'}
                     </p>
                   </div>
-                  <button onClick={() => navigate('HOME')} className="p-2 hover:bg-stone-100 rounded-full">
+                  <button onClick={() => navigate('PROFILE')} className="p-2 hover:bg-stone-100 rounded-full">
                     <XCircle size={24} className="text-stone-600" />
                   </button>
                 </div>
@@ -1181,7 +1181,7 @@ const AppContent: React.FC = () => {
                       <div className="p-5 flex flex-col flex-grow">
                         <div className="flex-grow mb-4">
                           <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-amber-950 mb-2 leading-tight group-hover:text-amber-700 transition-colors">{p.name[lang]}</h3>
-                          <p className="text-sm sm:text-base text-stone-600 font-medium leading-relaxed">{p.description[lang]}</p>
+                          <p className="text-sm sm:text-base text-stone-600 line-clamp-2 font-medium leading-relaxed">{p.description[lang]}</p>
                         </div>
                         <div className="space-y-4">
                           <div className="flex items-center justify-between">
@@ -1353,7 +1353,7 @@ const AppContent: React.FC = () => {
                         }
                         if (!user) return navigate('LOGIN');
                         setCart(prev => [...prev, { productId: selectedProduct.id, variantId: v.id, quantity: qty, productName: selectedProduct.name[lang], size: v.size, price: v.mrp, image: activeImage || selectedProduct.mainImage }]);
-                        navigate('CHECKOUT');
+                        navigate('CART');
                       }}
                       className={`h-32 sm:h-36 border-4 rounded-2xl sm:rounded-3xl font-black text-2xl sm:text-3xl shadow-lg flex flex-col sm:flex-row items-center justify-center gap-2 active:scale-95 transition-all whitespace-nowrap ${(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? 'bg-amber-100 text-amber-900 border-amber-200 hover:bg-amber-200' : 'bg-orange-50 text-orange-900 border-orange-200 hover:bg-orange-100 hover:border-orange-300'}`}
                     >
@@ -1363,6 +1363,44 @@ const AppContent: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* Detailed Description & Ingredients Section - NEW */}
+            <div className="mt-16 sm:mt-24 border-t border-orange-100 pt-16">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 sm:gap-20">
+                <div className="space-y-6">
+                  <h3 className="hindi-font text-3xl font-black text-orange-950 flex items-center gap-3">
+                    <span className="text-4xl">📝</span> {lang === 'hi' ? 'उत्पाद विवरण' : 'Product Description'}
+                  </h3>
+                  <div className="bg-orange-50 p-8 rounded-[2rem] border border-orange-100 shadow-inner">
+                    <p className="text-lg text-stone-700 leading-relaxed font-medium">
+                      {selectedProduct.description[lang]}
+                    </p>
+                    <div className="mt-6 flex flex-wrap gap-3">
+                      <span className="bg-white px-4 py-2 rounded-xl text-sm font-bold text-orange-800 shadow-sm border border-orange-100">🚫 No Preservatives</span>
+                      <span className="bg-white px-4 py-2 rounded-xl text-sm font-bold text-orange-800 shadow-sm border border-orange-100">☀️ Sun Dried</span>
+                      <span className="bg-white px-4 py-2 rounded-xl text-sm font-bold text-orange-800 shadow-sm border border-orange-100">🖐️ Hand Made</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <h3 className="hindi-font text-3xl font-black text-orange-950 flex items-center gap-3">
+                    <span className="text-4xl">🌿</span> {lang === 'hi' ? 'सामग्री' : 'Ingredients'}
+                  </h3>
+                  <div className="bg-white p-8 rounded-[2rem] border-2 border-green-100 shadow-md">
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {selectedProduct.ingredients.map((ing, idx) => (
+                        <li key={idx} className="flex items-center gap-3 text-stone-700 font-bold">
+                          <CheckCircle2 size={20} className="text-green-500 flex-shrink-0" />
+                          <span>{ing}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
 
             {/* Customer Reviews Section */}
             <div className="mt-20 sm:mt-32 pt-16 border-t border-orange-100">
@@ -1680,7 +1718,7 @@ const AppContent: React.FC = () => {
                     <h2 className="text-xl font-black text-orange-950">{user.name}</h2>
                     <p className="text-base font-bold text-stone-400 mb-6">{user.phone}</p>
                     <div className="space-y-3">
-                      <button className="w-full py-3 bg-orange-50 text-orange-900 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><Settings size={16} /> Edit Profile</button>
+                      <button onClick={() => setView('EDIT_PROFILE')} className="w-full py-3 bg-orange-50 text-orange-900 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><Settings size={16} /> Edit Profile</button>
                       <button onClick={handleLogout} className="w-full py-3 bg-stone-100 text-stone-600 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-red-50 hover:text-red-500 transition-colors"><LogIn size={16} className="rotate-180" /> Logout</button>
                     </div>
                   </div>
