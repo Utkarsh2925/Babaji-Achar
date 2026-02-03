@@ -9,6 +9,7 @@ import {
 import paymentQr from './assets/payment_qr.jpg';
 // import { PaymentService } from './services/PaymentService';
 import { WhatsAppService } from './services/WhatsAppService';
+import { OrderService } from './services/OrderService';
 import { BRAND_CONFIG, INITIAL_PRODUCTS, GET_ACTIVE_FESTIVAL, UI_TEXT } from './constants';
 import type { Product, CartItem, Order, OrderStatus, User, Review } from './types';
 
@@ -135,7 +136,7 @@ const AppContent: React.FC = () => {
     if (view === 'CHECKOUT' && !appliedCoupon && loginPhone.length === 10 && offersEnabled) {
       const isExistingUser = orders.some(o => o.customerDetails.phone === loginPhone);
       if (!isExistingUser) {
-        setAppliedCoupon({ code: 'FIRST10', type: 'PERCENTAGE', value: 10 });
+        setAppliedCoupon({ code: 'FIRST5', type: 'PERCENTAGE', value: 5 });
       }
     }
   }, [view, loginPhone, orders, appliedCoupon, offersEnabled]);
@@ -207,7 +208,7 @@ const AppContent: React.FC = () => {
             const newOrder: Order = {
               id: `Order #${Date.now().toString().slice(-6)}`,
               date: new Date().toISOString(),
-              status: 'Pending_Verification', // Paid but pending shipment
+              status: 'Payment_Received', // Paid via Razorpay
               items: cart,
               totalAmount: finalAmount,
               customerDetails: customerDetails,
@@ -215,6 +216,16 @@ const AppContent: React.FC = () => {
               utrNumber: response.razorpay_payment_id // Store Pay ID as UTR
             };
 
+            // Save to Firebase (real-time sync)
+            try {
+              await OrderService.createOrder(newOrder);
+              console.log('Order saved to Firebase successfully');
+            } catch (firebaseError) {
+              console.error('Failed to save order to Firebase:', firebaseError);
+              // Still proceed with local save as fallback
+            }
+
+            // Also save to localStorage as backup
             const updatedOrders = [newOrder, ...orders];
             setOrders(updatedOrders);
             localStorage.setItem('bj_orders', JSON.stringify(updatedOrders));
@@ -256,13 +267,16 @@ const AppContent: React.FC = () => {
   };
 
   useEffect(() => {
-    // 1. Support Logic (Orders, User, Stores, Products)
-    const loadData = () => {
-      try {
-        const savedOrders = localStorage.getItem('bj_orders');
-        if (savedOrders) setOrders(JSON.parse(savedOrders));
-      } catch (e) { console.error("Failed to load orders", e); }
+    // 1. Subscribe to Firebase Orders (real-time sync)
+    const unsubscribeOrders = OrderService.subscribeToOrders((firebaseOrders) => {
+      console.log('Received orders from Firebase:', firebaseOrders.length);
+      setOrders(firebaseOrders);
+      // Also save to localStorage as backup
+      localStorage.setItem('bj_orders', JSON.stringify(firebaseOrders));
+    });
 
+    // 2. Load user and stores from localStorage
+    const loadData = () => {
       try {
         const savedUser = localStorage.getItem('bj_user');
         if (savedUser) {
@@ -329,6 +343,7 @@ const AppContent: React.FC = () => {
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      unsubscribeOrders();
     };
   }, []);
 
@@ -390,17 +405,27 @@ const AppContent: React.FC = () => {
     }
   };
 
-  const updateOrderStatus = (orderId: string, newStatus: OrderStatus) => {
-    const updatedOrders = orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o);
-    setOrders(updatedOrders);
-    localStorage.setItem('bj_orders', JSON.stringify(updatedOrders));
+  const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
+    const order = orders.find(o => o.id === orderId);
+    if (order && (order as any).firebaseId) {
+      try {
+        await OrderService.updateOrderStatus((order as any).firebaseId, newStatus);
+      } catch (error) {
+        console.error('Failed to update order in Firebase:', error);
+      }
+    }
   };
 
-  const deleteOrder = (orderId: string) => {
+  const deleteOrder = async (orderId: string) => {
     if (!confirm("Are you sure you want to delete this order?")) return;
-    const updatedOrders = orders.filter(o => o.id !== orderId);
-    setOrders(updatedOrders);
-    localStorage.setItem('bj_orders', JSON.stringify(updatedOrders));
+    const order = orders.find(o => o.id === orderId);
+    if (order && (order as any).firebaseId) {
+      try {
+        await OrderService.deleteOrder((order as any).firebaseId);
+      } catch (error) {
+        console.error('Failed to delete order from Firebase:', error);
+      }
+    }
   };
 
   const filteredProducts = useMemo(() => {
@@ -530,13 +555,8 @@ const AppContent: React.FC = () => {
   const cartValues = useMemo(() => {
     const totalQty = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-    // Offer 1: 10% OFF on 1kg packs
+    // No bulk discount on 1kg packs anymore
     let bulkDiscount = 0;
-    cart.forEach(item => {
-      if (item.size === '1kg') {
-        bulkDiscount += Math.round((item.price * item.quantity) * 0.10);
-      }
-    });
 
     // Percentage/Flat/FreeDelivery logic
     const couponDiscount = appliedCoupon ? (
@@ -548,8 +568,8 @@ const AppContent: React.FC = () => {
     // Total Discount
     const totalDiscount = bulkDiscount + couponDiscount;
 
-    // Offer 2: Free Delivery > 499 OR Coupon override
-    const isFreeDelivery = cartSubtotal > 499 || appliedCoupon?.freeDelivery === true;
+    // Free Delivery > ₹999 OR Coupon override
+    const isFreeDelivery = cartSubtotal > 999 || appliedCoupon?.freeDelivery === true;
     const deliveryFee = isFreeDelivery ? 0 : 50;
 
     const finalTotal = cartSubtotal - totalDiscount + deliveryFee;
@@ -692,15 +712,13 @@ const AppContent: React.FC = () => {
 
       <div className="bg-gradient-to-r from-amber-700 via-orange-800 to-amber-900 text-white text-sm sm:text-base font-black text-center py-3 uppercase tracking-[0.2em] sm:tracking-[0.3em] shadow-inner relative z-40 overflow-hidden whitespace-nowrap flex">
         <div className="flex animate-marquee min-w-full shrink-0 items-center justify-around gap-20">
-          <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🚚 Free Delivery above ₹499</span>
-          <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🏷️ 10% OFF on 1kg Packs</span>
-          {offersEnabled && <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🏷️ 1st Order? Use FIRST10 for 10% OFF</span>}
+          <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🚚 Free Delivery above ₹999</span>
+          {offersEnabled && <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🏷️ 1st Order? Use FIRST5 for 5% OFF</span>}
           <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> {t.serving}</span>
         </div>
         <div className="flex animate-marquee min-w-full shrink-0 items-center justify-around gap-20" aria-hidden="true">
-          <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🚚 Free Delivery above ₹499</span>
-          <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🏷️ 10% OFF on 1kg Packs</span>
-          {offersEnabled && <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🏷️ 1st Order? Use FIRST10 for 10% OFF</span>}
+          <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🚚 Free Delivery above ₹999</span>
+          {offersEnabled && <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🏷️ 1st Order? Use FIRST5 for 5% OFF</span>}
           <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> {t.serving}</span>
         </div>
       </div>
