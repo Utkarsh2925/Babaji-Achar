@@ -1181,7 +1181,7 @@ const AppContent: React.FC = () => {
                       <div className="p-5 flex flex-col flex-grow">
                         <div className="flex-grow mb-4">
                           <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-amber-950 mb-2 leading-tight group-hover:text-amber-700 transition-colors">{p.name[lang]}</h3>
-                          <p className="text-sm sm:text-base text-stone-600 line-clamp-2 font-medium leading-relaxed">{p.description[lang]}</p>
+                          <p className="text-sm sm:text-base text-stone-600 font-medium leading-relaxed">{p.description[lang]}</p>
                         </div>
                         <div className="space-y-4">
                           <div className="flex items-center justify-between">
