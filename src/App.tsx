@@ -282,6 +282,47 @@ const AppContent: React.FC = () => {
     }
   };
 
+  // --- CASH ON DELIVERY (COD) HANDLER ---
+  const handleCODPayment = async (finalAmount: number, customerDetails: any) => {
+    try {
+      // Create Order with COD payment method
+      const newOrder: Order = {
+        id: `Order #${Date.now().toString().slice(-6)}`,
+        date: new Date().toISOString(),
+        status: 'Pending', // COD orders start as Pending
+        items: cart,
+        totalAmount: finalAmount,
+        customerDetails: customerDetails,
+        paymentMethod: 'Cash on Delivery', // COD payment method
+        utrNumber: 'COD' // Mark as COD
+      };
+
+      // Save to Firebase (real-time sync)
+      try {
+        await OrderService.createOrder(newOrder);
+        console.log('COD Order saved to Firebase successfully');
+      } catch (firebaseError) {
+        console.error('Failed to save COD order to Firebase:', firebaseError);
+        // Still proceed with local save as fallback
+      }
+
+      // Also save to localStorage as backup
+      const updatedOrders = [newOrder, ...orders];
+      setOrders(updatedOrders);
+      localStorage.setItem('bj_orders', JSON.stringify(updatedOrders));
+      setCurrentOrder(newOrder);
+      setCart([]);
+
+      // Send WhatsApp confirmation with COD details
+      WhatsAppService.sendOrderConfirmation(newOrder);
+
+      navigate('SUCCESS');
+    } catch (err: any) {
+      console.error("COD order creation error:", err);
+      alert("Failed to create COD order: " + (err.message || "Unknown error. Please try again."));
+    }
+  };
+
   useEffect(() => {
     // 1. Subscribe to Firebase Orders (real-time sync)
     const unsubscribeOrders = OrderService.subscribeToOrders((firebaseOrders) => {
