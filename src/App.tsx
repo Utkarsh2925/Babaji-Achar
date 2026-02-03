@@ -1258,12 +1258,13 @@ const AppContent: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-stone-50 p-6 sm:p-10 rounded-3xl h-fit border border-stone-100">
-                <h3 className="hindi-font text-xl sm:text-2xl font-black text-orange-900 flex items-center gap-2 mb-6"><ShieldCheck size={24} /> {t.scanToPay}</h3>
+              <div className="bg-white p-6 sm:p-10 rounded-3xl h-fit border border-stone-100 shadow-xl">
+                <h3 className="hindi-font text-xl sm:text-2xl font-black text-orange-900 flex items-center gap-2 mb-6"><ShieldCheck size={24} /> {t.paymentMethod || "Secure Payment"}</h3>
 
-                {/* Instruction Block */}
-                {/* Instruction Block */}
-                <div className="bg-white p-6 rounded-2xl border-2 border-stone-100 mb-8 text-center shadow-sm">
+                {/* Secure Payment Block */}
+                <div className="bg-stone-50 p-6 rounded-2xl border border-stone-100 mb-8 text-center">
+                  <p className="text-stone-500 font-bold mb-6 text-sm">Select a payment method to complete your order safely.</p>
+
                   {/* Razorpay Button */}
                   <button onClick={() => {
                     const name = (document.getElementById('c-name') as HTMLInputElement).value;
@@ -1276,245 +1277,150 @@ const AppContent: React.FC = () => {
 
                     handleRazorpayPayment(cartValues.finalTotal, { fullName: name, phone, street: addr, city: 'Prayagraj', state: 'UP', pincode: pin });
 
-                  }} className="w-full bg-orange-600 text-white py-4 rounded-xl font-black text-lg shadow-lg hover:bg-orange-700 transition-all flex items-center justify-center gap-2 mb-6 animate-pulse">
-                    <Sparkles size={20} /> Pay Online (Cards / UPI)
+                  }} className="w-full bg-[#3395ff] text-white py-5 rounded-2xl font-black text-xl shadow-lg hover:bg-[#2b84e6] active:scale-95 transition-all flex items-center justify-center gap-3 mb-4 group relative overflow-hidden">
+                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                    <span className="relative z-10 flex items-center gap-2">Pay ₹{cartValues.finalTotal} via Razorpay <ArrowRight size={20} /></span>
                   </button>
 
-                  <div className="flex items-center gap-2 mb-6">
-                    <div className="h-px bg-stone-200 flex-grow"></div>
-                    <span className="text-stone-400 text-xs font-bold uppercase tracking-widest">OR MANUAL</span>
-                    <div className="h-px bg-stone-200 flex-grow"></div>
+                  {/* Trust Badges */}
+                  <div className="flex items-center justify-center gap-4 text-stone-400 grayscale opacity-60">
+                    <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1"><Shield size={12} /> 100% Secure</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest">|</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest">PCI DSS Compliant</span>
                   </div>
 
-                  <div className="bg-orange-50 p-4 rounded-xl border border-orange-200 mb-6">
-                    <p className="text-orange-900 font-bold text-sm mb-2 uppercase tracking-widest"><AlertCircle size={16} className="inline mr-1" /> {t.paymentInstructionHeader}</p>
-                    <p className="text-sm text-stone-700 leading-relaxed font-bold">
-                      {t.paymentInstructionBody}
-                    </p>
+                  <div className="mt-6 flex flex-wrap justify-center gap-2">
+                    <div className="bg-white border border-stone-200 px-3 py-1 rounded text-[10px] font-bold text-stone-600">UPI</div>
+                    <div className="bg-white border border-stone-200 px-3 py-1 rounded text-[10px] font-bold text-stone-600">Cards</div>
+                    <div className="bg-white border border-stone-200 px-3 py-1 rounded text-[10px] font-bold text-stone-600">NetBanking</div>
+                    <div className="bg-white border border-stone-200 px-3 py-1 rounded text-[10px] font-bold text-stone-600">Wallets</div>
                   </div>
-
-                  {/* Mobile Number Only */}
-                  <div className="flex items-center justify-between bg-stone-50 p-4 rounded-xl border border-stone-200 mb-2">
-                    <div className="text-left">
-                      <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider block">{t.mobileNo}</span>
-                      <span className="font-mono font-bold text-stone-800 text-lg">9555809329</span>
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest mt-2">* Verify Name: Utkarsh</p>
                 </div>
-
-                {/* Universal Payment Redirect System (Pure App Launch) */}
-                <div className="grid grid-cols-1 gap-3 mb-8">
-                  <p className="font-bold text-stone-800 text-sm uppercase tracking-widest text-center mb-2">{t.orPayViaApp}</p>
-
-                  {/* Standardized Launcher Links */}
-                  {(() => {
-                    const isAndroid = /Android/i.test(navigator.userAgent);
-                    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-                    const isDesktop = !isAndroid && !isIOS;
-
-                    // Launcher Intents (Just Open App)
-                    const getLink = (app: 'paytm' | 'phonepe' | 'gpay') => {
-                      if (isDesktop) {
-                        if (app === 'paytm') return 'https://paytm.com/';
-                        if (app === 'phonepe') return 'https://www.phonepe.com/';
-                        if (app === 'gpay') return 'https://pay.google.com/about/';
-                      }
-
-                      if (isAndroid) {
-                        // Android: Use 'action.MAIN' to launch app entry point
-                        if (app === 'paytm') return 'intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=net.one97.paytm;S.browser_fallback_url=https://play.google.com/store/apps/details?id=net.one97.paytm;end';
-                        if (app === 'phonepe') return 'intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.phonepe.app;S.browser_fallback_url=https://play.google.com/store/apps/details?id=com.phonepe.app;end';
-                        if (app === 'gpay') return 'intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.google.android.apps.nbu.paisa.user;S.browser_fallback_url=https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user;end';
-                      }
-
-                      if (isIOS) {
-                        if (app === 'paytm') return 'paytmmp://';
-                        if (app === 'phonepe') return 'phonepe://';
-                        if (app === 'gpay') return 'gpay://';
-                      }
-
-                      return '#';
-                    };
-
-                    return (
-                      <>
-                        <a href={getLink('paytm')} target={isDesktop ? "_blank" : "_self"} className="bg-white border-2 border-stone-200 hover:border-[#00BAF2] p-3 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 w-full no-underline cursor-pointer">
-                          <span className="font-black text-[#00BAF2] text-lg">{t.paytm}</span>
-                        </a>
-                        <a href={getLink('phonepe')} target={isDesktop ? "_blank" : "_self"} className="bg-white border-2 border-stone-200 hover:border-[#5f259f] p-3 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 w-full no-underline cursor-pointer">
-                          <span className="font-black text-[#5f259f] text-lg">{t.phonepe}</span>
-                        </a>
-                        <a href={getLink('gpay')} target={isDesktop ? "_blank" : "_self"} className="bg-white border-2 border-stone-200 hover:border-[#EA4335] p-3 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 w-full no-underline cursor-pointer">
-                          <span className="font-black text-stone-600 text-lg"><span className="text-[#4285F4]">G</span><span className="text-[#EA4335]">P</span><span className="text-[#FBBC05]">a</span><span className="text-[#34A853]">y</span></span>
-                        </a>
-                      </>
-                    );
-                  })()}
-                </div>
-
-                {/* Mandate Checkbox */}
-                <div className="bg-orange-50 p-4 rounded-xl border border-orange-200 mb-8">
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input type="checkbox" id="payment-checkbox" className="mt-1 w-5 h-5 text-orange-600 rounded focus:ring-orange-500 border-gray-300" />
-                    <span className="text-sm font-bold text-stone-700 leading-tight select-none pt-0.5">{t.paymentCheckbox}</span>
-                  </label>
-                </div>
-
-                <button onClick={() => {
-                  const name = (document.getElementById('c-name') as HTMLInputElement).value;
-                  const addr = (document.getElementById('c-addr') as HTMLInputElement).value;
-                  const pin = (document.getElementById('c-pin') as HTMLInputElement).value;
-                  const phone = (document.getElementById('c-phone') as HTMLInputElement).value;
-                  const isChecked = (document.getElementById('payment-checkbox') as HTMLInputElement).checked;
-
-                  if (!name || !addr || !pin || !phone) return alert("Please fill all Shipping details (Name, Address, Pincode, Phone)");
-                  if (phone.length !== 10) return alert("Please enter a valid 10-digit phone number");
-                  if (!isChecked) return alert("Please confirm that you have completed the payment by checking the box.");
-
-                  // Generate Order
-                  const randomOrderId = Math.floor(100000 + Math.random() * 900000);
-                  const newOrder: Order = {
-                    id: `Order #${randomOrderId}`,
-                    date: new Date().toISOString(),
-                    status: 'Pending_Verification',
-                    items: cart,
-                    totalAmount: cartValues.finalTotal,
-                    customerDetails: { fullName: name, phone, street: addr, city: 'Prayagraj', state: 'UP', pincode: pin },
-                    paymentMethod: 'UPI (Manual - Checkbox Confirmed)',
-                    utrNumber: 'CHECKBOX_CONFIRMED'
-                  };
-
-                  const updatedOrders = [newOrder, ...orders];
-                  setOrders(updatedOrders);
-                  localStorage.setItem('bj_orders', JSON.stringify(updatedOrders));
-                  setCurrentOrder(newOrder);
-                  setCart([]);
-
-                  // Trigger WhatsApp
-                  WhatsAppService.sendOrderConfirmation(newOrder);
-                  navigate('SUCCESS');
-
-                }} className="w-full bg-[#25D366] text-white py-5 rounded-2xl font-black text-xl shadow-xl hover:bg-[#128C7E] transition-all active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap shadow-[#25D366]/30">
-                  {t.confirmOrder} <CheckCircle2 size={24} />
-                </button>
               </div>
             </div>
           </div>
         )}
 
-        {view === 'SUCCESS' && currentOrder && (
-          <div className="min-h-[80vh] flex items-center justify-center p-4 animate-in zoom-in duration-500">
-            <div className="bg-white p-8 sm:p-12 rounded-[2.5rem] shadow-2xl max-w-lg w-full text-center border-4 border-orange-50 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-orange-400 to-amber-500"></div>
-              <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce"><CheckCircle2 size={48} className="text-green-600" /></div>
-              <h2 className="hindi-font text-4xl sm:text-5xl font-black text-orange-950 mb-4">Order Placed!</h2>
-              <p className="text-stone-500 font-medium mb-8">Thank you {user?.name}. We have received your order request.</p>
-              <div className="bg-orange-50 p-6 rounded-2xl mb-8 border border-orange-100">
-                <p className="text-sm font-black uppercase tracking-widest text-orange-400 mb-2">Order ID</p>
-                <p className="text-2xl font-black text-orange-900 font-mono tracking-wider">{currentOrder.id}</p>
-              </div>
-              <div className="space-y-4">
-                <a href={generateWhatsAppLink(currentOrder)} target="_blank" rel="noreferrer" className="w-full bg-[#25D366] text-white py-4 rounded-xl font-black text-lg shadow-lg hover:bg-[#128C7E] transition-all flex items-center justify-center gap-2"><WhatsAppIcon /> Send to WhatsApp</a>
-                <button onClick={() => { setCurrentOrder(null); setView('HOME'); }} className="w-full bg-stone-100 text-stone-600 py-4 rounded-xl font-bold hover:bg-stone-200 transition-all text-lg">Continue Shopping</button>
-                <p className="text-sm text-stone-400 font-bold mt-4">* Sending to WhatsApp is mandatory for fast processing</p>
+        {
+          view === 'SUCCESS' && currentOrder && (
+            <div className="min-h-[80vh] flex items-center justify-center p-4 animate-in zoom-in duration-500">
+              <div className="bg-white p-8 sm:p-12 rounded-[2.5rem] shadow-2xl max-w-lg w-full text-center border-4 border-orange-50 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-orange-400 to-amber-500"></div>
+                <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce"><CheckCircle2 size={48} className="text-green-600" /></div>
+                <h2 className="hindi-font text-4xl sm:text-5xl font-black text-orange-950 mb-4">Order Placed!</h2>
+                <p className="text-stone-500 font-medium mb-8">Thank you {user?.name}. We have received your order request.</p>
+                <div className="bg-orange-50 p-6 rounded-2xl mb-8 border border-orange-100">
+                  <p className="text-sm font-black uppercase tracking-widest text-orange-400 mb-2">Order ID</p>
+                  <p className="text-2xl font-black text-orange-900 font-mono tracking-wider">{currentOrder.id}</p>
+                </div>
+                <div className="space-y-4">
+                  <a href={generateWhatsAppLink(currentOrder)} target="_blank" rel="noreferrer" className="w-full bg-[#25D366] text-white py-4 rounded-xl font-black text-lg shadow-lg hover:bg-[#128C7E] transition-all flex items-center justify-center gap-2"><WhatsAppIcon /> Send to WhatsApp</a>
+                  <button onClick={() => { setCurrentOrder(null); setView('HOME'); }} className="w-full bg-stone-100 text-stone-600 py-4 rounded-xl font-bold hover:bg-stone-200 transition-all text-lg">Continue Shopping</button>
+                  <p className="text-sm text-stone-400 font-bold mt-4">* Sending to WhatsApp is mandatory for fast processing</p>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )
+        }
 
-        {view === 'PROFILE' && user && (
-          <div className="max-w-7xl mx-auto px-4 py-8 sm:py-16 animate-in slide-in-from-right duration-500">
-            <button onClick={() => setView('HOME')} className="flex items-center gap-2 text-orange-900 mb-8 font-black uppercase text-sm tracking-widest"><ArrowLeft size={18} /> Home</button>
+        {
+          view === 'PROFILE' && user && (
+            <div className="max-w-7xl mx-auto px-4 py-8 sm:py-16 animate-in slide-in-from-right duration-500">
+              <button onClick={() => setView('HOME')} className="flex items-center gap-2 text-orange-900 mb-8 font-black uppercase text-sm tracking-widest"><ArrowLeft size={18} /> Home</button>
 
-            <div className="flex flex-col lg:flex-row gap-8 sm:gap-12">
-              {/* Sidebar */}
-              <div className="w-full lg:w-1/4 space-y-6">
-                <div className="bg-white p-6 sm:p-8 rounded-3xl border border-orange-100 shadow-xl text-center">
-                  <div className="w-24 h-24 bg-orange-100 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl font-black text-orange-800">{user.name.charAt(0)}</div>
-                  <h2 className="text-xl font-black text-orange-950">{user.name}</h2>
-                  <p className="text-base font-bold text-stone-400 mb-6">{user.phone}</p>
-                  <div className="space-y-3">
-                    <button className="w-full py-3 bg-orange-50 text-orange-900 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><Settings size={16} /> Edit Profile</button>
-                    <button onClick={handleLogout} className="w-full py-3 bg-stone-100 text-stone-600 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-red-50 hover:text-red-500 transition-colors"><LogIn size={16} className="rotate-180" /> Logout</button>
-                  </div>
-                </div>
-                {user.role === 'ADMIN' && (
-                  <div className="bg-orange-900 p-6 sm:p-8 rounded-3xl shadow-xl text-white">
-                    <h3 className="flex items-center gap-2 font-black mb-4"><ShieldCheck size={20} className="text-amber-400" /> Admin Panel</h3>
-                    <p className="text-xs text-orange-200 mb-6 font-medium">Manage orders and store settings.</p>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-white/10 p-3 rounded-xl text-center"><p className="text-2xl font-black text-amber-400">{orders.length}</p><p className="text-xs uppercase tracking-wider">Orders</p></div>
-                      <div className="bg-white/10 p-3 rounded-xl text-center"><p className="text-2xl font-black text-amber-400">₹{orders.reduce((a, b) => a + b.totalAmount, 0)}</p><p className="text-xs uppercase tracking-wider">Revenue</p></div>
+              <div className="flex flex-col lg:flex-row gap-8 sm:gap-12">
+                {/* Sidebar */}
+                <div className="w-full lg:w-1/4 space-y-6">
+                  <div className="bg-white p-6 sm:p-8 rounded-3xl border border-orange-100 shadow-xl text-center">
+                    <div className="w-24 h-24 bg-orange-100 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl font-black text-orange-800">{user.name.charAt(0)}</div>
+                    <h2 className="text-xl font-black text-orange-950">{user.name}</h2>
+                    <p className="text-base font-bold text-stone-400 mb-6">{user.phone}</p>
+                    <div className="space-y-3">
+                      <button className="w-full py-3 bg-orange-50 text-orange-900 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><Settings size={16} /> Edit Profile</button>
+                      <button onClick={handleLogout} className="w-full py-3 bg-stone-100 text-stone-600 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-red-50 hover:text-red-500 transition-colors"><LogIn size={16} className="rotate-180" /> Logout</button>
                     </div>
-                    <button onClick={() => setView('ADMIN')} className="w-full mt-6 py-3 bg-white text-orange-950 rounded-xl font-black text-sm hover:bg-amber-50 transition-colors">Open Dashboard</button>
                   </div>
-                )}
-              </div>
-
-              {/* Main Content */}
-              <div className="flex-grow space-y-8 sm:space-y-12">
-                <div>
-                  <h3 className="hindi-font text-3xl font-black text-orange-950 mb-6 sm:mb-8 flex items-center gap-3"><Package size={28} className="text-orange-700" /> My Orders</h3>
-
-                  {orders.filter(o => o.customerDetails.phone === user.phone).length === 0 ? (
-                    <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-stone-200"><p className="text-stone-400 font-bold">No orders found.</p></div>
-                  ) : (
-                    <div className="space-y-4 sm:space-y-6">
-                      {orders.filter(o => o.customerDetails.phone === user.phone).map(order => (
-                        <div key={order.id} className="bg-white p-6 rounded-2xl border border-orange-50 shadow-sm hover:shadow-md transition-all">
-                          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4 pb-4 border-b border-stone-100">
-                            <div>
-                              <p className="font-black text-lg text-orange-950">#{order.id}</p>
-                              <p className="text-sm font-bold text-stone-400">{new Date(order.date).toLocaleDateString()} • {new Date(order.date).toLocaleTimeString()}</p>
-                            </div>
-                            <div className={`px-4 py-1.5 rounded-lg text-sm font-black uppercase tracking-widest border ${getStatusColor(order.status)}`}>
-                              {order.status.replace('_', ' ')}
-                            </div>
-                          </div>
-                          <div className="space-y-2 mb-4">
-                            {order.items.map((item, idx) => (
-                              <div key={idx} className="flex justify-between text-base font-medium text-stone-600">
-                                <span>{item.productName} x{item.quantity} ({item.size})</span>
-                                <span className="font-bold">₹{item.price * item.quantity}</span>
-                              </div>
-                            ))}
-                          </div>
-                          <div className="flex flex-col sm:flex-row justify-between items-center pt-4 border-t border-stone-100 gap-4">
-                            <p className="font-black text-xl text-orange-900">Total: ₹{order.totalAmount}</p>
-                            <a href={generateWhatsAppLink(order)} target="_blank" rel="noreferrer" className="text-sm font-black text-[#25D366] hover:underline flex items-center gap-1"><WhatsAppIcon size={16} /> Track on WhatsApp</a>
-                          </div>
-                        </div>
-                      ))}
+                  {user.role === 'ADMIN' && (
+                    <div className="bg-orange-900 p-6 sm:p-8 rounded-3xl shadow-xl text-white">
+                      <h3 className="flex items-center gap-2 font-black mb-4"><ShieldCheck size={20} className="text-amber-400" /> Admin Panel</h3>
+                      <p className="text-xs text-orange-200 mb-6 font-medium">Manage orders and store settings.</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-white/10 p-3 rounded-xl text-center"><p className="text-2xl font-black text-amber-400">{orders.length}</p><p className="text-xs uppercase tracking-wider">Orders</p></div>
+                        <div className="bg-white/10 p-3 rounded-xl text-center"><p className="text-2xl font-black text-amber-400">₹{orders.reduce((a, b) => a + b.totalAmount, 0)}</p><p className="text-xs uppercase tracking-wider">Revenue</p></div>
+                      </div>
+                      <button onClick={() => setView('ADMIN')} className="w-full mt-6 py-3 bg-white text-orange-950 rounded-xl font-black text-sm hover:bg-amber-50 transition-colors">Open Dashboard</button>
                     </div>
                   )}
                 </div>
+
+                {/* Main Content */}
+                <div className="flex-grow space-y-8 sm:space-y-12">
+                  <div>
+                    <h3 className="hindi-font text-3xl font-black text-orange-950 mb-6 sm:mb-8 flex items-center gap-3"><Package size={28} className="text-orange-700" /> My Orders</h3>
+
+                    {orders.filter(o => o.customerDetails.phone === user.phone).length === 0 ? (
+                      <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-stone-200"><p className="text-stone-400 font-bold">No orders found.</p></div>
+                    ) : (
+                      <div className="space-y-4 sm:space-y-6">
+                        {orders.filter(o => o.customerDetails.phone === user.phone).map(order => (
+                          <div key={order.id} className="bg-white p-6 rounded-2xl border border-orange-50 shadow-sm hover:shadow-md transition-all">
+                            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4 pb-4 border-b border-stone-100">
+                              <div>
+                                <p className="font-black text-lg text-orange-950">#{order.id}</p>
+                                <p className="text-sm font-bold text-stone-400">{new Date(order.date).toLocaleDateString()} • {new Date(order.date).toLocaleTimeString()}</p>
+                              </div>
+                              <div className={`px-4 py-1.5 rounded-lg text-sm font-black uppercase tracking-widest border ${getStatusColor(order.status)}`}>
+                                {order.status.replace('_', ' ')}
+                              </div>
+                            </div>
+                            <div className="space-y-2 mb-4">
+                              {order.items.map((item, idx) => (
+                                <div key={idx} className="flex justify-between text-base font-medium text-stone-600">
+                                  <span>{item.productName} x{item.quantity} ({item.size})</span>
+                                  <span className="font-bold">₹{item.price * item.quantity}</span>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="flex flex-col sm:flex-row justify-between items-center pt-4 border-t border-stone-100 gap-4">
+                              <p className="font-black text-xl text-orange-900">Total: ₹{order.totalAmount}</p>
+                              <a href={generateWhatsAppLink(order)} target="_blank" rel="noreferrer" className="text-sm font-black text-[#25D366] hover:underline flex items-center gap-1"><WhatsAppIcon size={16} /> Track on WhatsApp</a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )
+        }
 
-        {view === 'ADMIN' && user?.role === 'ADMIN' && (
-          <AdminDashboard
-            stores={stores}
-            orders={orders}
-            products={products}
-            updateOrderStatus={updateOrderStatus}
-            deleteOrder={deleteOrder}
-            onUpdateStock={updateProductVariant}
-            onAddStore={addStore}
-            onDeleteStore={deleteStore}
-            onLogout={handleLogout}
-            onNavigateHome={() => setView('HOME')}
-          />
-        )}
+        {
+          view === 'ADMIN' && user?.role === 'ADMIN' && (
+            <AdminDashboard
+              stores={stores}
+              orders={orders}
+              products={products}
+              updateOrderStatus={updateOrderStatus}
+              deleteOrder={deleteOrder}
+              onUpdateStock={updateProductVariant}
+              onAddStore={addStore}
+              onDeleteStore={deleteStore}
+              onLogout={handleLogout}
+              onNavigateHome={() => setView('HOME')}
+            />
+          )
+        }
 
         {/* Legal Pages */}
-        {(view === 'PRIVACY' || view === 'REFUND' || view === 'TERMS' || view === 'DISCLAIMER') && (
-          <LegalPage type={view} onBack={goBack} />
-        )}
+        {
+          (view === 'PRIVACY' || view === 'REFUND' || view === 'TERMS' || view === 'DISCLAIMER') && (
+            <LegalPage type={view} onBack={goBack} />
+          )
+        }
 
-      </main>
+      </main >
 
       {/* Footer */}
       {/* Footer */}
@@ -1643,7 +1549,7 @@ const AppContent: React.FC = () => {
         <WhatsAppIcon size={32} />
         <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 font-bold whitespace-nowrap text-sm">Chat with us</span>
       </a>
-    </div>
+    </div >
   );
 };
 

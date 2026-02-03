@@ -14,7 +14,12 @@ export const ConfigService = {
 
     // Set Offers Enabled Status
     setOffersStatus: async (enabled: boolean) => {
-        const statusRef = ref(db, 'config/offersEnabled');
-        await set(statusRef, enabled);
+        try {
+            const statusRef = ref(db, 'config/offersEnabled');
+            await set(statusRef, enabled);
+        } catch (error) {
+            console.error("Firebase Write Error:", error);
+            alert("Admin Toggle Failed: Check Firebase Rules or Console Permissions.");
+        }
     }
 };
