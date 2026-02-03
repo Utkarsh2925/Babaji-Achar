@@ -1204,27 +1204,29 @@ const AppContent: React.FC = () => {
                         return;
                       }
 
-                      // Mobile Redirection Logic
+                      // Mobile Redirection Logic (Pure App Launch - No Auto Fill)
                       let url = '';
-                      const baseUrl = `upi://pay?pa=${vpa}&pn=${name}&cu=${currency}`;
 
                       if (isAndroid) {
-                        // Android Intents with Play Store Fallback
+                        // Android Intents -> Launch App Home Screen
                         if (app === 'paytm') {
-                          url = `intent://pay?pa=${vpa}&pn=${name}&cu=${currency}#Intent;scheme=upi;package=net.one97.paytm;S.browser_fallback_url=https://play.google.com/store/apps/details?id=net.one97.paytm;end`;
+                          url = `intent://#Intent;scheme=paytmmp;package=net.one97.paytm;S.browser_fallback_url=https://play.google.com/store/apps/details?id=net.one97.paytm;end`;
                         } else if (app === 'phonepe') {
-                          url = `intent://pay?pa=${vpa}&pn=${name}&cu=${currency}#Intent;scheme=upi;package=com.phonepe.app;S.browser_fallback_url=https://play.google.com/store/apps/details?id=com.phonepe.app;end`;
+                          url = `intent://#Intent;scheme=phonepe;package=com.phonepe.app;S.browser_fallback_url=https://play.google.com/store/apps/details?id=com.phonepe.app;end`;
                         } else if (app === 'gpay') {
-                          url = `intent://pay?pa=${vpa}&pn=${name}&cu=${currency}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;S.browser_fallback_url=https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user;end`;
+                          url = `intent://#Intent;scheme=tez;package=com.google.android.apps.nbu.paisa.user;S.browser_fallback_url=https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user;end`;
                         }
                       } else if (isIOS) {
-                        // iOS Deep Links
-                        if (app === 'paytm') url = `paytmmp://pay?pa=${vpa}&pn=${name}&cu=${currency}`;
-                        else if (app === 'phonepe') url = `phonepe://pay?pa=${vpa}&pn=${name}&cu=${currency}`;
-                        else if (app === 'gpay') url = `gpay://upi/pay?pa=${vpa}&pn=${name}&cu=${currency}`;
-                        else url = baseUrl; // Fallback
+                        // iOS Deep Links -> Launch App Home Screen
+                        if (app === 'paytm') url = `paytmmp://`;
+                        else if (app === 'phonepe') url = `phonepe://`;
+                        else if (app === 'gpay') url = `gpay://`;
+                        else url = `upi://`;
                       } else {
-                        url = baseUrl;
+                        // Fallback
+                        if (app === 'paytm') url = `https://paytm.com/`;
+                        else if (app === 'phonepe') url = `https://www.phonepe.com/`;
+                        else if (app === 'gpay') url = `https://pay.google.com/about/`;
                       }
 
                       window.location.href = url;
