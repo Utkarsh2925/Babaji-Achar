@@ -60,6 +60,7 @@ const WhatsAppIcon = ({ size = 24, className = "" }) => (
 
 import { NotificationProvider, useNotification } from './components/Notifications';
 import Analytics from './components/Analytics';
+import { ConfigService } from './services/ConfigService';
 import AdminDashboard from './components/Admin/AdminDashboard';
 import LocateStores from './components/LocateStores';
 import type { Store } from './types';
@@ -69,6 +70,17 @@ import type { Store } from './types';
 
 
 import LegalPage from './components/Legal/LegalPage';
+
+
+const loadRazorpay = () => {
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
 
 const AppContent: React.FC = () => {
   const { addToast } = useNotification();
@@ -109,19 +121,109 @@ const AppContent: React.FC = () => {
   // const [isVerifying, setIsVerifying] = useState(false);
 
 
+  // --- STATE ---
+  const [offersEnabled, setOffersEnabled] = useState(true);
+
   // --- AUTO-COUPON LOGIC ---
   useEffect(() => {
-    if (view === 'CHECKOUT' && !appliedCoupon && loginPhone.length === 10) {
+    // Subscribe to Config
+    const unsubscribe = ConfigService.subscribeToOffersStatus(setOffersEnabled);
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (view === 'CHECKOUT' && !appliedCoupon && loginPhone.length === 10 && offersEnabled) {
       const isExistingUser = orders.some(o => o.customerDetails.phone === loginPhone);
       if (!isExistingUser) {
         setAppliedCoupon({ code: 'FIRST10', type: 'PERCENTAGE', value: 10 });
-        // No alert for auto-apply to keep it smooth, user sees it in summary
       }
     }
-  }, [view, loginPhone, orders, appliedCoupon]);
+  }, [view, loginPhone, orders, appliedCoupon, offersEnabled]);
 
   const t = UI_TEXT[lang];
   const festival = useMemo(() => GET_ACTIVE_FESTIVAL(), []);
+
+  // --- RAZORPAY HANDLER ---
+  const handleRazorpayPayment = async (finalAmount: number, customerDetails: any) => {
+    const res = await loadRazorpay();
+
+    if (!res) {
+      alert("Razorpay SDK failed to load. Are you online?");
+      return;
+    }
+
+    try {
+      // 1. Create Order
+      const orderRes = await fetch("/api/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: finalAmount,
+          receipt: "BABAJI_" + Date.now(),
+        }),
+      });
+
+      if (!orderRes.ok) throw new Error("Server error creating order");
+      const orderData = await orderRes.json();
+
+      // 2. Open Checkout
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_live_SBYjKcIODAc0bx", // Fallback for safety
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Baba Ji Achar",
+        description: "Authentic Homemade Taste",
+        image: "https://babajiachar.com/logo.png", // Verify logo exists
+        order_id: orderData.id,
+        handler: async function (response: any) {
+          // 3. Verify Payment
+          try {
+            await fetch("/api/verify-payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(response),
+            });
+
+            // 4. Success -> Create Order in App
+            const newOrder: Order = {
+              id: `Order #${Date.now().toString().slice(-6)}`,
+              date: new Date().toISOString(),
+              status: 'Pending_Verification', // Paid but pending shipment
+              items: cart,
+              totalAmount: finalAmount,
+              customerDetails: customerDetails,
+              paymentMethod: 'Razorpay Online',
+              utrNumber: response.razorpay_payment_id // Store Pay ID as UTR
+            };
+
+            const updatedOrders = [newOrder, ...orders];
+            setOrders(updatedOrders);
+            localStorage.setItem('bj_orders', JSON.stringify(updatedOrders));
+            setCurrentOrder(newOrder);
+            setCart([]);
+            WhatsAppService.sendOrderConfirmation(newOrder);
+            navigate('SUCCESS');
+
+          } catch (err) {
+            alert("Payment verification failed. Please contact support.");
+          }
+        },
+        prefill: {
+          name: customerDetails.fullName,
+          contact: customerDetails.phone,
+        },
+        theme: {
+          color: "#ea580c",
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      console.error(err);
+      alert("Payment initiation failed. Please try manual payment.");
+    }
+  };
 
   useEffect(() => {
     // 1. Support Logic (Orders, User, Stores, Products)
@@ -1159,7 +1261,7 @@ const AppContent: React.FC = () => {
               <div className="bg-stone-50 p-6 sm:p-10 rounded-3xl h-fit border border-stone-100">
                 <h3 className="hindi-font text-xl sm:text-2xl font-black text-orange-900 flex items-center gap-2 mb-6"><ShieldCheck size={24} /> {t.scanToPay}</h3>
 
-                {/* Instruction Block (Replaces QR) */}
+                {/* Instruction Block */}
                 <div className="bg-white p-6 rounded-2xl border-2 border-stone-100 mb-8 text-center shadow-sm">
                   <div className="bg-orange-50 p-4 rounded-xl border border-orange-200 mb-6">
                     <p className="text-orange-900 font-bold text-sm mb-2 uppercase tracking-widest"><AlertCircle size={16} className="inline mr-1" /> {t.paymentInstructionHeader}</p>
@@ -1174,85 +1276,61 @@ const AppContent: React.FC = () => {
                       <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider block">{t.mobileNo}</span>
                       <span className="font-mono font-bold text-stone-800 text-lg">9555809329</span>
                     </div>
-                    <button onClick={() => { navigator.clipboard.writeText('9555809329'); addToast('Copied Number!', 'info'); }} className="p-3 text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors font-bold text-xs uppercase tracking-wider">Copy</button>
                   </div>
                   <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest mt-2">* Verify Name: Utkarsh</p>
                 </div>
 
-                {/* Universal Payment Redirect System */}
+                {/* Universal Payment Redirect System (Pure App Launch) */}
                 <div className="grid grid-cols-1 gap-3 mb-8">
                   <p className="font-bold text-stone-800 text-sm uppercase tracking-widest text-center mb-2">{t.orPayViaApp}</p>
 
-                  {/* Payment Handler Logic */}
+                  {/* Standardized Launcher Links */}
                   {(() => {
-                    const handlePayment = (app: 'paytm' | 'phonepe' | 'gpay') => {
-                      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                      const isAndroid = /Android/i.test(navigator.userAgent);
-                      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+                    const isAndroid = /Android/i.test(navigator.userAgent);
+                    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+                    const isDesktop = !isAndroid && !isIOS;
 
-                      // Payment Details
-                      const vpa = '7754865997@kotak811';
-                      const name = 'Utkarsh'; // Verify Name
-                      const currency = 'INR';
-                      // Note: Amount (am) is OMITTED intentionally for Risk Policy compliance (No Auto-Fill)
-
-                      if (!isMobile) {
-                        // Desktop Fallback -> Official Websites
-                        if (app === 'paytm') window.open('https://paytm.com/', '_blank');
-                        if (app === 'phonepe') window.open('https://www.phonepe.com/', '_blank');
-                        if (app === 'gpay') window.open('https://pay.google.com/about/', '_blank');
-                        return;
+                    // Launcher Intents (Just Open App)
+                    const getLink = (app: 'paytm' | 'phonepe' | 'gpay') => {
+                      if (isDesktop) {
+                        if (app === 'paytm') return 'https://paytm.com/';
+                        if (app === 'phonepe') return 'https://www.phonepe.com/';
+                        if (app === 'gpay') return 'https://pay.google.com/about/';
                       }
-
-                      // Mobile Redirection Logic (Pure App Launch - No Auto Fill)
-                      let url = '';
 
                       if (isAndroid) {
-                        // Android Intents -> Force Launch App via UPI Scheme (Standard Entry)
-                        // Using 'upi' scheme with specific package avoids "scheme not found" errors
-                        if (app === 'paytm') {
-                          url = `intent://pay?#Intent;scheme=upi;package=net.one97.paytm;S.browser_fallback_url=https://play.google.com/store/apps/details?id=net.one97.paytm;end`;
-                        } else if (app === 'phonepe') {
-                          url = `intent://pay?#Intent;scheme=upi;package=com.phonepe.app;S.browser_fallback_url=https://play.google.com/store/apps/details?id=com.phonepe.app;end`;
-                        } else if (app === 'gpay') {
-                          url = `intent://pay?#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;S.browser_fallback_url=https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user;end`;
-                        }
-                      } else if (isIOS) {
-                        // iOS Deep Links -> Launch App Home Screen
-                        if (app === 'paytm') url = `paytmmp://`;
-                        else if (app === 'phonepe') url = `phonepe://`;
-                        else if (app === 'gpay') url = `gpay://`;
-                        else url = `upi://`;
-                      } else {
-                        // Fallback
-                        if (app === 'paytm') url = `https://paytm.com/`;
-                        else if (app === 'phonepe') url = `https://www.phonepe.com/`;
-                        else if (app === 'gpay') url = `https://pay.google.com/about/`;
+                        // Android: Use 'action.MAIN' to launch app entry point
+                        if (app === 'paytm') return 'intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=net.one97.paytm;S.browser_fallback_url=https://play.google.com/store/apps/details?id=net.one97.paytm;end';
+                        if (app === 'phonepe') return 'intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.phonepe.app;S.browser_fallback_url=https://play.google.com/store/apps/details?id=com.phonepe.app;end';
+                        if (app === 'gpay') return 'intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.google.android.apps.nbu.paisa.user;S.browser_fallback_url=https://play.google.com/store/apps/details?id=com.google.android.apps.nbu.paisa.user;end';
                       }
 
-                      window.location.href = url;
+                      if (isIOS) {
+                        if (app === 'paytm') return 'paytmmp://';
+                        if (app === 'phonepe') return 'phonepe://';
+                        if (app === 'gpay') return 'gpay://';
+                      }
+
+                      return '#';
                     };
 
                     return (
                       <>
-                        {/* Paytm */}
-                        <button onClick={() => handlePayment('paytm')} className="bg-white border-2 border-stone-200 hover:border-[#00BAF2] p-3 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 w-full">
+                        <a href={getLink('paytm')} target={isDesktop ? "_blank" : "_self"} className="bg-white border-2 border-stone-200 hover:border-[#00BAF2] p-3 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 w-full no-underline cursor-pointer">
                           <span className="font-black text-[#00BAF2] text-lg">{t.paytm}</span>
-                        </button>
-                        {/* PhonePe */}
-                        <button onClick={() => handlePayment('phonepe')} className="bg-white border-2 border-stone-200 hover:border-[#5f259f] p-3 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 w-full">
+                        </a>
+                        <a href={getLink('phonepe')} target={isDesktop ? "_blank" : "_self"} className="bg-white border-2 border-stone-200 hover:border-[#5f259f] p-3 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 w-full no-underline cursor-pointer">
                           <span className="font-black text-[#5f259f] text-lg">{t.phonepe}</span>
-                        </button>
-                        {/* GPay */}
-                        <button onClick={() => handlePayment('gpay')} className="bg-white border-2 border-stone-200 hover:border-[#EA4335] p-3 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 w-full">
+                        </a>
+                        <a href={getLink('gpay')} target={isDesktop ? "_blank" : "_self"} className="bg-white border-2 border-stone-200 hover:border-[#EA4335] p-3 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 w-full no-underline cursor-pointer">
                           <span className="font-black text-stone-600 text-lg"><span className="text-[#4285F4]">G</span><span className="text-[#EA4335]">P</span><span className="text-[#FBBC05]">a</span><span className="text-[#34A853]">y</span></span>
-                        </button>
+                        </a>
                       </>
                     );
                   })()}
                 </div>
 
-                {/* Mandate Checkbox (Replaces UTR/Screenshot Form) */}
+                {/* Mandate Checkbox */}
                 <div className="bg-orange-50 p-4 rounded-xl border border-orange-200 mb-8">
                   <label className="flex items-start gap-3 cursor-pointer">
                     <input type="checkbox" id="payment-checkbox" className="mt-1 w-5 h-5 text-orange-600 rounded focus:ring-orange-500 border-gray-300" />
@@ -1290,7 +1368,7 @@ const AppContent: React.FC = () => {
                   setCurrentOrder(newOrder);
                   setCart([]);
 
-                  // Trigger WhatsApp with Manual context
+                  // Trigger WhatsApp
                   WhatsAppService.sendOrderConfirmation(newOrder);
                   navigate('SUCCESS');
 

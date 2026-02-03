@@ -8,6 +8,7 @@ import AdminOrders from './AdminOrders';
 import AdminProducts from './AdminProducts';
 import AdminStores from './AdminStores'; // Import
 import DataCentre from './DataCentre';
+import { ConfigService } from '../../services/ConfigService';
 import type { Order, Product, OrderStatus, Store } from '../../types';
 
 interface AdminDashboardProps {
@@ -96,6 +97,25 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     </nav>
 
                     <div className="pt-6 border-t border-stone-100 space-y-2">
+
+                        {/* Admin Offer Toggle */}
+                        <div className="px-4 mb-2">
+                            {(() => {
+                                const [enabled, setEnabled] = useState(true);
+                                React.useEffect(() => {
+                                    return ConfigService.subscribeToOffersStatus(setEnabled);
+                                }, []);
+
+                                return (
+                                    <button onClick={() => {
+                                        ConfigService.setOffersStatus(!enabled);
+                                    }} className={`w-full text-xs font-bold py-2 rounded-xl transition-colors border ${enabled ? 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200' : 'bg-red-50 text-red-500 border-red-100 hover:bg-red-100'}`}>
+                                        Offers: {enabled ? 'ENABLED' : 'DISABLED'}
+                                    </button>
+                                );
+                            })()}
+                        </div>
+
                         <button
                             onClick={onNavigateHome}
                             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-stone-500 hover:bg-stone-50 hover:text-orange-800 transition-colors font-bold"

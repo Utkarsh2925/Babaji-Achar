@@ -1,4 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getDatabase } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBVUeOL8isK7Nf4bpTbLW19NfHCnr16YNo",
@@ -12,5 +13,6 @@ const firebaseConfig = {
 // Singleton pattern: initialize only if no apps exist, otherwise use existing.
 // This prevents duplicate initialization errors and is safe for Vercel/SSR.
 export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+export const db = getDatabase(app);
 
 export default app;
