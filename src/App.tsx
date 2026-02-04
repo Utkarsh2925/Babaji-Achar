@@ -3,12 +3,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import organicBadge from './assets/organic_badge_final.png';
 import {
-  ShoppingCart, User as UserIcon, ChevronRight, Instagram, Trash2, CheckCircle2, QrCode,
+  ShoppingCart, User as UserIcon, ChevronRight, Instagram, Trash2, CheckCircle2,
   ArrowLeft, MapPin, Plus, Minus, Globe, ShieldCheck, Search, Sparkles, Star, Leaf,
   MessageCircle, Package, XCircle, LogIn, Settings, Phone, ArrowRight, Shield,
-  ImageIcon, Mail, Copy, AlertCircle, Camera
+  ImageIcon, Mail, Camera
 } from 'lucide-react';
-import paymentQr from './assets/payment_qr.jpg';
 // import { PaymentService } from './services/PaymentService';
 import { WhatsAppService } from './services/WhatsAppService';
 import { OrderService } from './services/OrderService';
@@ -320,6 +319,7 @@ const AppContent: React.FC = () => {
   };
 
   // --- CASH ON DELIVERY (COD) HANDLER ---
+  // --- CASH ON DELIVERY (COD) HANDLER ---
   const handleCODPayment = async (finalAmount: number, customerDetails: any) => {
     console.log('🟡 COD Payment initiated:', { finalAmount, customerDetails });
 
@@ -336,29 +336,43 @@ const AppContent: React.FC = () => {
         utrNumber: 'COD' // Mark as COD
       };
 
-      // Save to Firebase (real-time sync)
+      // 1. Save to Firebase (real-time sync)
       try {
         await OrderService.createOrder(newOrder);
         console.log('COD Order saved to Firebase successfully');
       } catch (firebaseError) {
         console.error('Failed to save COD order to Firebase:', firebaseError);
-        // Still proceed with local save as fallback
+        // Continue to local save as fallback
       }
 
-      // Also save to localStorage as backup
-      const updatedOrders = [newOrder, ...orders];
-      setOrders(updatedOrders);
-      localStorage.setItem('bj_orders', JSON.stringify(updatedOrders));
-      setCurrentOrder(newOrder);
-      setCart([]);
+      // 2. Save to localStorage (Backup)
+      try {
+        const updatedOrders = [newOrder, ...orders];
+        setOrders(updatedOrders);
+        localStorage.setItem('bj_orders', JSON.stringify(updatedOrders));
+        setCurrentOrder(newOrder);
+      } catch (storageError) {
+        console.error('Failed to save order to localStorage:', storageError);
+        // Continue, not critical for completion
+      }
 
-      // Send WhatsApp confirmation with COD details
-      WhatsAppService.sendOrderConfirmation(newOrder);
+      setCart([]); // Clear cart in state
 
+      // 3. Send WhatsApp confirmation
+      try {
+        await WhatsAppService.sendOrderConfirmation(newOrder);
+      } catch (waError) {
+        console.error('Failed to send WhatsApp confirmation:', waError);
+        // Continue, not critical
+      }
+
+      // 4. Navigate to SUCCESS (CRITICAL STEP)
+      console.log('✅ Order processed, navigating to SUCCESS');
       navigate('SUCCESS');
+
     } catch (err: any) {
-      console.error("COD order creation error:", err);
-      alert("Failed to create COD order: " + (err.message || "Unknown error. Please try again."));
+      console.error("COD order creation critical error:", err);
+      alert("Failed to create COD order. Please try again.");
     }
   };
 
