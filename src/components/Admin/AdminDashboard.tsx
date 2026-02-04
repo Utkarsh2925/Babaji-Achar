@@ -22,6 +22,7 @@ interface AdminDashboardProps {
     onDeleteStore: (id: string) => void; // New prop
     onLogout: () => void;
     onNavigateHome: () => void;
+    firebaseError?: string | null; // New Prop
 }
 
 type AdminView = 'OVERVIEW' | 'ORDERS' | 'PRODUCTS' | 'DATA' | 'STORES';
@@ -50,7 +51,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     onAddStore,
     onDeleteStore,
     onLogout,
-    onNavigateHome
+    onNavigateHome,
+    firebaseError
 }) => {
     const [currentView, setCurrentView] = useState<AdminView>('OVERVIEW');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -64,6 +66,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
     return (
         <div className="min-h-screen bg-stone-50 flex font-sans">
+            {/* DEBUG BANNER FOR FIREBASE ERRORS */}
+            {firebaseError && (
+                <div className="fixed top-0 left-0 right-0 z-[100] bg-red-600 text-white px-6 py-3 font-bold flex items-center justify-center gap-4 shadow-xl animate-pulse">
+                    <span className="text-2xl">⚠️</span>
+                    <div className="flex flex-col">
+                        <span className="uppercase tracking-wider text-xs text-red-100">System Error</span>
+                        <span className="text-sm md:text-base">{firebaseError}</span>
+                    </div>
+                </div>
+            )}
             {/* Mobile Sidebar Overlay */}
             {isSidebarOpen && (
                 <div

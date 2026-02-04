@@ -25,7 +25,7 @@ export const OrderService = {
     },
 
     // Subscribe to all orders (real-time)
-    subscribeToOrders: (callback: (orders: Order[]) => void) => {
+    subscribeToOrders: (callback: (orders: Order[]) => void, onError?: (error: Error) => void) => {
         const ordersRef = ref(db, 'orders');
         const ordersQuery = query(ordersRef, orderByChild('createdAt'));
 
@@ -46,6 +46,7 @@ export const OrderService = {
             callback(ordersData);
         }, (error) => {
             console.error('Error loading orders from Firebase:', error);
+            if (onError) onError(error);
             callback([]);
         });
     },

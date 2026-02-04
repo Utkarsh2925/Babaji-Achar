@@ -396,14 +396,23 @@ const AppContent: React.FC = () => {
 
 
 
+  /* DEBUG STATE */
+  const [firebaseError, setFirebaseError] = useState<string | null>(null);
+
   useEffect(() => {
     // 1. Subscribe to Firebase Orders (real-time sync)
-    const unsubscribeOrders = OrderService.subscribeToOrders((firebaseOrders) => {
-      console.log('Received orders from Firebase:', firebaseOrders.length);
-      setOrders(firebaseOrders);
-      // Also save to localStorage as backup
-      localStorage.setItem('bj_orders', JSON.stringify(firebaseOrders));
-    });
+    const unsubscribeOrders = OrderService.subscribeToOrders(
+      (firebaseOrders) => {
+        console.log('Received orders from Firebase:', firebaseOrders.length);
+        setOrders(firebaseOrders);
+        setFirebaseError(null); // Clear error on success
+        // Also save to localStorage as backup
+        localStorage.setItem('bj_orders', JSON.stringify(firebaseOrders));
+      },
+      (error) => {
+        setFirebaseError(error.message);
+      }
+    );
 
     // 2. Load user and stores from localStorage
     const loadData = () => {
@@ -1927,21 +1936,22 @@ const AppContent: React.FC = () => {
         {
           view === 'ADMIN' && user?.role === 'ADMIN' && (
             <AdminDashboard
-              stores={stores}
               orders={orders}
               products={products}
+              stores={stores}
               updateOrderStatus={updateOrderStatus}
               deleteOrder={deleteOrder}
               onUpdateStock={updateProductVariant}
               onAddStore={addStore}
               onDeleteStore={deleteStore}
-              onLogout={handleLogout}
-              onNavigateHome={() => setView('HOME')}
-            />
-          )
-        }
-
-        {/* Legal Pages */}
+              onLogout={() => {
+                setUser(null);
+                localStorage.removeItem('bj_user');
+                navigate('HOME');
+              }}
+              onNavigateHome={() => navigate('HOME')}
+              firebaseError={firebaseError} // PASS ERROR HERE
+            />)}
         {
           (view === 'PRIVACY' || view === 'REFUND' || view === 'TERMS' || view === 'DISCLAIMER') && (
             <LegalPage type={view} onBack={goBack} />
