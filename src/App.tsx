@@ -112,6 +112,11 @@ const AppContent: React.FC = () => {
   const [loginPhone, setLoginPhone] = useState('');
   const [loginName, setLoginName] = useState('');
 
+  // Checkout Form State (Replacing direct DOM access)
+  const [checkoutName, setCheckoutName] = useState('');
+  const [checkoutAddress, setCheckoutAddress] = useState('');
+  const [checkoutPin, setCheckoutPin] = useState('');
+
   // Review state
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewText, setReviewText] = useState('');
@@ -510,6 +515,10 @@ const AppContent: React.FC = () => {
 
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
+      // Special handling for 'Bharwa Lal Mirch' shortcut
+      if (selectedCategory === 'RedChilliLink') {
+        return p.id === 'red-chilli-pickle-01';
+      }
       const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
       const matchesSearch = p.name[lang].toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.category.toLowerCase().includes(searchQuery.toLowerCase());
@@ -1134,21 +1143,7 @@ const AppContent: React.FC = () => {
             <div className="sticky top-[72px] sm:top-[89px] z-40 bg-white/60 backdrop-blur-xl border-b border-orange-100/50 py-4 sm:py-6 overflow-x-auto no-scrollbar">
               <div className="w-full max-w-[1920px] mx-auto px-6 sm:px-12 flex gap-3 sm:gap-5 whitespace-nowrap justify-start lg:justify-center">
                 {categories.map(cat => (
-                  <button key={cat.id} onClick={() => {
-                    if (cat.id === 'RedChilliLink') {
-                      const p = products.find(x => x.id === 'red-chilli-pickle-01');
-                      if (p) {
-                        const v = p.variants.find(k => k.stock > 0) || p.variants[0];
-                        setSelectedProduct(p);
-                        setSelectedVariantId(v.id);
-                        setActiveImage(p.mainImage);
-                        setView('DETAILS');
-                        window.scrollTo(0, 0);
-                      }
-                    } else {
-                      setSelectedCategory(cat.id);
-                    }
-                  }} className={`px-6 sm:px-10 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-sm sm:text-base font-black border-2 transition-all ${selectedCategory === cat.id ? 'bg-orange-700 border-orange-700 text-white shadow-lg' : 'bg-white border-orange-50 text-orange-900'}`}>{cat.label}</button>
+                  <button key={cat.id} onClick={() => setSelectedCategory(cat.id)} className={`px-6 sm:px-10 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-sm sm:text-base font-black border-2 transition-all ${selectedCategory === cat.id ? 'bg-orange-700 border-orange-700 text-white shadow-lg' : 'bg-white border-orange-50 text-orange-900'}`}>{cat.label}</button>
                 ))}
               </div>
             </div>
@@ -1576,9 +1571,9 @@ const AppContent: React.FC = () => {
                 <div className="bg-white p-6 sm:p-10 rounded-3xl border border-orange-100 shadow-xl space-y-6 sm:space-y-8">
                   <div className="space-y-4">
                     <h3 className="hindi-font text-xl sm:text-2xl font-black text-orange-900 flex items-center gap-2"><MapPin size={24} /> {t.address}</h3>
-                    <input type="text" placeholder={t.name} className="w-full p-4 sm:p-5 bg-stone-50 rounded-xl border border-orange-50 outline-none focus:border-orange-500 font-bold" id="c-name" defaultValue={user?.name} required />
-                    <input type="text" placeholder={t.address} className="w-full p-4 sm:p-5 bg-stone-50 rounded-xl border border-orange-50 outline-none focus:border-orange-500 font-bold" id="c-addr" required />
-                    <div className="grid grid-cols-2 gap-4"><input type="text" placeholder={t.cityPlaceholder} className="w-full p-4 sm:p-5 bg-stone-50 rounded-xl border border-orange-50 outline-none focus:border-orange-500 font-bold" defaultValue="Prayagraj" readOnly /><input type="text" placeholder={t.pincodePlaceholder} className="w-full p-4 sm:p-5 bg-stone-50 rounded-xl border border-orange-50 outline-none focus:border-orange-500 font-bold" id="c-pin" required /></div>
+                    <input type="text" placeholder={t.name} className="w-full p-4 sm:p-5 bg-stone-50 rounded-xl border border-orange-50 outline-none focus:border-orange-500 font-bold" id="c-name" value={checkoutName} onChange={(e) => setCheckoutName(e.target.value)} required />
+                    <input type="text" placeholder={t.address} className="w-full p-4 sm:p-5 bg-stone-50 rounded-xl border border-orange-50 outline-none focus:border-orange-500 font-bold" id="c-addr" value={checkoutAddress} onChange={(e) => setCheckoutAddress(e.target.value)} required />
+                    <div className="grid grid-cols-2 gap-4"><input type="text" placeholder={t.cityPlaceholder} className="w-full p-4 sm:p-5 bg-stone-50 rounded-xl border border-orange-50 outline-none focus:border-orange-500 font-bold" defaultValue="Prayagraj" readOnly /><input type="text" placeholder={t.pincodePlaceholder} className="w-full p-4 sm:p-5 bg-stone-50 rounded-xl border border-orange-50 outline-none focus:border-orange-500 font-bold" id="c-pin" value={checkoutPin} onChange={(e) => setCheckoutPin(e.target.value)} required /></div>
                     <input
                       type="tel"
                       placeholder={t.phone}
@@ -1635,15 +1630,12 @@ const AppContent: React.FC = () => {
 
                   {/* Razorpay Button */}
                   <button onClick={() => {
-                    const name = (document.getElementById('c-name') as HTMLInputElement).value;
-                    const addr = (document.getElementById('c-addr') as HTMLInputElement).value;
-                    const pin = (document.getElementById('c-pin') as HTMLInputElement).value;
-                    const phone = (document.getElementById('c-phone') as HTMLInputElement).value;
+                    if (!checkoutName || !checkoutAddress || !checkoutPin || !loginPhone) {
+                      return alert("Please fill all Shipping details first.");
+                    }
+                    if (loginPhone.length !== 10) return alert("Please enter a valid 10-digit phone number");
 
-                    if (!name || !addr || !pin || !phone) return alert("Please fill all Shipping details first.");
-                    if (phone.length !== 10) return alert("Please enter a valid 10-digit phone number");
-
-                    handleRazorpayPayment(cartValues.finalTotal, { fullName: name, phone, street: addr, city: 'Prayagraj', state: 'UP', pincode: pin });
+                    handleRazorpayPayment(cartValues.finalTotal, { fullName: checkoutName, phone: loginPhone, street: checkoutAddress, city: 'Prayagraj', state: 'UP', pincode: checkoutPin });
 
                   }} className="w-full bg-[#3395ff] text-white py-5 rounded-2xl font-black text-xl shadow-lg hover:bg-[#2b84e6] active:scale-95 transition-all flex items-center justify-center gap-3 mb-4 group relative overflow-hidden">
                     <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
@@ -1652,17 +1644,15 @@ const AppContent: React.FC = () => {
 
                   {/* Cash on Delivery (COD) Button - NEW */}
                   <button onClick={(e) => {
-                    e.preventDefault(); // Prevent accidental form submission or bubbling
-                    // Safe DOM access with optional chaining to prevent crashes
-                    const name = (document.getElementById('c-name') as HTMLInputElement)?.value;
-                    const addr = (document.getElementById('c-addr') as HTMLInputElement)?.value;
-                    const pin = (document.getElementById('c-pin') as HTMLInputElement)?.value;
-                    const phone = (document.getElementById('c-phone') as HTMLInputElement)?.value;
+                    e.preventDefault();
 
-                    if (!name || !addr || !pin || !phone) return alert("Please fill all Shipping details first.");
-                    if (phone.length !== 10) return alert("Please enter a valid 10-digit phone number");
+                    if (!checkoutName || !checkoutAddress || !checkoutPin || !loginPhone) {
+                      return alert("Please fill all Shipping details first.");
+                    }
+                    if (loginPhone.length !== 10) return alert("Please enter a valid 10-digit phone number");
 
-                    handleCODPayment(cartValues.finalTotal, { fullName: name, phone, street: addr, city: 'Prayagraj', state: 'UP', pincode: pin });
+                    handleCODPayment(cartValues.finalTotal, { fullName: checkoutName, phone: loginPhone, street: checkoutAddress, city: 'Prayagraj', state: 'UP', pincode: checkoutPin });
+
 
                   }} className="w-full bg-yellow-500 text-white py-5 rounded-2xl font-black text-xl shadow-lg hover:bg-yellow-600 active:scale-95 transition-all flex items-center justify-center gap-3 mb-4 group relative overflow-hidden">
 
