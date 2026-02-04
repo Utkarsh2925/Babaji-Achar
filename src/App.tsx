@@ -1674,15 +1674,23 @@ const AppContent: React.FC = () => {
 
                   {/* Cash on Delivery (COD) Button - NEW */}
                   <button onClick={(e) => {
+                    console.log('🔵 COD Button clicked!');
                     e.preventDefault();
 
+                    console.log('🔍 Checking form validation...', { checkoutName, checkoutAddress, checkoutPin, loginPhone });
+
                     if (!checkoutName || !checkoutAddress || !checkoutPin || !loginPhone) {
+                      console.error('❌ Validation failed: Missing fields');
                       return alert("Please fill all Shipping details first.");
                     }
-                    if (loginPhone.length !== 10) return alert("Please enter a valid 10-digit phone number");
+                    if (loginPhone.length !== 10) {
+                      console.error('❌ Validation failed: Invalid phone number');
+                      return alert("Please enter a valid 10-digit phone number");
+                    }
 
+                    console.log('✅ Validation passed, calling handleCODPayment...');
                     handleCODPayment(cartValues.finalTotal, { fullName: checkoutName, phone: loginPhone, street: checkoutAddress, city: 'Prayagraj', state: 'UP', pincode: checkoutPin });
-
+                    console.log('🔵 handleCODPayment called');
 
                   }} className="w-full bg-yellow-500 text-white py-5 rounded-2xl font-black text-xl shadow-lg hover:bg-yellow-600 active:scale-95 transition-all flex items-center justify-center gap-3 mb-4 group relative overflow-hidden">
 
