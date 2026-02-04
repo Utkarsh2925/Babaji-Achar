@@ -345,12 +345,8 @@ const AppContent: React.FC = () => {
         razorpayPaymentId: null
       };
 
-      // Save to Firebase (MUST complete before proceeding)
-      // Added 15s safety timeout to prevent infinite hanging
-      await Promise.race([
-        OrderService.createOrder(newOrder),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timed out. Please check your internet.')), 15000))
-      ]);
+      // Save to Firebase (instant now that database is enabled)
+      await OrderService.createOrder(newOrder);
 
       // Update local state
       const updatedOrders = [newOrder, ...orders];
