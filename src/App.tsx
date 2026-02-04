@@ -1674,7 +1674,6 @@ const AppContent: React.FC = () => {
 
                   {/* Cash on Delivery (COD) Button - NEW */}
                   <button onClick={(e) => {
-                    alert('🔵 COD Button Handler Started!');
                     console.log('🔵 COD Button clicked!');
                     e.preventDefault();
 
