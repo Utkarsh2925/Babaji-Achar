@@ -1777,6 +1777,14 @@ const AppContent: React.FC = () => {
                   <p className="text-sm font-black uppercase tracking-widest text-orange-400 mb-2">Order ID</p>
                   <p className="text-2xl font-black text-orange-900 font-mono tracking-wider">{currentOrder.id}</p>
                 </div>
+
+                {/* Security Note */}
+                <div className="bg-red-50 border border-red-100 rounded-xl p-4 mb-6">
+                  <p className="text-red-700 font-bold text-sm leading-relaxed">
+                    ⚠️ Important: It is mandatory to send WhatsApp confirmation for security and authenticity verification.
+                  </p>
+                </div>
+
                 <div className="space-y-4">
                   <a href={generateWhatsAppLink(currentOrder)} target="_blank" rel="noreferrer" className="w-full bg-[#25D366] text-white py-4 rounded-xl font-black text-lg shadow-lg hover:bg-[#128C7E] transition-all flex items-center justify-center gap-2"><WhatsAppIcon /> Send to WhatsApp</a>
                   <button onClick={() => { setCurrentOrder(null); setView('HOME'); }} className="w-full bg-stone-100 text-stone-600 py-4 rounded-xl font-bold hover:bg-stone-200 transition-all text-lg">Continue Shopping</button>
