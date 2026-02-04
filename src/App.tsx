@@ -318,7 +318,7 @@ const AppContent: React.FC = () => {
     }
   };
 
-  // --- COD HANDLER V3 (ULTRA-SIMPLE WITH STEP-BY-STEP ALERTS) ---
+  // --- COD HANDLER V4 (WITH FIREBASE TIMEOUT PROTECTION) ---
   const executeCODOrder = async (finalAmount: number, customerDetails: any) => {
     alert('STEP 1: COD Handler Started');
 
@@ -336,14 +336,23 @@ const AppContent: React.FC = () => {
         utrNumber: 'COD'
       };
 
-      alert('STEP 3: Order Object Created. Saving to Firebase...');
+      alert('STEP 3: Order Created. Saving to Firebase (5 sec timeout)...');
 
+      // Firebase save with 5-second timeout
+      let firebaseSaved = false;
       try {
-        await OrderService.createOrder(newOrder);
+        await Promise.race([
+          OrderService.createOrder(newOrder).then(() => { firebaseSaved = true; }),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Firebase timeout')), 5000))
+        ]);
         alert('STEP 4: Firebase Save SUCCESS!');
-      } catch (firebaseError) {
-        alert('STEP 4 ERROR: Firebase Failed - ' + firebaseError);
-        throw firebaseError;
+      } catch (firebaseError: any) {
+        if (firebaseError.message === 'Firebase timeout') {
+          alert('STEP 4: Firebase TIMEOUT - Proceeding with local save only');
+        } else {
+          alert('STEP 4: Firebase ERROR - ' + firebaseError.message + ' - Proceeding anyway');
+        }
+        console.error('Firebase error:', firebaseError);
       }
 
       alert('STEP 5: Updating Local State...');
@@ -354,13 +363,13 @@ const AppContent: React.FC = () => {
       setCart([]);
       localStorage.setItem('bj_orders', JSON.stringify(updatedOrders));
 
-      alert('STEP 6: State Updated. Now Navigating to SUCCESS...');
+      alert('STEP 6: State Updated. Navigating to SUCCESS...');
 
       setView('SUCCESS');
       setViewStack([...viewStack, 'SUCCESS']);
       window.scrollTo(0, 0);
 
-      alert('STEP 7: Navigation Complete! You should see SUCCESS page now.');
+      alert('STEP 7: SUCCESS! Order placed' + (firebaseSaved ? ' (synced to cloud)' : ' (local only)'));
 
       // Background WhatsApp
       setTimeout(() => {

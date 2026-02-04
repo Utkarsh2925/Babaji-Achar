@@ -4,6 +4,7 @@ import { getDatabase } from 'firebase/database';
 const firebaseConfig = {
   apiKey: "AIzaSyBVUeOL8isK7Nf4bpTbLW19NfHCnr16YNo",
   authDomain: "babaji-achar.firebaseapp.com",
+  databaseURL: "https://babaji-achar-default-rtdb.firebaseio.com",
   projectId: "babaji-achar",
   storageBucket: "babaji-achar.appspot.com",
   messagingSenderId: "1055070676948",
