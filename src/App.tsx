@@ -375,30 +375,55 @@ const AppContent: React.FC = () => {
           const token = await auth.currentUser?.getIdToken();
           if (!token) throw new Error('Failed to get Auth Token');
 
-          // 3. REST API WRITE (Bypass SDK)
-          const dbUrl = "https://babaji-achar-default-rtdb.firebaseio.com";
-          const url = `${dbUrl}/orders.json?auth=${token}`;
+          // 3. REST API WRITE (Multi-Region Retry)
+          // The 404 error implies 
+          const candidateUrls = [
+            "https://babaji-achar-default-rtdb.firebaseio.com", // Configured (Derived)
+            "https://babaji-achar.firebaseio.com", // Legacy
+            "https://babaji-achar-default-rtdb.asia-southeast1.firebasedatabase.app", // Singapore
+            "https://babaji-achar-default-rtdb.asia-south1.firebasedatabase.app" // Mumbai
+          ];
 
-          console.log('🟡 COD: Sending via REST API...');
+          let success = false;
+          let lastError = '';
 
-          const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              ...newOrder,
-              firebaseId: 'pending_rest_update', // Server generates key
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
-            })
-          });
+          for (const dbUrl of candidateUrls) {
+            try {
+              const url = `${dbUrl}/orders.json?auth=${token}`;
+              console.log(`🟡 COD: Trying DB URL: ${dbUrl}`);
 
-          if (!response.ok) {
-            throw new Error(`REST Error: ${response.status} ${response.statusText}`);
+              const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  ...newOrder,
+                  firebaseId: 'pending_rest_update',
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString()
+                })
+              });
+
+              if (response.ok) {
+                const data = await response.json();
+                console.log('✅ COD: REST Sync Success, ID:', data.name);
+                setSyncStatus('SAVED');
+                success = true;
+                // TODO: Could update firebase.config here potentially
+                break;
+              } else {
+                console.warn(`⚠️ Failed URL ${dbUrl}: ${response.status}`);
+                // If 404/401, try next. If 200, done.
+                if (response.status === 401) throw new Error("Permission Denied (Auth)");
+                lastError = `${response.status} ${response.statusText}`;
+              }
+            } catch (err: any) {
+              console.warn(`⚠️ Error connecting to ${dbUrl}`, err);
+            }
           }
 
-          const data = await response.json();
-          console.log('✅ COD: REST Sync Success, ID:', data.name);
-          setSyncStatus('SAVED');
+          if (!success) {
+            throw new Error(`Sync Failed on all URLs. Last Error: ${lastError}`);
+          }
 
         } catch (e: any) {
           console.error('❌ COD: Firebase Sync Failed', e);
