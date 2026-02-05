@@ -1727,10 +1727,39 @@ const AppContent: React.FC = () => {
                       <ImageWithFallback src={item.image} alt={item.productName} className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-stone-50 border border-orange-50 shrink-0" />
                       <div className="flex-grow">
                         <h4 className="font-black text-lg sm:text-xl text-orange-950">{item.productName}</h4>
-                        <p className="text-sm font-bold text-stone-400 uppercase">{item.size} • Qty {item.quantity}</p>
+                        <p className="text-sm font-bold text-stone-400 uppercase">{item.size}</p>
                         <p className="text-orange-700 font-black text-lg">₹{item.price * item.quantity}</p>
+
+                        {/* Quantity Controls */}
+                        <div className="flex items-center gap-2 mt-2">
+                          <button
+                            onClick={() => {
+                              const newCart = [...cart];
+                              if (newCart[i].quantity > 1) {
+                                newCart[i].quantity -= 1;
+                                setCart(newCart);
+                              }
+                            }}
+                            className="w-8 h-8 rounded-lg bg-orange-100 text-orange-900 hover:bg-orange-200 flex items-center justify-center font-bold"
+                          >
+                            <Minus size={16} />
+                          </button>
+                          <span className="w-12 text-center font-black text-orange-950">{item.quantity}</span>
+                          <button
+                            onClick={() => {
+                              const newCart = [...cart];
+                              newCart[i].quantity += 1;
+                              setCart(newCart);
+                            }}
+                            className="w-8 h-8 rounded-lg bg-orange-100 text-orange-900 hover:bg-orange-200 flex items-center justify-center font-bold"
+                          >
+                            <Plus size={16} />
+                          </button>
+                        </div>
                       </div>
-                      <button onClick={() => setCart(cart.filter((_, idx) => idx !== i))} className="p-3 text-stone-300 hover:text-red-500 transition-colors"><Trash2 size={20} /></button>
+                      <button onClick={() => setCart(cart.filter((_, idx) => idx !== i))} className="p-3 text-stone-300 hover:text-red-500 transition-colors">
+                        <Trash2 size={20} />
+                      </button>
                     </div>
                   ))}
                 </div>
