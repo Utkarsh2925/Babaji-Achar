@@ -400,6 +400,13 @@ const AppContent: React.FC = () => {
   const [firebaseError, setFirebaseError] = useState<string | null>(null);
 
   useEffect(() => {
+    // 0. Ensure Local Auth for Guest Users (Required for Firebase Writes if Rules are "auth != null")
+    if (!auth.currentUser) {
+      signInAnonymously(auth)
+        .then((cred) => console.log('👤 Guest authenticated silently:', cred.user.uid))
+        .catch((e) => console.error('❌ Guest Auth Failed:', e));
+    }
+
     // 1. Subscribe to Firebase Orders (real-time sync)
     const unsubscribeOrders = OrderService.subscribeToOrders(
       (firebaseOrders) => {
