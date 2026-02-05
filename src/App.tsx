@@ -364,8 +364,23 @@ const AppContent: React.FC = () => {
       // Fallback Auth Check (Critical if global auth failed)
       const saveOrderWithAuth = async () => {
         try {
-          if (!auth.currentUser) await signInAnonymously(auth);
-          await OrderService.createOrder(newOrder);
+          // 1. AUTH CHECK
+          if (!auth.currentUser) {
+            console.log('🟡 COD: Authenticating...');
+            await signInAnonymously(auth);
+          }
+          console.log('✅ COD: Auth OK, Sending Data...');
+
+          // 2. TIMED WRITE
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Connection Timeout: Server took too long')), 15000)
+          );
+
+          await Promise.race([
+            OrderService.createOrder(newOrder),
+            timeoutPromise
+          ]);
+
           setSyncStatus('SAVED');
           console.log('✅ COD: Firebase Sync Success');
         } catch (e: any) {
@@ -1870,7 +1885,7 @@ const AppContent: React.FC = () => {
 
                   {/* SYNC STATUS INDICATOR */}
                   <div className={`text-sm font-bold border-t border-orange-200 pt-4 flex flex-col items-center gap-1 ${syncStatus === 'SAVED' ? 'text-green-600' :
-                      syncStatus === 'FAILED' ? 'text-red-600' : 'text-orange-500'
+                    syncStatus === 'FAILED' ? 'text-red-600' : 'text-orange-500'
                     }`}>
                     <div className="flex items-center gap-2">
                       {syncStatus === 'PENDING' && <span className="animate-spin">⏳</span>}
