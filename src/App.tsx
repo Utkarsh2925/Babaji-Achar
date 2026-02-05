@@ -361,28 +361,45 @@ const AppContent: React.FC = () => {
       setSyncStatus('PENDING');
       setSyncError('');
 
-      // Fallback Auth Check (Critical if global auth failed)
-      const saveOrderWithAuth = async () => {
+      // Fallback Auth Check & REST Sync
+      const syncWithRestApi = async () => {
         try {
           // 1. AUTH CHECK
           if (!auth.currentUser) {
             console.log('🟡 COD: Authenticating...');
             await signInAnonymously(auth);
           }
-          console.log('✅ COD: Auth OK, Sending Data...');
+          console.log('✅ COD: Auth OK, Preparing REST Request...');
 
-          // 2. TIMED WRITE
-          const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Connection Timeout: Server took too long')), 15000)
-          );
+          // 2. GET TOKEN
+          const token = await auth.currentUser?.getIdToken();
+          if (!token) throw new Error('Failed to get Auth Token');
 
-          await Promise.race([
-            OrderService.createOrder(newOrder),
-            timeoutPromise
-          ]);
+          // 3. REST API WRITE (Bypass SDK)
+          const dbUrl = "https://babaji-achar-default-rtdb.firebaseio.com";
+          const url = `${dbUrl}/orders.json?auth=${token}`;
 
+          console.log('🟡 COD: Sending via REST API...');
+
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...newOrder,
+              firebaseId: 'pending_rest_update', // Server generates key
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error(`REST Error: ${response.status} ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          console.log('✅ COD: REST Sync Success, ID:', data.name);
           setSyncStatus('SAVED');
-          console.log('✅ COD: Firebase Sync Success');
+
         } catch (e: any) {
           console.error('❌ COD: Firebase Sync Failed', e);
           setSyncStatus('FAILED');
@@ -391,7 +408,7 @@ const AppContent: React.FC = () => {
       };
 
       // Trigger Background Save
-      saveOrderWithAuth();
+      syncWithRestApi();
 
       console.log('✅ COD: Proceeding immediately...');
       // console.log('✅ COD: Firebase save successful!');
