@@ -1424,7 +1424,7 @@ const AppContent: React.FC = () => {
                     <input type="text" placeholder={t.search} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-12 pr-6 py-4 sm:py-5 rounded-2xl border-none text-stone-900 text-base sm:text-lg outline-none" />
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" size={20} />
                   </div>
-                  <button onClick={() => document.getElementById('grid')?.scrollIntoView({ behavior: 'smooth' })} className="w-full sm:w-auto bg-orange-700 text-white px-8 py-4 rounded-2xl font-black text-lg shadow-xl flex items-center justify-center gap-3 transition-all active:scale-95">{t.orderNow} <ChevronRight size={20} /></button>
+                  <button onClick={() => document.getElementById('grid')?.scrollIntoView({ behavior: 'smooth' })} className="w-full sm:w-auto btn-primary text-lg shadow-xl gap-3">{t.orderNow} <ChevronRight size={20} /></button>
                 </div>
               </div>
             </div>
@@ -1447,7 +1447,7 @@ const AppContent: React.FC = () => {
                   const isAllOutOfStock = p.variants.every(v => v.stock <= 0);
 
                   return (
-                    <div key={p.id} className="group bg-white/95 backdrop-blur-md rounded-[2.5rem] overflow-hidden shadow-lg border border-amber-100 flex flex-col transition-all hover:shadow-2xl hover:-translate-y-2 hover:border-amber-300 p-2">
+                    <div key={p.id} className="group card-hover flex flex-col p-2">
                       <div className="relative aspect-square rounded-[2rem] overflow-hidden cursor-pointer" onClick={() => { setSelectedProduct(p); setActiveImage(null); setSelectedVariantId(inStockVariant.id); navigate('DETAILS'); }}>
                         <ImageWithFallback
                           src={p.mainImage}
@@ -1627,9 +1627,9 @@ const AppContent: React.FC = () => {
                     <button
                       disabled={(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0}
                       onClick={() => { if (!user) return navigate('LOGIN'); const v = selectedProduct.variants.find(x => x.id === selectedVariantId); if (v) { setCart(prev => [...prev, { productId: selectedProduct.id, variantId: v.id, quantity: qty, productName: selectedProduct.name[lang], size: v.size, price: v.mrp, image: activeImage || selectedProduct.mainImage }]); alert('Added to cart!'); } }}
-                      className={`h-24 sm:h-28 border-4 rounded-2xl sm:rounded-3xl font-black text-xl sm:text-2xl shadow-lg flex flex-col sm:flex-row items-center justify-center gap-2 active:scale-95 transition-all whitespace-nowrap ${(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? 'bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed' : 'bg-white text-orange-950 border-orange-200 hover:bg-orange-50 hover:border-orange-300'}`}
+                      className={`h-16 sm:h-20 btn-outline rounded-2xl font-black text-lg sm:text-xl shadow-sm flex flex-col sm:flex-row items-center justify-center gap-2 whitespace-nowrap ${(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                      <ShoppingCart size={32} /> {(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? (lang === 'hi' ? 'स्टॉक खत्म' : 'Out of Stock') : t.add}
+                      <ShoppingCart size={24} /> {(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? (lang === 'hi' ? 'स्टॉक खत्म' : 'Out of Stock') : t.add}
                     </button>
                     <button
                       onClick={() => {
@@ -1644,9 +1644,9 @@ const AppContent: React.FC = () => {
                         setCart(prev => [...prev, { productId: selectedProduct.id, variantId: v.id, quantity: qty, productName: selectedProduct.name[lang], size: v.size, price: v.mrp, image: activeImage || selectedProduct.mainImage }]);
                         navigate('CHECKOUT');
                       }}
-                      className={`h-24 sm:h-28 border-4 rounded-2xl sm:rounded-3xl font-black text-xl sm:text-2xl shadow-lg flex flex-col sm:flex-row items-center justify-center gap-2 active:scale-95 transition-all whitespace-nowrap ${(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? 'bg-amber-100 text-amber-900 border-amber-200 hover:bg-amber-200' : 'bg-orange-50 text-orange-900 border-orange-200 hover:bg-orange-100 hover:border-orange-300'}`}
+                      className={`h-16 sm:h-20 btn-primary rounded-2xl font-black text-lg sm:text-xl shadow-lg flex flex-col sm:flex-row items-center justify-center gap-2 whitespace-nowrap ${(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? 'bg-amber-100 text-amber-900 border-amber-200' : ''}`}
                     >
-                      {(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? (lang === 'hi' ? 'निवेदन भेजें' : 'Request Order') : t.orderNow} <ArrowRight size={32} />
+                      {(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? (lang === 'hi' ? 'निवेदन भेजें' : 'Request Order') : t.orderNow} <ArrowRight size={24} />
                     </button>
                   </div>
                 </div>
@@ -1889,13 +1889,13 @@ const AppContent: React.FC = () => {
                 <div className="bg-white p-6 sm:p-10 rounded-3xl border border-orange-100 shadow-xl space-y-6 sm:space-y-8">
                   <div className="space-y-4">
                     <h3 className="hindi-font text-xl sm:text-2xl font-black text-orange-900 flex items-center gap-2"><MapPin size={24} /> {t.address}</h3>
-                    <input type="text" placeholder={t.name} className="w-full p-4 sm:p-5 bg-stone-50 rounded-xl border border-orange-50 outline-none focus:border-orange-500 font-bold" id="c-name" value={checkoutName} onChange={(e) => setCheckoutName(e.target.value)} required />
-                    <input type="text" placeholder={t.address} className="w-full p-4 sm:p-5 bg-stone-50 rounded-xl border border-orange-50 outline-none focus:border-orange-500 font-bold" id="c-addr" value={checkoutAddress} onChange={(e) => setCheckoutAddress(e.target.value)} required />
-                    <div className="grid grid-cols-2 gap-4"><input type="text" placeholder={t.cityPlaceholder} className="w-full p-4 sm:p-5 bg-stone-50 rounded-xl border border-orange-50 outline-none focus:border-orange-500 font-bold" defaultValue="Prayagraj" readOnly /><input type="text" placeholder={t.pincodePlaceholder} className="w-full p-4 sm:p-5 bg-stone-50 rounded-xl border border-orange-50 outline-none focus:border-orange-500 font-bold" id="c-pin" value={checkoutPin} onChange={(e) => setCheckoutPin(e.target.value)} required /></div>
+                    <input type="text" placeholder={t.name} className="input-primary" id="c-name" value={checkoutName} onChange={(e) => setCheckoutName(e.target.value)} required />
+                    <input type="text" placeholder={t.address} className="input-primary" id="c-addr" value={checkoutAddress} onChange={(e) => setCheckoutAddress(e.target.value)} required />
+                    <div className="grid grid-cols-2 gap-4"><input type="text" placeholder={t.cityPlaceholder} className="input-primary" defaultValue="Prayagraj" readOnly /><input type="text" placeholder={t.pincodePlaceholder} className="input-primary" id="c-pin" value={checkoutPin} onChange={(e) => setCheckoutPin(e.target.value)} required /></div>
                     <input
                       type="tel"
                       placeholder={t.phone}
-                      className="w-full p-4 sm:p-5 bg-stone-50 rounded-xl border border-orange-50 outline-none focus:border-orange-500 font-bold"
+                      className="input-primary"
                       id="c-phone"
                       value={loginPhone}
                       onChange={(e) => setLoginPhone(e.target.value)}
@@ -1972,7 +1972,7 @@ const AppContent: React.FC = () => {
 
                     handleRazorpayPayment(cartValues.finalTotal, { fullName: checkoutName, phone: loginPhone, street: checkoutAddress, city: 'Prayagraj', state: 'UP', pincode: checkoutPin });
 
-                  }} className="w-full bg-[#3395ff] text-white py-5 rounded-2xl font-black text-xl shadow-lg hover:bg-[#2b84e6] active:scale-95 transition-all flex items-center justify-center gap-3 mb-4 group relative overflow-hidden">
+                  }} className="btn-primary w-full py-5 text-xl relative overflow-hidden group">
                     <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                     <span className="relative z-10 flex items-center gap-2">Pay ₹{cartValues.finalTotal} <ArrowRight size={20} /></span>
                   </button>
