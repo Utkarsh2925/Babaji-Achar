@@ -1,27 +1,30 @@
 export const canRunAnimations = () => {
     if (typeof window === 'undefined') return false;
 
-    // 1. Check for reduced motion preference (Accessibility - Keep this)
+    // 1. Check for reduced motion preference
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (mediaQuery.matches) {
-        return false;
-    }
+    if (mediaQuery.matches) return false;
 
-    // ENABLE for all devices as requested
     return true;
 };
 
 export const canRunThreeJS = () => {
     if (!canRunAnimations()) return false;
 
-    // ENABLE Three.js for mobile too
+    // STRICT DISABLE ON MOBILE (User Directive)
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) return false;
+
+    // Check for low-end devices
+    if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) return false;
+
     return true;
 };
 
-export const safeExecute = (fn, name = 'Animation') => {
+export const safeExecute = (fn) => {
     try {
         fn();
     } catch (e) {
-        console.warn(`⚠️ ${name} failed safely:`, e);
+        // Silent failure as requested
     }
 };

@@ -90,7 +90,7 @@ const loadRazorpay = () => {
 };
 
 // --- ANIMATION LAYER ---
-import { initVisualLayer } from './animations/initAnimations';
+import { updateAnimations } from './animations/initAnimations';
 
 
 const AppContent: React.FC = () => {
@@ -103,10 +103,10 @@ const AppContent: React.FC = () => {
   type Coupon = { code: string; type: 'FLAT' | 'PERCENTAGE'; value: number; freeDelivery?: boolean; description?: string; };
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
 
-  // Initialize Animations (Visual Layer)
+  // Initialize Animations (Visual Layer - Route Aware)
   useEffect(() => {
-    initVisualLayer();
-  }, []);
+    updateAnimations(view);
+  }, [view]);
   const [viewStack, setViewStack] = useState<string[]>(['HOME']);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
