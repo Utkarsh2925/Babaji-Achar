@@ -176,7 +176,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         {currentView === 'ORDERS' && <AdminOrders orders={orders} updateOrderStatus={updateOrderStatus} deleteOrder={deleteOrder} />}
                         {currentView === 'PRODUCTS' && <AdminProducts products={products} onUpdateStock={onUpdateStock} />}
                         {currentView === 'STORES' && <AdminStores stores={stores} onAddStore={onAddStore} onDeleteStore={onDeleteStore} />}
-                        {currentView === 'DATA' && <DataCentre orders={orders} />}
+                        {currentView === 'DATA' && <DataCentre orders={orders} products={products} stores={stores} />}
                     </div>
                 </div>
             </main>

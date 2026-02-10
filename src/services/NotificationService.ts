@@ -76,12 +76,20 @@ export const NotificationService = {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    email: "mailbabajiachar@gmail.com", // Admin Email for trial or User Email if available
-                    // Note: In real prod, this should be order.customerDetails.email if you collect it.
-                    // For now using brand email as placeholder/admin-alert as per trial.
-                    subject: `Order #${order.id} Confirmed`,
-                    templateName: 'order_confirmation',
-                    parameters: { order }
+                    to: "mailbabajiachar@gmail.com", // Admin email (or customer email if collected)
+                    type: 'order_confirmation',
+                    subject: `Order Confirmation - ${order.id}`,
+                    orderDetails: {
+                        orderId: order.id,
+                        customerName: order.customerDetails.fullName,
+                        phone: order.customerDetails.phone,
+                        address: order.customerDetails.street,
+                        city: order.customerDetails.city,
+                        pincode: order.customerDetails.pincode,
+                        items: order.items,
+                        totalAmount: order.totalAmount,
+                        paymentMethod: order.paymentMethod
+                    }
                 })
             }).catch(e => console.error('Email trigger failed', e));
         }

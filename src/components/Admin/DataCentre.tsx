@@ -1,53 +1,30 @@
 import React from 'react';
-import { Download, FileSpreadsheet, Shield } from 'lucide-react';
-import type { Order } from '../../types';
+import { Download, FileSpreadsheet, Shield, Package, MapPin } from 'lucide-react';
+import type { Order, Product, Store } from '../../types';
+import { CSVExport } from '../../utils/CSVExport';
 
 interface DataCentreProps {
     orders: Order[];
+    products: Product[];
+    stores: Store[];
 }
 
-const DataCentre: React.FC<DataCentreProps> = ({ orders }) => {
+const DataCentre: React.FC<DataCentreProps> = ({ orders, products, stores }) => {
 
-    const downloadCSV = () => {
-        // 1. Define Headers
-        const headers = [
-            'Order ID', 'Date', 'Status', 'Total Amount',
-            'Customer Name', 'Phone', 'Address', 'City', 'Pincode',
-            'Items', 'Payment Method', 'UTR'
-        ];
+    const downloadAllData = () => {
+        CSVExport.exportAll(orders, products, stores);
+    };
 
-        // 2. Map Data
-        const rows = orders.map(order => [
-            order.id,
-            new Date(order.date).toLocaleDateString(),
-            order.status,
-            order.totalAmount,
-            `"${order.customerDetails.fullName}"`, // Quote to handle commas in names
-            order.customerDetails.phone,
-            `"${order.customerDetails.street}"`, // Quote to handle commas in address
-            order.customerDetails.city,
-            order.customerDetails.pincode,
-            `"${order.items.map(i => `${i.productName} (${i.quantity}x${i.size})`).join(', ')}"`,
-            order.paymentMethod,
-            order.utrNumber
-        ]);
+    const downloadOrders = () => {
+        CSVExport.exportOrders(orders);
+    };
 
-        // 3. Construct CSV Content
-        const csvContent = [
-            headers.join(','),
-            ...rows.map(row => row.join(','))
-        ].join('\n');
+    const downloadProducts = () => {
+        CSVExport.exportProducts(products);
+    };
 
-        // 4. Create Blob and Download
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.setAttribute('href', url);
-        link.setAttribute('download', `babaji_achar_data_${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    const downloadStores = () => {
+        CSVExport.exportStores(stores);
     };
 
     return (
@@ -62,24 +39,81 @@ const DataCentre: React.FC<DataCentreProps> = ({ orders }) => {
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Export Card */}
-                <div className="bg-white p-8 rounded-3xl border-2 border-blue-50 shadow-xl hover:shadow-2xl transition-all relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-32 bg-blue-50 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-500"></div>
-                    <div className="relative z-10">
-                        <FileSpreadsheet size={48} className="text-blue-600 mb-6" />
-                        <h3 className="text-2xl font-black text-stone-900 mb-2">Master Data Sheet</h3>
-                        <p className="text-stone-500 font-medium mb-8">
-                            Comprehensive Excel-compatible CSV file containing everyone's personal data (Name, Phone, Address) and complete order history.
-                        </p>
-                        <button
-                            onClick={downloadCSV}
-                            className="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-lg shadow-lg hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-3"
-                        >
-                            <Download size={24} />
-                            Download All Data
-                        </button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Export All Data */}
+                <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-8 rounded-3xl text-white shadow-xl hover:shadow-2xl transition-all md:col-span-2">
+                    <FileSpreadsheet size={48} className="mb-6" />
+                    <h3 className="text-3xl font-black mb-2">Complete Data Export</h3>
+                    <p className="text-blue-100 font-medium mb-8">
+                        Download all orders, products, and stores data in separate CSV files
+                    </p>
+                    <button
+                        onClick={downloadAllData}
+                        className="w-full bg-white text-blue-700 py-4 rounded-xl font-black text-lg shadow-lg hover:bg-blue-50 active:scale-95 transition-all flex items-center justify-center gap-3"
+                    >
+                        <Download size={24} />
+                        Export All Data (3 Files)
+                    </button>
+                </div>
+
+                {/* Orders Export */}
+                <div className="bg-white p-6 rounded-2xl border-2 border-orange-100 shadow-lg hover:shadow-xl transition-all">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600">
+                            <FileSpreadsheet size={24} />
+                        </div>
+                        <div>
+                            <h4 className="font-black text-stone-900">Orders Data</h4>
+                            <p className="text-sm text-stone-500 font-medium">{orders.length} records</p>
+                        </div>
                     </div>
+                    <button
+                        onClick={downloadOrders}
+                        className="w-full bg-orange-600 text-white py-3 rounded-xl font-bold hover:bg-orange-700 active:scale-95 transition-all flex items-center justify-center gap-2"
+                    >
+                        <Download size={18} />
+                        Export Orders
+                    </button>
+                </div>
+
+                {/* Products Export */}
+                <div className="bg-white p-6 rounded-2xl border-2 border-green-100 shadow-lg hover:shadow-xl transition-all">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600">
+                            <Package size={24} />
+                        </div>
+                        <div>
+                            <h4 className="font-black text-stone-900">Products Data</h4>
+                            <p className="text-sm text-stone-500 font-medium">{products.length} products</p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={downloadProducts}
+                        className="w-full bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700 active:scale-95 transition-all flex items-center justify-center gap-2"
+                    >
+                        <Download size={18} />
+                        Export Products
+                    </button>
+                </div>
+
+                {/* Stores Export */}
+                <div className="bg-white p-6 rounded-2xl border-2 border-purple-100 shadow-lg hover:shadow-xl transition-all">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600">
+                            <MapPin size={24} />
+                        </div>
+                        <div>
+                            <h4 className="font-black text-stone-900">Stores Data</h4>
+                            <p className="text-sm text-stone-500 font-medium">{stores.length} locations</p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={downloadStores}
+                        className="w-full bg-purple-600 text-white py-3 rounded-xl font-bold hover:bg-purple-700 active:scale-95 transition-all flex items-center justify-center gap-2"
+                    >
+                        <Download size={18} />
+                        Export Stores
+                    </button>
                 </div>
 
                 {/* Security Info */}
