@@ -1,4 +1,4 @@
-// Deployed: 2026-02-17 23:55 IST - Force Update v3.0 REMOVED SHARE
+// Deployed: 2026-02-18 00:15 IST - Force Update v4.0 FINAL
 // DEPLOYMENT: 2026-02-04 10:35 - PRODUCTION LAUNCH
 import React, { useState, useEffect, useMemo } from 'react';
 import organicBadge from './assets/organic_badge_final.png';
@@ -1671,11 +1671,30 @@ const AppContent: React.FC = () => {
           {view === 'DETAILS' && selectedProduct && (
             <div className="max-w-7xl mx-auto px-4 py-8 sm:py-16 animate-in slide-in-from-right duration-500">
               {/* Header with Back and Share Buttons */}
-              {/* Header with Back Button - v3.0 REMOVED SHARE */}
+              {/* Header with Back and Share Buttons */}
               <div className="flex items-center justify-between mb-6 sm:mb-12">
                 <button onClick={goBack} className="flex items-center gap-2 text-orange-900 font-black uppercase text-sm tracking-widest hover:gap-3 transition-all">
                   <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md border border-orange-50"><ArrowLeft size={18} /></div>
                   {t.back}
+                </button>
+
+                <button
+                  onClick={async () => {
+                    const shareUrl = `${window.location.origin}?product=${selectedProduct.id}`;
+                    const shareData = {
+                      title: `Babaji Achar - ${selectedProduct.name[lang]}`,
+                      text: `Check out this authentic ${selectedProduct.name[lang]} from Babaji Achar! 100% Organic & Handmade.`,
+                      url: shareUrl
+                    };
+                    try {
+                      if ((navigator as any).share) { await (navigator as any).share(shareData); }
+                      else { await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`); alert('Link copied!'); }
+                    } catch (err) { }
+                  }}
+                  className="flex items-center gap-2 text-orange-900 font-black uppercase text-sm tracking-widest hover:text-orange-700 transition-all bg-white px-4 py-2 rounded-xl shadow-sm border border-orange-50"
+                >
+                  <Share2 size={18} />
+                  Share
                 </button>
               </div>
 
