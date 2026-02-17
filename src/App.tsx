@@ -2172,6 +2172,194 @@ const AppContent: React.FC = () => {
           )
         }
 
+
+        {/* FAQ Section with Schema */}
+        <section className="py-16 px-4 bg-orange-50/50" id="faq">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-black text-orange-900 mb-4 font-serif">
+                {lang === 'hi' ? 'अक्सर पूछे जाने वाले प्रश्न' : 'Frequently Asked Questions'}
+              </h2>
+              <div className="w-24 h-1 bg-orange-500 mx-auto rounded-full"></div>
+            </div>
+
+            <div className="grid gap-6">
+              {[
+                {
+                  q: "Is Babaji Achar 100% Organic?",
+                  a: "Yes! We use only organic, farm-fresh ingredients grown without harmful chemicals. Our pickles are made using traditional methods to preserve natural nutrition.",
+                  bs: "क्या बाबाजी अचार 100% ऑर्गेनिक है?",
+                  ba: "हाँ! हम केवल ऑर्गेनिक और खेत से ताज़ा सामग्री का उपयोग करते हैं। हमारे अचार पारंपरिक विधियों से बनाए जाते हैं।"
+                },
+                {
+                  q: "Do you use preservatives?",
+                  a: "No artificial preservatives are used. Typical preservatives like oil, salt, and spices act as natural preservatives in our traditional recipes.",
+                  bs: "क्या आप प्रिज़र्वेटिव्स का उपयोग करते हैं?",
+                  ba: "नहीं। तेल, नमक और मसाले ही हमारे अचार में प्राकृतिक प्रिज़र्वेटिव का काम करते हैं।"
+                },
+                {
+                  q: "How long does shipping take?",
+                  a: "We usually dispatch within 24 hours. Delivery takes 3-7 business days depending on your location in India.",
+                  bs: "शिपिंग में कितना समय लगता है?",
+                  ba: "हम आमतौर पर 24 घंटे के भीतर डिस्पैच करते हैं। डिलीवरी में 3-7 कार्य दिवस लगते हैं।"
+                },
+                {
+                  q: "What is the shelf life?",
+                  a: "Our pickles have a shelf life of 12 months when stored in a cool, dry place and handled with a dry spoon.",
+                  bs: "शेल्फ लाइफ क्या है?",
+                  ba: "हमारे अचार की शेल्फ लाइफ 12 महीने है एगर उन्हें सूखी जगह पर रखा जाए।"
+                }
+              ].map((faq, idx) => (
+                <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
+                  <h3 className="text-lg font-bold text-stone-800 mb-2 flex items-start gap-3">
+                    <span className="text-orange-500 mt-1"><MessageCircle size={20} /></span>
+                    {lang === 'hi' ? faq.bs : faq.q}
+                  </h3>
+                  <p className="text-stone-600 ml-8 leading-relaxed">
+                    {lang === 'hi' ? faq.ba : faq.a}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* JSON-LD Schema for FAQ */}
+            <script type="application/ld+json">
+              {JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                "mainEntity": [
+                  {
+                    "@type": "Question",
+                    "name": "Is Babaji Achar 100% Organic?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "Yes! We use only organic, farm-fresh ingredients grown without harmful chemicals. Our pickles are made using traditional methods to preserve natural nutrition."
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "Do you use preservatives?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "No artificial preservatives are used. Typical preservatives like oil, salt, and spices act as natural preservatives in our traditional recipes."
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "How long does shipping take?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "We usually dispatch within 24 hours. Delivery takes 3-7 business days depending on your location in India."
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "What is the shelf life?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "Our pickles have a shelf life of 12 months when stored in a cool, dry place and handled with a dry spoon."
+                    }
+                  }
+                ]
+              })}
+            </script>
+          </div>
+        </section>
+
+
+        {/* FAQ Section with Schema */}
+        <section className="py-16 px-4 bg-orange-50/50" id="faq">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-black text-orange-900 mb-4 font-serif">
+                {lang === 'hi' ? 'अक्सर पूछे जाने वाले प्रश्न' : 'Frequently Asked Questions'}
+              </h2>
+              <div className="w-24 h-1 bg-orange-500 mx-auto rounded-full"></div>
+            </div>
+
+            <div className="grid gap-6">
+              {[
+                {
+                  q: "Is Babaji Achar 100% Organic?",
+                  a: "Yes! We use only organic, farm-fresh ingredients grown without harmful chemicals. Our pickles are made using traditional methods to preserve natural nutrition.",
+                  bs: "क्या बाबाजी अचार 100% ऑर्गेनिक है?",
+                  ba: "हाँ! हम केवल ऑर्गेनिक और खेत से ताज़ा सामग्री का उपयोग करते हैं। हमारे अचार पारंपरिक विधियों से बनाए जाते हैं।"
+                },
+                {
+                  q: "Do you use preservatives?",
+                  a: "No artificial preservatives are used. Typical preservatives like oil, salt, and spices act as natural preservatives in our traditional recipes.",
+                  bs: "क्या आप प्रिज़र्वेटिव्स का उपयोग करते हैं?",
+                  ba: "नहीं। तेल, नमक और मसाले ही हमारे अचार में प्राकृतिक प्रिज़र्वेटिव का काम करते हैं।"
+                },
+                {
+                  q: "How long does shipping take?",
+                  a: "We usually dispatch within 24 hours. Delivery takes 3-7 business days depending on your location in India.",
+                  bs: "शिपिंग में कितना समय लगता है?",
+                  ba: "हम आमतौर पर 24 घंटे के भीतर डिस्पैच करते हैं। डिलीवरी में 3-7 कार्य दिवस लगते हैं।"
+                },
+                {
+                  q: "What is the shelf life?",
+                  a: "Our pickles have a shelf life of 12 months when stored in a cool, dry place and handled with a dry spoon.",
+                  bs: "शेल्फ लाइफ क्या है?",
+                  ba: "हमारे अचार की शेल्फ लाइफ 12 महीने है एगर उन्हें सूखी जगह पर रखा जाए।"
+                }
+              ].map((faq, idx) => (
+                <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
+                  <h3 className="text-lg font-bold text-stone-800 mb-2 flex items-start gap-3">
+                    <span className="text-orange-500 mt-1"><MessageCircle size={20} /></span>
+                    {lang === 'hi' ? faq.bs : faq.q}
+                  </h3>
+                  <p className="text-stone-600 ml-8 leading-relaxed">
+                    {lang === 'hi' ? faq.ba : faq.a}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* JSON-LD Schema for FAQ */}
+            <script type="application/ld+json">
+              {JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                "mainEntity": [
+                  {
+                    "@type": "Question",
+                    "name": "Is Babaji Achar 100% Organic?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "Yes! We use only organic, farm-fresh ingredients grown without harmful chemicals. Our pickles are made using traditional methods to preserve natural nutrition."
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "Do you use preservatives?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "No artificial preservatives are used. Typical preservatives like oil, salt, and spices act as natural preservatives in our traditional recipes."
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "How long does shipping take?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "We usually dispatch within 24 hours. Delivery takes 3-7 business days depending on your location in India."
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "What is the shelf life?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "Our pickles have a shelf life of 12 months when stored in a cool, dry place and handled with a dry spoon."
+                    }
+                  }
+                ]
+              })}
+            </script>
+          </div>
+        </section>
+
       </main >
 
       {/* Footer */}

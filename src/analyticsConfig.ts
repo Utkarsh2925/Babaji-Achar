@@ -1,6 +1,9 @@
 // Analytics & Tracking Configuration
 // Replace the empty strings with your actual Tracking IDs
 
+// Analytics & Tracking Configuration
+// Replace the empty strings with your actual Tracking IDs
+
 export const ANALYTICS_CONFIG = {
     // 1. Google Analytics 4 (Measurement ID starting with G-)
     GA_MEASUREMENT_ID: "",
@@ -12,6 +15,5 @@ export const ANALYTICS_CONFIG = {
     CLARITY_PROJECT_ID: "",
 
     // 4. Google Merchant Center / Search Console (Meta Tag Content)
-    // Example: "google-site-verification=..."
     GOOGLE_VERIFICATION_CONTENT: ""
 };

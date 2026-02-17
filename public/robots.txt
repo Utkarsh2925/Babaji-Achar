@@ -1,4 +1,11 @@
 User-agent: *
 Allow: /
 
+# AI & Discovery Bots - explicitly allowed for better indexing
+User-agent: GPTBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
 Sitemap: https://babaji-achar.vercel.app/sitemap.xml
