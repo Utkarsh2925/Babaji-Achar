@@ -1660,7 +1660,8 @@ const AppContent: React.FC = () => {
                             url: window.location.href
                           };
                           try {
-                            if (navigator.share) { await navigator.share(shareData); }
+                            // Fix: Cast to any to avoid TS error 'Property share does not exist on type Navigator'
+                            if ((navigator as any).share) { await (navigator as any).share(shareData); }
                             else { await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`); alert('Link copied!'); }
                           } catch (err) { }
                         }}
