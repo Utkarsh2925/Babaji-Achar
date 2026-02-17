@@ -1,4 +1,4 @@
-// Deployed: 2026-02-04 00:22 IST - Force Update 2
+// Deployed: 2026-02-17 23:50 IST - Force Update v2.0
 // DEPLOYMENT: 2026-02-04 10:35 - PRODUCTION LAUNCH
 import React, { useState, useEffect, useMemo } from 'react';
 import organicBadge from './assets/organic_badge_final.png';
@@ -1715,7 +1715,9 @@ const AppContent: React.FC = () => {
                 </div>
                 <div className="flex flex-col py-4">
                   <div className="flex items-center mb-4"><span className="bg-orange-700 text-white text-sm font-black px-6 py-2 rounded-full uppercase tracking-widest shadow-md">100% Natural Heritage</span></div>
-                  <h1 className="hindi-font text-4xl sm:text-6xl lg:text-7xl font-black text-orange-950 mb-6 leading-tight">{selectedProduct.name[lang]}</h1>
+                  <h1 className="hindi-font text-4xl sm:text-6xl lg:text-7xl font-black text-orange-950 mb-6 leading-tight">
+                    {selectedProduct.name[lang]} <span className="text-sm align-top text-stone-300 opacity-50 font-sans tracking-tight">v2.0</span>
+                  </h1>
                   <p className="text-xl sm:text-3xl text-orange-700 italic font-black mb-8 hindi-font">"{selectedProduct.tagline[lang]}"</p>
                   <p className="text-lg sm:text-2xl text-stone-600 mb-12 leading-relaxed font-bold">{selectedProduct.description[lang]}</p>
 
