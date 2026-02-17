@@ -1623,6 +1623,7 @@ const AppContent: React.FC = () => {
 
                   {/* Action Buttons - Side by Side to match Pack Size buttons */}
                   {/* Action Buttons - Side by Side to match Pack Size buttons */}
+
                   <div className="grid grid-cols-2 gap-4">
                     <button
                       disabled={(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0}
@@ -1631,23 +1632,43 @@ const AppContent: React.FC = () => {
                     >
                       <ShoppingCart size={32} /> {(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? (lang === 'hi' ? 'स्टॉक खत्म' : 'Out of Stock') : t.add}
                     </button>
-                    <button
-                      onClick={() => {
-                        const v = selectedProduct.variants.find(x => x.id === selectedVariantId);
-                        if (!v) return;
-                        if (v.stock <= 0) {
-                          const msg = `Hello Babaji Achar, I want to request an order for "${selectedProduct.name[lang]}" (${v.size}). It is currently out of stock. Please notify me when it's available!`;
-                          window.open(`https://wa.me/${BRAND_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
-                          return;
-                        }
-                        if (!user) return navigate('LOGIN');
-                        setCart(prev => [...prev, { productId: selectedProduct.id, variantId: v.id, quantity: qty, productName: selectedProduct.name[lang], size: v.size, price: v.mrp, image: activeImage || selectedProduct.mainImage }]);
-                        navigate('CHECKOUT');
-                      }}
-                      className={`h-24 sm:h-28 border-4 rounded-2xl sm:rounded-3xl font-black text-xl sm:text-2xl shadow-lg flex flex-col sm:flex-row items-center justify-center gap-2 active:scale-95 transition-all whitespace-nowrap ${(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? 'bg-amber-100 text-amber-900 border-amber-200 hover:bg-amber-200' : 'bg-orange-50 text-orange-900 border-orange-200 hover:bg-orange-100 hover:border-orange-300'}`}
-                    >
-                      {(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? (lang === 'hi' ? 'निवेदन भेजें' : 'Request Order') : t.orderNow} <ArrowRight size={32} />
-                    </button>
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={() => {
+                          const v = selectedProduct.variants.find(x => x.id === selectedVariantId);
+                          if (!v) return;
+                          if (v.stock <= 0) {
+                            const msg = `Hello Babaji Achar, I want to request an order for "${selectedProduct.name[lang]}" (${v.size}). It is currently out of stock. Please notify me when it's available!`;
+                            window.open(`https://wa.me/${BRAND_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+                            return;
+                          }
+                          if (!user) return navigate('LOGIN');
+                          setCart(prev => [...prev, { productId: selectedProduct.id, variantId: v.id, quantity: qty, productName: selectedProduct.name[lang], size: v.size, price: v.mrp, image: activeImage || selectedProduct.mainImage }]);
+                          navigate('CHECKOUT');
+                        }}
+                        className={`flex-grow h-14 sm:h-[4.5rem] border-4 rounded-2xl sm:rounded-3xl font-black text-xl sm:text-2xl shadow-lg flex flex-col sm:flex-row items-center justify-center gap-2 active:scale-95 transition-all whitespace-nowrap ${(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? 'bg-amber-100 text-amber-900 border-amber-200 hover:bg-amber-200' : 'bg-orange-50 text-orange-900 border-orange-200 hover:bg-orange-100 hover:border-orange-300'}`}
+                      >
+                        {(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? (lang === 'hi' ? 'निवेदन भेजें' : 'Request Order') : t.orderNow} <ArrowRight size={24} />
+                      </button>
+
+                      {/* Share Button */}
+                      <button
+                        onClick={async () => {
+                          const shareData = {
+                            title: `Babaji Achar - ${selectedProduct.name[lang]}`,
+                            text: `Check out this authentic ${selectedProduct.name[lang]} from Babaji Achar! 100% Organic & Handmade.`,
+                            url: window.location.href
+                          };
+                          try {
+                            if (navigator.share) { await navigator.share(shareData); }
+                            else { await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`); alert('Link copied!'); }
+                          } catch (err) { }
+                        }}
+                        className="bg-white border-2 border-stone-200 text-stone-500 h-10 sm:h-12 rounded-xl sm:rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-stone-50 hover:text-orange-600 transition-colors uppercase tracking-widest text-xs sm:text-sm"
+                      >
+                        <Share2 size={16} /> Share Product
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
