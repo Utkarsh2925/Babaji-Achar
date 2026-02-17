@@ -1,4 +1,4 @@
-// Deployed: 2026-02-17 23:50 IST - Force Update v2.0
+// Deployed: 2026-02-17 23:55 IST - Force Update v3.0 REMOVED SHARE
 // DEPLOYMENT: 2026-02-04 10:35 - PRODUCTION LAUNCH
 import React, { useState, useEffect, useMemo } from 'react';
 import organicBadge from './assets/organic_badge_final.png';
@@ -1671,29 +1671,11 @@ const AppContent: React.FC = () => {
           {view === 'DETAILS' && selectedProduct && (
             <div className="max-w-7xl mx-auto px-4 py-8 sm:py-16 animate-in slide-in-from-right duration-500">
               {/* Header with Back and Share Buttons */}
+              {/* Header with Back Button - v3.0 REMOVED SHARE */}
               <div className="flex items-center justify-between mb-6 sm:mb-12">
                 <button onClick={goBack} className="flex items-center gap-2 text-orange-900 font-black uppercase text-sm tracking-widest hover:gap-3 transition-all">
                   <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md border border-orange-50"><ArrowLeft size={18} /></div>
                   {t.back}
-                </button>
-
-                <button
-                  onClick={async () => {
-                    const shareUrl = `${window.location.origin}?product=${selectedProduct.id}`;
-                    const shareData = {
-                      title: `Babaji Achar - ${selectedProduct.name[lang]}`,
-                      text: `Check out this authentic ${selectedProduct.name[lang]} from Babaji Achar! 100% Organic & Handmade.`,
-                      url: shareUrl
-                    };
-                    try {
-                      if ((navigator as any).share) { await (navigator as any).share(shareData); }
-                      else { await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`); alert('Link copied!'); }
-                    } catch (err) { }
-                  }}
-                  className="flex items-center gap-2 text-orange-900 font-black uppercase text-sm tracking-widest hover:text-orange-700 transition-all bg-white px-4 py-2 rounded-xl shadow-sm border border-orange-50"
-                >
-                  <Share2 size={18} />
-                  Share
                 </button>
               </div>
 
@@ -1715,9 +1697,7 @@ const AppContent: React.FC = () => {
                 </div>
                 <div className="flex flex-col py-4">
                   <div className="flex items-center mb-4"><span className="bg-orange-700 text-white text-sm font-black px-6 py-2 rounded-full uppercase tracking-widest shadow-md">100% Natural Heritage</span></div>
-                  <h1 className="hindi-font text-4xl sm:text-6xl lg:text-7xl font-black text-orange-950 mb-6 leading-tight">
-                    {selectedProduct.name[lang]} <span className="text-sm align-top text-stone-300 opacity-50 font-sans tracking-tight">v2.0</span>
-                  </h1>
+                  <h1 className="hindi-font text-4xl sm:text-6xl lg:text-7xl font-black text-orange-950 mb-6 leading-tight">{selectedProduct.name[lang]}</h1>
                   <p className="text-xl sm:text-3xl text-orange-700 italic font-black mb-8 hindi-font">"{selectedProduct.tagline[lang]}"</p>
                   <p className="text-lg sm:text-2xl text-stone-600 mb-12 leading-relaxed font-bold">{selectedProduct.description[lang]}</p>
 
