@@ -6,7 +6,7 @@ import {
   ShoppingCart, User as UserIcon, ChevronRight, Instagram, Trash2, CheckCircle2,
   ArrowLeft, MapPin, Plus, Minus, Globe, ShieldCheck, Search, Sparkles, Star, Leaf,
   MessageCircle, Package, XCircle, LogIn, Settings, Phone, ArrowRight, Shield,
-  ImageIcon, Mail, Camera
+  ImageIcon, Mail, Camera, Share2
 } from 'lucide-react';
 // import { PaymentService } from './services/PaymentService';
 import { WhatsAppService } from './services/WhatsAppService';
