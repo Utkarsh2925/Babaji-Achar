@@ -108,6 +108,39 @@ const AppContent: React.FC = () => {
     updateAnimations(view);
   }, [view]);
   const [viewStack, setViewStack] = useState<string[]>(['HOME']);
+
+  // --- DEEP LINKING LOGIC ---
+  // 1. Initial Load: Check for ?product=ID from shared links
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('product');
+
+    if (productId) {
+      const foundProduct = INITIAL_PRODUCTS.find(p => p.id === productId);
+      if (foundProduct) {
+        setSelectedProduct(foundProduct);
+        setSelectedVariantId(foundProduct.variants[0].id);
+        setView('DETAILS');
+      }
+    }
+  }, []);
+
+  // 2. Update URL when Product is configured (so user can copy from address bar if they want)
+  useEffect(() => {
+    if (view === 'DETAILS' && selectedProduct) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('product', selectedProduct.id);
+      window.history.pushState({}, '', url);
+    } else {
+      // If we leave details, clear the param to keep URL clean
+      const url = new URL(window.location.href);
+      if (url.searchParams.has('product')) {
+        url.searchParams.delete('product');
+        window.history.pushState({}, '', url);
+      }
+    }
+  }, [view, selectedProduct]);
+
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
