@@ -6,7 +6,7 @@ import {
   ShoppingCart, User as UserIcon, ChevronRight, Instagram, Trash2, CheckCircle2,
   ArrowLeft, MapPin, Plus, Minus, Globe, ShieldCheck, Search, Sparkles, Star, Leaf,
   MessageCircle, Package, XCircle, LogIn, Settings, Phone, ArrowRight, Shield,
-  ImageIcon, Mail, Camera
+  ImageIcon, Mail, Camera, Share2
 } from 'lucide-react';
 // import { PaymentService } from './services/PaymentService';
 import { WhatsAppService } from './services/WhatsAppService';
@@ -1576,10 +1576,27 @@ const AppContent: React.FC = () => {
 
         {view === 'DETAILS' && selectedProduct && (
           <div className="max-w-7xl mx-auto px-4 py-8 sm:py-16 animate-in slide-in-from-right duration-500">
-            <button onClick={goBack} className="flex items-center gap-2 text-orange-900 mb-6 sm:mb-12 font-black uppercase text-sm tracking-widest hover:gap-3 transition-all">
-              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md border border-orange-50"><ArrowLeft size={18} /></div>
-              {t.back}
-            </button>
+            <div className="flex items-center justify-between mb-6 sm:mb-12">
+              <button onClick={goBack} className="flex items-center gap-2 text-orange-900 font-black uppercase text-sm tracking-widest hover:gap-3 transition-all">
+                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md border border-orange-50"><ArrowLeft size={18} /></div>
+                {t.back}
+              </button>
+              <button
+                onClick={() => {
+                  const shareUrl = `${window.location.origin}${window.location.pathname}?product=${selectedProduct.id}`;
+                  const shareText = `${selectedProduct.name[lang]} - ${selectedProduct.description[lang]}`;
+                  if (navigator.share) {
+                    navigator.share({ title: selectedProduct.name[lang], text: shareText, url: shareUrl }).catch(() => { });
+                  } else {
+                    navigator.clipboard.writeText(shareUrl).then(() => alert('Product link copied to clipboard!')).catch(() => alert('Copy this link: ' + shareUrl));
+                  }
+                }}
+                className="flex items-center gap-2 text-orange-900 font-black uppercase text-sm tracking-widest hover:gap-3 transition-all"
+              >
+                {lang === 'hi' ? 'शेयर' : 'Share'}
+                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md border border-orange-50"><Share2 size={18} /></div>
+              </button>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-20">
               <div className="space-y-6 sm:space-y-10 max-w-md mx-auto lg:max-w-none">
                 <div className="relative rounded-3xl sm:rounded-[3rem] overflow-hidden border-4 border-white bg-white aspect-square shadow-xl w-3/5 lg:w-1/2 mx-auto p-4">
