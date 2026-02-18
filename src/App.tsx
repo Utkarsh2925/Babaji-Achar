@@ -1,4 +1,4 @@
-// Deployed: 2026-02-18 00:15 IST - Force Update v4.0 FINAL
+// Deployed: 2026-02-18 07:30 IST - Force Update v6.0 EMERGENCY
 // DEPLOYMENT: 2026-02-04 10:35 - PRODUCTION LAUNCH
 import React, { useState, useEffect, useMemo } from 'react';
 import organicBadge from './assets/organic_badge_final.png';
@@ -13,6 +13,7 @@ import { WhatsAppService } from './services/WhatsAppService';
 import { OrderService } from './services/OrderService';
 import { NotificationService } from './services/NotificationService';
 import { UserProfileService } from './services/UserProfileService';
+import ProductShare from './components/ProductShare';
 // Firebase Auth Imports
 import { signInWithPopup, signInAnonymously } from 'firebase/auth';
 import { auth, googleProvider } from './firebase.config';
@@ -1671,31 +1672,18 @@ const AppContent: React.FC = () => {
           {view === 'DETAILS' && selectedProduct && (
             <div className="max-w-7xl mx-auto px-4 py-8 sm:py-16 animate-in slide-in-from-right duration-500">
               {/* Header with Back and Share Buttons */}
-              {/* Header with Back and Share Buttons */}
+// Add import at the top (I'll do this in a separate chunk to be safe, but wait, I can try to do it here if I am careful about contexts. No, replace_file_content doesn't support adding imports easily if they are far away. I'll stick to replacing the button first, then add import.)
+              // ACTUALLY, I must add the import first.
+              // I will use multi-step.
+
+              // Step 1: Replace the button usage.
               <div className="flex items-center justify-between mb-6 sm:mb-12">
                 <button onClick={goBack} className="flex items-center gap-2 text-orange-900 font-black uppercase text-sm tracking-widest hover:gap-3 transition-all">
                   <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md border border-orange-50"><ArrowLeft size={18} /></div>
                   {t.back}
                 </button>
 
-                <button
-                  onClick={async () => {
-                    const shareUrl = `${window.location.origin}?product=${selectedProduct.id}`;
-                    const shareData = {
-                      title: `Babaji Achar - ${selectedProduct.name[lang]}`,
-                      text: `Check out this authentic ${selectedProduct.name[lang]} from Babaji Achar! 100% Organic & Handmade.`,
-                      url: shareUrl
-                    };
-                    try {
-                      if ((navigator as any).share) { await (navigator as any).share(shareData); }
-                      else { await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`); alert('Link copied!'); }
-                    } catch (err) { }
-                  }}
-                  className="flex items-center gap-2 text-orange-900 font-black uppercase text-sm tracking-widest hover:text-orange-700 transition-all bg-white px-4 py-2 rounded-xl shadow-sm border border-orange-50"
-                >
-                  <Share2 size={18} />
-                  Share
-                </button>
+                <ProductShare product={selectedProduct} lang={lang} />
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-20">
