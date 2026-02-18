@@ -167,6 +167,21 @@ const AppContent: React.FC = () => {
     }
   });
 
+  // --- DEEP LINK HANDLER: Read ?product=ID from URL on page load ---
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('product');
+    if (productId) {
+      const foundProduct = INITIAL_PRODUCTS.find(p => p.id === productId);
+      if (foundProduct) {
+        setSelectedProduct(foundProduct);
+        setSelectedVariantId(foundProduct.variants[0].id);
+        setActiveImage(null);
+        setView('DETAILS');
+      }
+    }
+  }, []);
+
   // --- AUTO-COUPON LOGIC ---
   useEffect(() => {
     // Subscribe to Config
