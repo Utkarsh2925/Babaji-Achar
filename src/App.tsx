@@ -1,4 +1,4 @@
-﻿// Deployed: 2026-02-18 09:25 IST - v10.0 CLEAN BUILD (Share Removed)
+// Deployed: 2026-02-04 00:22 IST - Force Update 2
 // DEPLOYMENT: 2026-02-04 10:35 - PRODUCTION LAUNCH
 import React, { useState, useEffect, useMemo } from 'react';
 import organicBadge from './assets/organic_badge_final.png';
@@ -6,7 +6,7 @@ import {
   ShoppingCart, User as UserIcon, ChevronRight, Instagram, Trash2, CheckCircle2,
   ArrowLeft, MapPin, Plus, Minus, Globe, ShieldCheck, Search, Sparkles, Star, Leaf,
   MessageCircle, Package, XCircle, LogIn, Settings, Phone, ArrowRight, Shield,
-  ImageIcon, Mail, Camera, Share2
+  ImageIcon, Mail, Camera
 } from 'lucide-react';
 // import { PaymentService } from './services/PaymentService';
 import { WhatsAppService } from './services/WhatsAppService';
@@ -108,7 +108,6 @@ const AppContent: React.FC = () => {
     updateAnimations(view);
   }, [view]);
   const [viewStack, setViewStack] = useState<string[]>(['HOME']);
-
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -168,36 +167,6 @@ const AppContent: React.FC = () => {
     }
   });
 
-  // --- DEEP LINKING LOGIC ---
-  // 1. Initial Load: Check for ?product=ID from shared links
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const productId = params.get('product');
-    if (productId) {
-      const foundProduct = INITIAL_PRODUCTS.find(p => p.id === productId);
-      if (foundProduct) {
-        setSelectedProduct(foundProduct);
-        setSelectedVariantId(foundProduct.variants[0].id);
-        setView('DETAILS');
-      }
-    }
-  }, []);
-
-  // 2. Update URL when viewing a product
-  useEffect(() => {
-    if (view === 'DETAILS' && selectedProduct) {
-      const url = new URL(window.location.href);
-      url.searchParams.set('product', selectedProduct.id);
-      window.history.pushState({}, '', url);
-    } else {
-      const url = new URL(window.location.href);
-      if (url.searchParams.has('product')) {
-        url.searchParams.delete('product');
-        window.history.pushState({}, '', url);
-      }
-    }
-  }, [view, selectedProduct]);
-
   // --- AUTO-COUPON LOGIC ---
   useEffect(() => {
     // Subscribe to Config
@@ -212,7 +181,7 @@ const AppContent: React.FC = () => {
       const userOrders = orders.filter(o => o.customerDetails.phone === loginPhone);
 
       if (userOrders.length === 0) {
-        // First-time user â†’ Apply 5% welcome discount
+        // First-time user → Apply 5% welcome discount
         console.log('First-time user detected, applying 5% discount');
         setAppliedCoupon({
           code: 'WELCOME5',
@@ -381,7 +350,7 @@ const AppContent: React.FC = () => {
     if (isCodLoading) return; // Prevent double clicks
 
     setIsCodLoading(true);
-    console.log('ðŸŸ¡ COD: Starting order process...');
+    console.log('🟡 COD: Starting order process...');
 
     try {
       // Create COD Order with proper structure
@@ -400,10 +369,10 @@ const AppContent: React.FC = () => {
         marketingConsent: marketingConsent
       };
 
-      console.log('ðŸŸ¡ COD: Order object created:', newOrder);
+      console.log('🟡 COD: Order object created:', newOrder);
 
       // Save to Firebase (With Tracking & Auth Check)
-      console.log('ðŸŸ¡ COD: Attempting Firebase save...');
+      console.log('🟡 COD: Attempting Firebase save...');
 
       // Reset Sync State
       setSyncStatus('PENDING');
@@ -414,10 +383,10 @@ const AppContent: React.FC = () => {
         try {
           // 1. AUTH CHECK
           if (!auth.currentUser) {
-            console.log('ðŸŸ¡ COD: Authenticating...');
+            console.log('🟡 COD: Authenticating...');
             await signInAnonymously(auth);
           }
-          console.log('âœ… COD: Auth OK, Preparing REST Request...');
+          console.log('✅ COD: Auth OK, Preparing REST Request...');
 
           // 2. GET TOKEN
           const token = await auth.currentUser?.getIdToken();
@@ -440,7 +409,7 @@ const AppContent: React.FC = () => {
           for (const dbUrl of candidateUrls) {
             try {
               const url = `${dbUrl}/orders.json?auth=${token}`;
-              console.log(`ðŸŸ¡ COD: Trying DB URL: ${dbUrl}`);
+              console.log(`🟡 COD: Trying DB URL: ${dbUrl}`);
 
               const response = await fetch(url, {
                 method: 'POST',
@@ -455,20 +424,20 @@ const AppContent: React.FC = () => {
 
               if (response.ok) {
                 const data = await response.json();
-                console.log('âœ… COD: REST Sync Success!');
-                console.log('âœ… Working Database URL:', dbUrl);
-                console.log('âœ… Order ID:', data.name);
+                console.log('✅ COD: REST Sync Success!');
+                console.log('✅ Working Database URL:', dbUrl);
+                console.log('✅ Order ID:', data.name);
                 setSyncStatus('SAVED');
                 success = true;
                 break;
               } else {
-                console.warn(`âš ï¸ Failed URL ${dbUrl}: ${response.status}`);
+                console.warn(`⚠️ Failed URL ${dbUrl}: ${response.status}`);
                 // If 404/401, try next. If 200, done.
                 if (response.status === 401) throw new Error("Permission Denied (Auth)");
                 lastError = `${response.status} ${response.statusText}`;
               }
             } catch (err: any) {
-              console.warn(`âš ï¸ Error connecting to ${dbUrl}`, err);
+              console.warn(`⚠️ Error connecting to ${dbUrl}`, err);
             }
           }
 
@@ -477,7 +446,7 @@ const AppContent: React.FC = () => {
           }
 
         } catch (e: any) {
-          console.error('âŒ COD: Firebase Sync Failed', e);
+          console.error('❌ COD: Firebase Sync Failed', e);
           setSyncStatus('FAILED');
           setSyncError(e.message || 'Unknown Error');
         }
@@ -486,8 +455,8 @@ const AppContent: React.FC = () => {
       // Trigger Background Save
       syncWithRestApi();
 
-      console.log('âœ… COD: Proceeding immediately...');
-      // console.log('âœ… COD: Firebase save successful!');
+      console.log('✅ COD: Proceeding immediately...');
+      // console.log('✅ COD: Firebase save successful!');
 
       // Update local state
       const updatedOrders = [newOrder, ...orders];
@@ -495,40 +464,40 @@ const AppContent: React.FC = () => {
       setCurrentOrder(newOrder);
       setCart([]);
       localStorage.setItem('bj_orders', JSON.stringify(updatedOrders));
-      console.log('âœ… COD: Local state updated');
+      console.log('✅ COD: Local state updated');
 
       // Send WhatsApp confirmation (background, non-blocking)
       setTimeout(() => {
         try {
           WhatsAppService.sendOrderConfirmation(newOrder);
-          console.log('âœ… COD: WhatsApp sent');
+          console.log('✅ COD: WhatsApp sent');
         } catch (e) {
-          console.error('âš ï¸ COD: WhatsApp failed:', e);
+          console.error('⚠️ COD: WhatsApp failed:', e);
         }
 
         // Send automated notification via Communication Bot
         try {
           NotificationService.sendPaymentStatus(newOrder);
-          console.log('âœ… COD: Notification sent');
+          console.log('✅ COD: Notification sent');
         } catch (e) {
-          console.error('âš ï¸ COD: Notification failed:', e);
+          console.error('⚠️ COD: Notification failed:', e);
         }
       }, 100);
 
       // Navigate to success
-      console.log('âœ… COD: Navigating to success...');
+      console.log('✅ COD: Navigating to success...');
       setView('SUCCESS');
       setViewStack([...viewStack, 'SUCCESS']);
       window.scrollTo(0, 0);
-      console.log('âœ… COD: Complete!');
+      console.log('✅ COD: Complete!');
 
     } catch (err: any) {
-      console.error('âŒ COD: Error caught:', err);
+      console.error('❌ COD: Error caught:', err);
       // Only show user-friendly error message
       alert(err.message || 'Unable to place order. Please check your internet connection.');
     } finally {
       setIsCodLoading(false);
-      console.log('ðŸŸ¡ COD: Loading state reset');
+      console.log('🟡 COD: Loading state reset');
     }
   };
 
@@ -541,8 +510,8 @@ const AppContent: React.FC = () => {
     // 0. Ensure Local Auth for Guest Users (Required for Firebase Writes if Rules are "auth != null")
     if (!auth.currentUser) {
       signInAnonymously(auth)
-        .then((cred) => console.log('ðŸ‘¤ Guest authenticated silently:', cred.user.uid))
-        .catch((e) => console.error('âŒ Guest Auth Failed:', e));
+        .then((cred) => console.log('👤 Guest authenticated silently:', cred.user.uid))
+        .catch((e) => console.error('❌ Guest Auth Failed:', e));
     }
 
     // 1. Subscribe to Firebase Orders (real-time sync)
@@ -550,13 +519,13 @@ const AppContent: React.FC = () => {
     const unsubscribeOrders = OrderService.subscribeToOrders(
       (firebaseOrders) => {
         if (firebaseOrders.length > 0) {
-          console.log('âœ… SDK: Received orders:', firebaseOrders.length);
+          console.log('✅ SDK: Received orders:', firebaseOrders.length);
           setOrders(firebaseOrders);
           setFirebaseError(null);
           localStorage.setItem('bj_orders', JSON.stringify(firebaseOrders));
         } else {
           // SDK returned empty. Could be wrong DB URL. Try REST Fallback.
-          console.log('âš ï¸ SDK found 0 orders. Initiating Multi-Region Discovery...');
+          console.log('⚠️ SDK found 0 orders. Initiating Multi-Region Discovery...');
           discoverOrdersFromRegions();
         }
       },
@@ -589,7 +558,7 @@ const AppContent: React.FC = () => {
           if (res.ok) {
             const data = await res.json();
             if (data) {
-              console.log(`âœ… FOUND DATA at: ${url}`);
+              console.log(`✅ FOUND DATA at: ${url}`);
               // Convert Map to Array
               const ordersList = Object.keys(data).map(key => ({
                 ...data[key],
@@ -597,7 +566,7 @@ const AppContent: React.FC = () => {
               })).sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
               if (ordersList.length > 0) {
-                console.log(`âœ… Recovered ${ordersList.length} orders via REST.`);
+                console.log(`✅ Recovered ${ordersList.length} orders via REST.`);
                 setOrders(ordersList);
                 setFirebaseError(null);
                 // If this URL works, we should probably record it or alert the user
@@ -799,46 +768,21 @@ const AppContent: React.FC = () => {
 
 
 
-
-  const cartSubtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const cartValues = useMemo(() => {
-    const totalQty = cart.reduce((acc, item) => acc + item.quantity, 0);
-
-    // No bulk discount on 1kg packs anymore
-    let bulkDiscount = 0;
-
-    // Percentage/Flat/FreeDelivery logic
-    const couponDiscount = appliedCoupon ? (
-      appliedCoupon.type === 'PERCENTAGE'
-        ? Math.round(cartSubtotal * (appliedCoupon.value / 100))
-        : appliedCoupon.value
-    ) : 0;
-
-    // Total Discount
-    const totalDiscount = bulkDiscount + couponDiscount;
-
-    // Free Delivery > â‚¹999 OR Coupon override
-    const isFreeDelivery = cartSubtotal > 999 || appliedCoupon?.freeDelivery === true;
-    const deliveryFee = isFreeDelivery ? 0 : 50;
-
-    const finalTotal = cartSubtotal - totalDiscount + deliveryFee;
-
-    // Maintain compatibility with isBulkDiscount name for generic check, but return breakdown
-    return { totalQty, bulkDiscount, couponDiscount, totalDiscount, isFreeDelivery, deliveryFee, finalTotal, isBulkDiscount: bulkDiscount > 0 };
-  }, [cart, cartSubtotal, appliedCoupon]);
-
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
+
       if (user) {
+        // Map Google User to App User
         const newUser: User = {
           id: user.uid,
           name: user.displayName || 'Valued Customer',
           role: 'USER',
-          phone: user.email || 'Google User',
+          phone: user.email || 'Google User', // Fallback for phone
           email: user.email || undefined
         };
+
         setUser(newUser);
         localStorage.setItem('bj_user', JSON.stringify(newUser));
         addToast('success', 'Welcome!', `Signed in as ${newUser.name}`);
@@ -854,12 +798,15 @@ const AppContent: React.FC = () => {
     e.preventDefault();
     if (!loginPhone) return addToast('error', 'Required', 'Please enter your phone number or email');
 
+    // Check for admin bypass
     if (loginPhone === '0000' && loginName === 'Vandita') {
       try {
+        // Authenticate anonymously to ensure Firebase Database access (if rules require auth)
         await signInAnonymously(auth);
       } catch (err) {
         console.error("Admin Firebase Auth failed", err);
       }
+
       const adminUser: User = { id: 'admin-01', name: 'Super Admin', role: 'ADMIN', phone: '0000' };
       setUser(adminUser);
       localStorage.setItem('bj_user', JSON.stringify(adminUser));
@@ -867,6 +814,7 @@ const AppContent: React.FC = () => {
       return;
     }
 
+    // Validation for email or 10-digit mobile number
     const isEmail = loginPhone.includes('@');
     const phoneRegex = /^[0-9]{10}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -874,6 +822,7 @@ const AppContent: React.FC = () => {
     if (!isEmail && !phoneRegex.test(loginPhone)) {
       return addToast('error', 'Invalid Phone', 'Please enter a valid 10-digit mobile number.');
     }
+
     if (isEmail && !emailRegex.test(loginPhone)) {
       return addToast('error', 'Invalid Email', 'Please enter a valid email address.');
     }
@@ -928,11 +877,14 @@ const AppContent: React.FC = () => {
     setReviewRating(5);
   };
 
+  // Save user profile
   const handleSaveProfile = async () => {
     if (!user?.phone) {
       alert(lang === 'hi' ? 'कृपया पहले लॉगिन करें' : 'Please login first');
       return;
     }
+
+    // Validation
     if (!profileData.fullName.trim()) {
       alert(lang === 'hi' ? 'कृपया अपना नाम दर्ज करें' : 'Please enter your name');
       return;
@@ -945,6 +897,7 @@ const AppContent: React.FC = () => {
       alert(lang === 'hi' ? 'पिन कोड 6 अंकों का होना चाहिए' : 'Pincode must be 6 digits');
       return;
     }
+
     try {
       await UserProfileService.saveProfile({
         phone: user.phone,
@@ -953,6 +906,8 @@ const AppContent: React.FC = () => {
         gender: profileData.gender,
         address: profileData.address
       });
+
+      // Update local user state
       setUser({
         ...user,
         name: profileData.fullName || user.name,
@@ -960,6 +915,7 @@ const AppContent: React.FC = () => {
         gender: profileData.gender,
         address: profileData.address
       });
+
       addToast(lang === 'hi' ? 'प्रोफाइल सफलतापूर्वक सहेजा गया!' : 'Profile saved successfully!', 'success');
       setView('PROFILE');
     } catch (error) {
@@ -967,6 +923,8 @@ const AppContent: React.FC = () => {
       addToast(lang === 'hi' ? 'प्रोफाइल सहेजने में विफल' : 'Failed to save profile', 'error');
     }
   };
+
+
 
   const generateWhatsAppLink = (order: Order) => {
     const items = order.items.map(i => `- ${i.productName} (${i.size}) x${i.quantity}`).join('\n');
@@ -980,6 +938,13 @@ const AppContent: React.FC = () => {
     return `https://wa.me/${BRAND_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
   };
 
+  // const generateSupportWhatsAppLink = (topic: string) => {
+  //   const message = `Namaste! I need help with ${topic} on the Baba Ji Achar platform. My name is ${user?.name || 'Guest'}.`;
+  //   return `https://wa.me/${BRAND_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+  // };
+
+
+
   const getStatusColor = (status: OrderStatus) => {
     switch (status) {
       case 'Delivered': return 'bg-green-100 text-green-700 border-green-200';
@@ -992,9 +957,38 @@ const AppContent: React.FC = () => {
     }
   };
 
+
+
+  const cartSubtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const cartValues = useMemo(() => {
+    const totalQty = cart.reduce((acc, item) => acc + item.quantity, 0);
+
+    // No bulk discount on 1kg packs anymore
+    let bulkDiscount = 0;
+
+    // Percentage/Flat/FreeDelivery logic
+    const couponDiscount = appliedCoupon ? (
+      appliedCoupon.type === 'PERCENTAGE'
+        ? Math.round(cartSubtotal * (appliedCoupon.value / 100))
+        : appliedCoupon.value
+    ) : 0;
+
+    // Total Discount
+    const totalDiscount = bulkDiscount + couponDiscount;
+
+    // Free Delivery > ₹999 OR Coupon override
+    const isFreeDelivery = cartSubtotal > 999 || appliedCoupon?.freeDelivery === true;
+    const deliveryFee = isFreeDelivery ? 0 : 50;
+
+    const finalTotal = cartSubtotal - totalDiscount + deliveryFee;
+
+    // Maintain compatibility with isBulkDiscount name for generic check, but return breakdown
+    return { totalQty, bulkDiscount, couponDiscount, totalDiscount, isFreeDelivery, deliveryFee, finalTotal, isBulkDiscount: bulkDiscount > 0 };
+  }, [cart, cartSubtotal, appliedCoupon]);
+
   const categories = [
     { id: 'All', label: t.all },
-    { id: 'RedChilliLink', label: lang === 'hi' ? 'à¤­à¤°à¤µà¤¾ à¤²à¤¾à¤² à¤®à¤¿à¤°à¥à¤š' : 'Bharwa Lal Mirch' },
+    { id: 'RedChilliLink', label: lang === 'hi' ? 'भरवा लाल मिर्च' : 'Bharwa Lal Mirch' },
     { id: 'Mix', label: t.mix },
     { id: 'Mango', label: t.mango },
     { id: 'Aawla', label: t.aawla },
@@ -1047,7 +1041,7 @@ const AppContent: React.FC = () => {
 
         {/* Floating Culinary Doodles - ALWAYS VEGETABLES (As requested) */}
         <div className="absolute inset-0 z-0 pointer-events-none opacity-70 select-none overflow-hidden">
-          {['ðŸŒ¶ï¸', 'ðŸ‹', 'ðŸ§„', 'ðŸ¥¬', 'ðŸŒ¿', 'ðŸŽ‹', 'ðŸ…', 'ðŸ§‚', 'ðŸ¥œ', 'ðŸ§…', 'ðŸ¥•', 'ðŸ¥­'].map((icon, i) => (
+          {['🌶️', '🍋', '🧄', '🥬', '🌿', '🎋', '🍅', '🧂', '🥜', '🧅', '🥕', '🥭'].map((icon, i) => (
             <div key={i} className={`absolute animate-[float_${4 + (i % 5)}s_ease-in-out_infinite] text-${i % 3 === 0 ? '3xl' : '2xl'} opacity-${i % 2 === 0 ? '80' : '60'}`} style={{
               top: `${(i * 23) % 90}%`,
               left: `${(i * 19) % 90}%`,
@@ -1093,7 +1087,7 @@ const AppContent: React.FC = () => {
                 className="flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-white rounded-xl text-stone-700 hover:bg-amber-900 hover:text-white transition-all shadow-md border-2 border-stone-100"
               >
                 <Globe size={24} className={lang === 'hi' ? "text-amber-600 group-hover:text-white" : "text-stone-700 group-hover:text-white"} />
-                <span className="hidden lg:inline font-bold text-sm leading-none">{lang === 'hi' ? 'EN' : 'à¤¹à¤¿à¤‚à¤¦à¥€'}</span>
+                <span className="hidden lg:inline font-bold text-sm leading-none">{lang === 'hi' ? 'EN' : 'हिंदी'}</span>
               </button>
 
               <button onClick={() => navigate('STORES')} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-white rounded-xl text-stone-700 hover:bg-amber-900 hover:text-white transition-all shadow-md border-2 border-stone-100">
@@ -1126,13 +1120,13 @@ const AppContent: React.FC = () => {
 
       <div className="bg-gradient-to-r from-amber-700 via-orange-800 to-amber-900 text-white text-sm sm:text-base font-black text-center py-3 uppercase tracking-[0.2em] sm:tracking-[0.3em] shadow-inner relative z-40 overflow-hidden whitespace-nowrap flex">
         <div className="flex animate-marquee min-w-full shrink-0 items-center justify-around gap-20">
-          <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> ðŸšš Free Delivery above â‚¹999</span>
-          {offersEnabled && <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> ðŸ·ï¸ 1st Order? Use FIRST5 for 5% OFF</span>}
+          <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🚚 Free Delivery above ₹999</span>
+          {offersEnabled && <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🏷️ 1st Order? Use FIRST5 for 5% OFF</span>}
           <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> {t.serving}</span>
         </div>
         <div className="flex animate-marquee min-w-full shrink-0 items-center justify-around gap-20" aria-hidden="true">
-          <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> ðŸšš Free Delivery above â‚¹999</span>
-          {offersEnabled && <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> ðŸ·ï¸ 1st Order? Use FIRST5 for 5% OFF</span>}
+          <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🚚 Free Delivery above ₹999</span>
+          {offersEnabled && <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> 🏷️ 1st Order? Use FIRST5 for 5% OFF</span>}
           <span className="flex items-center gap-4"><Sparkles size={14} className="text-amber-400" /> {t.serving}</span>
         </div>
       </div>
@@ -1272,7 +1266,7 @@ const AppContent: React.FC = () => {
                   </button>
                 </div>
                 <p className="text-sm text-stone-500 mt-3">
-                  {lang === 'hi' ? 'à¤ªà¥à¤°à¥‹à¤«à¤¾à¤‡à¤² à¤«à¥‹à¤Ÿà¥‹ à¤œà¤²à¥à¤¦ à¤† à¤°à¤¹à¤¾ à¤¹à¥ˆ' : 'Profile photo coming soon'}
+                  {lang === 'hi' ? 'प्रोफाइल फोटो जल्द आ रहा है' : 'Profile photo coming soon'}
                 </p>
               </div>
 
@@ -1281,14 +1275,14 @@ const AppContent: React.FC = () => {
                 {/* Full Name */}
                 <div>
                   <label className="block text-sm font-semibold text-stone-700 mb-2">
-                    {lang === 'hi' ? 'à¤ªà¥‚à¤°à¤¾ à¤¨à¤¾à¤®' : 'Full Name'}
+                    {lang === 'hi' ? 'पूरा नाम' : 'Full Name'}
                   </label>
                   <input
                     type="text"
                     value={profileData.fullName}
                     onChange={(e) => setProfileData({ ...profileData, fullName: e.target.value })}
                     className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl focus:border-orange-500 focus:outline-none"
-                    placeholder={lang === 'hi' ? 'à¤…à¤ªà¤¨à¤¾ à¤¨à¤¾à¤® à¤¦à¤°à¥à¤œ à¤•à¤°à¥‡à¤‚' : 'Enter your name'}
+                    placeholder={lang === 'hi' ? 'अपना नाम दर्ज करें' : 'Enter your name'}
                     required
                   />
                 </div>
@@ -1296,38 +1290,38 @@ const AppContent: React.FC = () => {
                 {/* Email */}
                 <div>
                   <label className="block text-sm font-semibold text-stone-700 mb-2">
-                    {lang === 'hi' ? 'à¤ˆà¤®à¥‡à¤²' : 'Email'}
+                    {lang === 'hi' ? 'ईमेल' : 'Email'}
                   </label>
                   <input
                     type="email"
                     value={profileData.email}
                     onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
                     className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl focus:border-orange-500 focus:outline-none"
-                    placeholder={lang === 'hi' ? 'à¤†à¤ªà¤•à¤¾ à¤ˆà¤®à¥‡à¤²' : 'Your email'}
+                    placeholder={lang === 'hi' ? 'आपका ईमेल' : 'Your email'}
                   />
                 </div>
 
                 {/* Gender */}
                 <div>
                   <label className="block text-sm font-semibold text-stone-700 mb-2">
-                    {lang === 'hi' ? 'à¤²à¤¿à¤‚à¤—' : 'Gender'}
+                    {lang === 'hi' ? 'लिंग' : 'Gender'}
                   </label>
                   <select
                     value={profileData.gender}
                     onChange={(e) => setProfileData({ ...profileData, gender: e.target.value as any })}
                     className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl focus:border-orange-500 focus:outline-none"
                   >
-                    <option value="">{lang === 'hi' ? 'à¤šà¥à¤¨à¥‡à¤‚' : 'Select'}</option>
-                    <option value="male">{lang === 'hi' ? 'à¤ªà¥à¤°à¥à¤·' : 'Male'}</option>
-                    <option value="female">{lang === 'hi' ? 'à¤®à¤¹à¤¿à¤²à¤¾' : 'Female'}</option>
-                    <option value="other">{lang === 'hi' ? 'à¤…à¤¨à¥à¤¯' : 'Other'}</option>
+                    <option value="">{lang === 'hi' ? 'चुनें' : 'Select'}</option>
+                    <option value="male">{lang === 'hi' ? 'पुरुष' : 'Male'}</option>
+                    <option value="female">{lang === 'hi' ? 'महिला' : 'Female'}</option>
+                    <option value="other">{lang === 'hi' ? 'अन्य' : 'Other'}</option>
                   </select>
                 </div>
 
                 {/* Address Section */}
                 <div className="border-t-2 border-stone-100 pt-6">
                   <h3 className="text-lg font-bold text-stone-800 mb-4">
-                    {lang === 'hi' ? 'à¤ªà¤¤à¤¾' : 'Address'}
+                    {lang === 'hi' ? 'पता' : 'Address'}
                   </h3>
 
                   <div className="space-y-4">
@@ -1339,7 +1333,7 @@ const AppContent: React.FC = () => {
                         address: { ...profileData.address, house: e.target.value }
                       })}
                       className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl focus:border-orange-500 focus:outline-none"
-                      placeholder={lang === 'hi' ? 'à¤®à¤•à¤¾à¤¨/à¤«à¥à¤²à¥ˆà¤Ÿ à¤¨à¤‚à¤¬à¤°' : 'House/Flat No.'}
+                      placeholder={lang === 'hi' ? 'मकान/फ्लैट नंबर' : 'House/Flat No.'}
                     />
 
                     <input
@@ -1350,7 +1344,7 @@ const AppContent: React.FC = () => {
                         address: { ...profileData.address, area: e.target.value }
                       })}
                       className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl focus:border-orange-500 focus:outline-none"
-                      placeholder={lang === 'hi' ? 'à¤‡à¤²à¤¾à¤•à¤¾/à¤—à¤²à¥€' : 'Area/Street'}
+                      placeholder={lang === 'hi' ? 'इलाका/गली' : 'Area/Street'}
                     />
 
                     <input
@@ -1361,7 +1355,7 @@ const AppContent: React.FC = () => {
                         address: { ...profileData.address, city: e.target.value }
                       })}
                       className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl focus:border-orange-500 focus:outline-none"
-                      placeholder={lang === 'hi' ? 'à¤¶à¤¹à¤°' : 'City'}
+                      placeholder={lang === 'hi' ? 'शहर' : 'City'}
                     />
 
                     <select
@@ -1372,7 +1366,7 @@ const AppContent: React.FC = () => {
                       })}
                       className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl focus:border-orange-500 focus:outline-none bg-white"
                     >
-                      <option value="">{lang === 'hi' ? 'à¤°à¤¾à¤œà¥à¤¯ à¤šà¥à¤¨à¥‡à¤‚' : 'Select State'}</option>
+                      <option value="">{lang === 'hi' ? 'राज्य चुनें' : 'Select State'}</option>
                       {["Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", "Delhi", "Jammu and Kashmir", "Ladakh", "Puducherry"].map(s => (
                         <option key={s} value={s}>{s}</option>
                       ))}
@@ -1386,7 +1380,7 @@ const AppContent: React.FC = () => {
                         address: { ...profileData.address, pincode: e.target.value }
                       })}
                       className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl focus:border-orange-500 focus:outline-none"
-                      placeholder={lang === 'hi' ? 'à¤ªà¤¿à¤¨ à¤•à¥‹à¤¡' : 'Pincode'}
+                      placeholder={lang === 'hi' ? 'पिन कोड' : 'Pincode'}
                       maxLength={6}
                     />
                   </div>
@@ -1397,7 +1391,7 @@ const AppContent: React.FC = () => {
                   onClick={handleSaveProfile}
                   className="w-full bg-[#8B4513] text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-[#6b360e] active:scale-95 transition-all"
                 >
-                  {lang === 'hi' ? 'à¤¸à¤¹à¥‡à¤œà¥‡à¤‚' : 'Save'}
+                  {lang === 'hi' ? 'सहेजें' : 'Save'}
                 </button>
               </div>
             </div>
@@ -1416,11 +1410,11 @@ const AppContent: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-[#FFFDFB] via-transparent to-black/30"></div>
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4 sm:p-6 space-y-6 sm:space-y-10">
                 <div className="space-y-4 sm:space-y-6 max-w-5xl">
-                  <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-6 py-3 rounded-full text-amber-200 text-sm sm:text-base font-black uppercase tracking-[0.2em] mb-4"><Leaf size={16} className="text-green-400" /> 100% Natural â€¢ Heritage</div>
+                  <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-6 py-3 rounded-full text-amber-200 text-sm sm:text-base font-black uppercase tracking-[0.2em] mb-4"><Leaf size={16} className="text-green-400" /> 100% Natural • Heritage</div>
                   <h1 className="hindi-font text-5xl sm:text-7xl lg:text-8xl font-black text-white drop-shadow-2xl tracking-tight leading-none uppercase whitespace-nowrap mb-2">
-                    {BRAND_CONFIG.PRODUCT_BRAND} <span className="text-orange-500 italic ml-2">à¤…à¤šà¤¾à¤°</span>
+                    {BRAND_CONFIG.PRODUCT_BRAND} <span className="text-orange-500 italic ml-2">अचार</span>
                   </h1>
-                  <p className="text-base sm:text-3xl text-stone-200 font-medium max-w-2xl mx-auto leading-relaxed hindi-font px-4">à¤ªà¥€à¤¢à¤¼à¤¿à¤¯à¥‹à¤‚ à¤•à¥€ à¤ªà¤°à¤‚à¤ªà¤°à¤¾ à¤¸à¥‡ à¤¬à¤¨à¤¾ à¤¶à¥à¤¦à¥à¤§ à¤¦à¥‡à¤¸à¥€ à¤…à¤šà¤¾à¤°</p>
+                  <p className="text-base sm:text-3xl text-stone-200 font-medium max-w-2xl mx-auto leading-relaxed hindi-font px-4">पीढ़ियों की परंपरा से बना शुद्ध देसी अचार</p>
                   <h2 className="text-[11px] sm:text-sm text-amber-200/50 font-black uppercase tracking-[0.3em] max-w-4xl mx-auto mt-6 leading-none whitespace-nowrap">
                     100% Organic Traditional Natural Pickles by Bhojnamrit Foods | Made in Prayagraj
                   </h2>
@@ -1480,7 +1474,7 @@ const AppContent: React.FC = () => {
                         </div>
                         <div className="space-y-4">
                           <div className="flex items-center justify-between">
-                            {!isAllOutOfStock && <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-amber-900">â‚¹{inStockVariant.mrp}</span>}
+                            {!isAllOutOfStock && <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-amber-900">₹{inStockVariant.mrp}</span>}
                             <span className="text-sm sm:text-base text-stone-500 font-bold bg-stone-100 px-3 py-1.5 rounded-lg">{inStockVariant.size}</span>
                           </div>
                           <div className="grid grid-cols-2 gap-3">
@@ -1508,7 +1502,7 @@ const AppContent: React.FC = () => {
                               }}
                               className="bg-amber-50 border-2 border-amber-200 text-amber-900 py-6 sm:py-8 rounded-2xl text-xl sm:text-2xl font-black hover:bg-amber-100 hover:border-amber-300 transition-all shadow-sm active:scale-95 flex items-center justify-center gap-3"
                             >
-                              {isAllOutOfStock ? (lang === 'hi' ? 'à¤¨à¤¿à¤µà¥‡à¤¦à¤¨ à¤­à¥‡à¤œà¥‡à¤‚' : 'Request Order') : 'Buy Now'} <ChevronRight size={24} />
+                              {isAllOutOfStock ? (lang === 'hi' ? 'निवेदन भेजें' : 'Request Order') : 'Buy Now'} <ChevronRight size={24} />
                             </button>
                           </div>
                         </div>
@@ -1526,7 +1520,7 @@ const AppContent: React.FC = () => {
                     <h2 className="hindi-font text-4xl sm:text-5xl font-black text-orange-950 mb-8">Bhojnamrit Foods: Preserving Indian Culinary Traditions</h2>
                     <div className="space-y-6 text-lg text-stone-600 font-medium leading-relaxed">
                       <p>At <strong className="text-orange-900">Bhojnamrit Foods</strong>, we believe in the sanctity of food. <strong className="text-orange-900">Babaji Achar</strong> was born from a desire to bring the authentic, sun-dried flavors of home back to every table across India.</p>
-                      <p>Unlike mass-produced alternatives, our <strong className="text-orange-900">natural pickles</strong> are made in small batches in <strong className="text-orange-900">Prayagraj</strong>, using 100% organic ingredients sourced directly from local farmers. We use no preservatives or synthetic chemicalsâ€”only time-honored traditional Indian achar recipes passed down through generations.</p>
+                      <p>Unlike mass-produced alternatives, our <strong className="text-orange-900">natural pickles</strong> are made in small batches in <strong className="text-orange-900">Prayagraj</strong>, using 100% organic ingredients sourced directly from local farmers. We use no preservatives or synthetic chemicals—only time-honored traditional Indian achar recipes passed down through generations.</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-6">
@@ -1557,17 +1551,17 @@ const AppContent: React.FC = () => {
                   <h2 className="text-center hindi-font text-4xl sm:text-5xl font-black text-orange-950 mb-16">Why Choose Babaji Achar?</h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
                     <div className="space-y-4">
-                      <div className="text-4xl">ðŸ’Ž</div>
+                      <div className="text-4xl">💎</div>
                       <h3 className="text-xl font-black text-orange-900 uppercase tracking-widest">Heritage Recipes</h3>
                       <p className="text-stone-500 font-medium">Authentic Banarasi and Traditional UP recipes preserved for modern health-conscious families.</p>
                     </div>
                     <div className="space-y-4">
-                      <div className="text-4xl">ðŸšœ</div>
+                      <div className="text-4xl">🚜</div>
                       <h3 className="text-xl font-black text-orange-900 uppercase tracking-widest">Organic Sourcing</h3>
                       <p className="text-stone-500 font-medium">We source our mangoes, chillies, and spices directly from organic farms in Uttar Pradesh.</p>
                     </div>
                     <div className="space-y-4">
-                      <div className="text-4xl">ðŸ¥£</div>
+                      <div className="text-4xl">🥣</div>
                       <h3 className="text-xl font-black text-orange-900 uppercase tracking-widest">Small Batch Promise</h3>
                       <p className="text-stone-500 font-medium">Every jar of Babaji Achar is packed by hand to ensure the highest quality and taste consistency.</p>
                     </div>
@@ -1582,14 +1576,10 @@ const AppContent: React.FC = () => {
 
         {view === 'DETAILS' && selectedProduct && (
           <div className="max-w-7xl mx-auto px-4 py-8 sm:py-16 animate-in slide-in-from-right duration-500">
-            {/* Header with Back Button */}
-            <div className="mb-6 sm:mb-12">
-              <button onClick={goBack} className="flex items-center gap-2 text-orange-900 font-black uppercase text-sm tracking-widest hover:gap-3 transition-all">
-                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md border border-orange-50"><ArrowLeft size={18} /></div>
-                {t.back}
-              </button>
-            </div>
-
+            <button onClick={goBack} className="flex items-center gap-2 text-orange-900 mb-6 sm:mb-12 font-black uppercase text-sm tracking-widest hover:gap-3 transition-all">
+              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md border border-orange-50"><ArrowLeft size={18} /></div>
+              {t.back}
+            </button>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-20">
               <div className="space-y-6 sm:space-y-10 max-w-md mx-auto lg:max-w-none">
                 <div className="relative rounded-3xl sm:rounded-[3rem] overflow-hidden border-4 border-white bg-white aspect-square shadow-xl w-3/5 lg:w-1/2 mx-auto p-4">
@@ -1618,7 +1608,7 @@ const AppContent: React.FC = () => {
                     {selectedProduct.variants.map(v => (
                       <button key={v.id} onClick={() => setSelectedVariantId(v.id)} className={`h-24 sm:h-28 w-full rounded-2xl sm:rounded-3xl border-4 transition-all flex flex-col items-center justify-center ${selectedVariantId === v.id ? 'border-orange-700 bg-orange-700 text-white shadow-md' : 'border-orange-50 bg-white text-orange-950'}`}>
                         <span className="font-black text-xl sm:text-2xl mb-1">{v.size}</span>
-                        {v.stock > 0 && <span className={`font-black text-lg sm:text-xl ${selectedVariantId === v.id ? 'text-amber-200' : 'text-orange-700'}`}>â‚¹{v.mrp}</span>}
+                        {v.stock > 0 && <span className={`font-black text-lg sm:text-xl ${selectedVariantId === v.id ? 'text-amber-200' : 'text-orange-700'}`}>₹{v.mrp}</span>}
                       </button>
                     ))}
                   </div>
@@ -1631,14 +1621,15 @@ const AppContent: React.FC = () => {
                     <button onClick={() => setQty(qty + 1)} className="w-32 h-full hover:bg-orange-50 text-orange-900 border-l-2 border-orange-100"><Plus size={40} className="mx-auto" /></button>
                   </div>
 
-                  {/* Action Buttons - Restored to Original Grid Layout */}
+                  {/* Action Buttons - Side by Side to match Pack Size buttons */}
+                  {/* Action Buttons - Side by Side to match Pack Size buttons */}
                   <div className="grid grid-cols-2 gap-4">
                     <button
                       disabled={(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0}
                       onClick={() => { if (!user) return navigate('LOGIN'); const v = selectedProduct.variants.find(x => x.id === selectedVariantId); if (v) { setCart(prev => [...prev, { productId: selectedProduct.id, variantId: v.id, quantity: qty, productName: selectedProduct.name[lang], size: v.size, price: v.mrp, image: activeImage || selectedProduct.mainImage }]); alert('Added to cart!'); } }}
                       className={`h-24 sm:h-28 border-4 rounded-2xl sm:rounded-3xl font-black text-xl sm:text-2xl shadow-lg flex flex-col sm:flex-row items-center justify-center gap-2 active:scale-95 transition-all whitespace-nowrap ${(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? 'bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed' : 'bg-white text-orange-950 border-orange-200 hover:bg-orange-50 hover:border-orange-300'}`}
                     >
-                      <ShoppingCart size={32} /> {(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? (lang === 'hi' ? 'à¤¸à¥à¤Ÿà¥‰à¤• à¤–à¤¤à¥à¤®' : 'Out of Stock') : t.add}
+                      <ShoppingCart size={32} /> {(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? (lang === 'hi' ? 'स्टॉक खत्म' : 'Out of Stock') : t.add}
                     </button>
                     <button
                       onClick={() => {
@@ -1655,7 +1646,7 @@ const AppContent: React.FC = () => {
                       }}
                       className={`h-24 sm:h-28 border-4 rounded-2xl sm:rounded-3xl font-black text-xl sm:text-2xl shadow-lg flex flex-col sm:flex-row items-center justify-center gap-2 active:scale-95 transition-all whitespace-nowrap ${(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? 'bg-amber-100 text-amber-900 border-amber-200 hover:bg-amber-200' : 'bg-orange-50 text-orange-900 border-orange-200 hover:bg-orange-100 hover:border-orange-300'}`}
                     >
-                      {(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? (lang === 'hi' ? 'à¤¨à¤¿à¤µà¥‡à¤¦à¤¨ à¤­à¥‡à¤œà¥‡à¤‚' : 'Request Order') : t.orderNow} <ArrowRight size={32} />
+                      {(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? (lang === 'hi' ? 'निवेदन भेजें' : 'Request Order') : t.orderNow} <ArrowRight size={32} />
                     </button>
                   </div>
                 </div>
@@ -1667,23 +1658,23 @@ const AppContent: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 sm:gap-20">
                 <div className="space-y-6">
                   <h3 className="hindi-font text-3xl font-black text-orange-950 flex items-center gap-3">
-                    <span className="text-4xl">ðŸ“</span> {lang === 'hi' ? 'à¤‰à¤¤à¥à¤ªà¤¾à¤¦ à¤µà¤¿à¤µà¤°à¤£' : 'Product Description'}
+                    <span className="text-4xl">📝</span> {lang === 'hi' ? 'उत्पाद विवरण' : 'Product Description'}
                   </h3>
                   <div className="bg-orange-50 p-8 rounded-[2rem] border border-orange-100 shadow-inner">
                     <p className="text-lg text-stone-700 leading-relaxed font-medium">
                       {selectedProduct.description[lang]}
                     </p>
                     <div className="mt-6 flex flex-wrap gap-3">
-                      <span className="bg-white px-4 py-2 rounded-xl text-sm font-bold text-orange-800 shadow-sm border border-orange-100">ðŸš« No Preservatives</span>
-                      <span className="bg-white px-4 py-2 rounded-xl text-sm font-bold text-orange-800 shadow-sm border border-orange-100">â˜€ï¸ Sun Dried</span>
-                      <span className="bg-white px-4 py-2 rounded-xl text-sm font-bold text-orange-800 shadow-sm border border-orange-100">ðŸ–ï¸ Hand Made</span>
+                      <span className="bg-white px-4 py-2 rounded-xl text-sm font-bold text-orange-800 shadow-sm border border-orange-100">🚫 No Preservatives</span>
+                      <span className="bg-white px-4 py-2 rounded-xl text-sm font-bold text-orange-800 shadow-sm border border-orange-100">☀️ Sun Dried</span>
+                      <span className="bg-white px-4 py-2 rounded-xl text-sm font-bold text-orange-800 shadow-sm border border-orange-100">🖐️ Hand Made</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-6">
                   <h3 className="hindi-font text-3xl font-black text-orange-950 flex items-center gap-3">
-                    <span className="text-4xl">ðŸŒ¿</span> {lang === 'hi' ? 'à¤¸à¤¾à¤®à¤—à¥à¤°à¥€' : 'Ingredients'}
+                    <span className="text-4xl">🌿</span> {lang === 'hi' ? 'सामग्री' : 'Ingredients'}
                   </h3>
                   <div className="bg-white p-8 rounded-[2rem] border-2 border-green-100 shadow-md">
                     <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1817,7 +1808,7 @@ const AppContent: React.FC = () => {
                       <div className="flex-grow">
                         <h4 className="font-black text-lg sm:text-xl text-orange-950">{item.productName}</h4>
                         <p className="text-sm font-bold text-stone-400 uppercase">{item.size}</p>
-                        <p className="text-orange-700 font-black text-lg">â‚¹{item.price * item.quantity}</p>
+                        <p className="text-orange-700 font-black text-lg">₹{item.price * item.quantity}</p>
 
                         {/* Quantity Controls */}
                         <div className="flex items-center gap-2 mt-2">
@@ -1855,28 +1846,28 @@ const AppContent: React.FC = () => {
                 <div className="bg-orange-950 text-white p-8 rounded-3xl shadow-xl h-fit">
                   <h3 className="text-stone-400 text-sm font-black uppercase tracking-widest mb-6">{t.orderSummary}</h3>
                   <div className="space-y-3 mb-8">
-                    <div className="flex justify-between text-base"><span>{t.subtotal}</span><span className="font-bold">â‚¹{cartSubtotal}</span></div>
+                    <div className="flex justify-between text-base"><span>{t.subtotal}</span><span className="font-bold">₹{cartSubtotal}</span></div>
 
                     {/* No bulk discount anymore */}
                     {cartValues.couponDiscount > 0 && (
                       <div className="flex justify-between text-base text-green-400">
                         <span>{t.coupon} ({appliedCoupon?.code})</span>
-                        <span className="font-bold">-â‚¹{cartValues.couponDiscount}</span>
+                        <span className="font-bold">-₹{cartValues.couponDiscount}</span>
                       </div>
                     )}
 
                     <div className="flex justify-between text-base">
                       <span>{t.deliveryCharges}</span>
                       {cartValues.isFreeDelivery ? (
-                        <span className="font-bold text-green-400">FREE (Orders &gt; â‚¹999)</span>
+                        <span className="font-bold text-green-400">FREE (Orders &gt; ₹999)</span>
                       ) : (
-                        <span className="font-bold">â‚¹50</span>
+                        <span className="font-bold">₹50</span>
                       )}
                     </div>
 
                     <div className="pt-4 border-t border-white/10 flex justify-between text-2xl font-black text-amber-500">
                       <span>{t.total}</span>
-                      <span>â‚¹{cartValues.finalTotal}</span>
+                      <span>₹{cartValues.finalTotal}</span>
                     </div>
                   </div>
                   {cartValues.bulkDiscount === 0 && (
@@ -1918,18 +1909,18 @@ const AppContent: React.FC = () => {
                       {cart.map((item, i) => (
                         <div key={i} className="flex justify-between items-center text-base sm:text-lg font-bold text-stone-600 border-b border-stone-200 pb-2">
                           <span>{item.productName} (x{item.quantity})</span>
-                          <span>â‚¹{item.price * item.quantity}</span>
+                          <span>₹{item.price * item.quantity}</span>
                         </div>
                       ))}
                     </div>
 
 
                     <div className="space-y-2 mb-4 text-sm font-bold text-stone-500 border-t border-dashed border-stone-200 pt-4">
-                      <div className="flex justify-between"><span>{t.subtotal}</span><span>â‚¹{cartSubtotal}</span></div>
+                      <div className="flex justify-between"><span>{t.subtotal}</span><span>₹{cartSubtotal}</span></div>
 
                       <div className="flex justify-between">
                         <span>{t.deliveryCharges}</span>
-                        {cartValues.isFreeDelivery ? <span className="text-green-600">FREE</span> : <span>â‚¹50</span>}
+                        {cartValues.isFreeDelivery ? <span className="text-green-600">FREE</span> : <span>₹50</span>}
                       </div>
 
                       {cartValues.couponDiscount > 0 && (
@@ -1938,12 +1929,12 @@ const AppContent: React.FC = () => {
                             <span>{t.coupon} ({appliedCoupon?.code})</span>
                             <button onClick={() => { setAppliedCoupon(null); }} className="bg-red-50 text-red-500 text-[10px] font-black uppercase px-2 py-0.5 rounded hover:bg-red-100 transition-colors">Remove</button>
                           </div>
-                          <span>-â‚¹{cartValues.couponDiscount}</span>
+                          <span>-₹{cartValues.couponDiscount}</span>
                         </div>
                       )}
                     </div>
 
-                    <div className="flex justify-between items-center text-2xl font-black text-orange-950 pt-4 border-t-2 border-stone-200"><span>{t.total}</span><span>â‚¹{cartValues.finalTotal}</span></div>
+                    <div className="flex justify-between items-center text-2xl font-black text-orange-950 pt-4 border-t-2 border-stone-200"><span>{t.total}</span><span>₹{cartValues.finalTotal}</span></div>
 
                     {/* Marketing Consent Checkbox */}
                     <div className="mt-6 pt-6 border-t border-dashed border-orange-100">
@@ -1957,7 +1948,7 @@ const AppContent: React.FC = () => {
                         <span className="text-sm text-stone-600 font-medium leading-relaxed">
                           I agree to receive order updates and offers from <strong>Baba Ji Achar</strong> on WhatsApp.
                           <br />
-                          <span className="text-xs text-stone-400 hindi-font">à¤®à¥ˆà¤‚ à¤¬à¤¾à¤¬à¤¾ à¤œà¥€ à¤…à¤šà¤¾à¤° à¤¸à¥‡ à¤µà¥à¤¹à¤¾à¤Ÿà¥à¤¸à¤à¤ª à¤ªà¤° à¤…à¤ªà¤¡à¥‡à¤Ÿ à¤”à¤° à¤‘à¤«à¤° à¤ªà¥à¤°à¤¾à¤ªà¥à¤¤ à¤•à¤°à¤¨à¥‡ à¤•à¥‡ à¤²à¤¿à¤ à¤¸à¤¹à¤®à¤¤ à¤¹à¥‚à¤‚à¥¤</span>
+                          <span className="text-xs text-stone-400 hindi-font">मैं बाबा जी अचार से व्हाट्सएप पर अपडेट और ऑफर प्राप्त करने के लिए सहमत हूं।</span>
                         </span>
                       </label>
                     </div>
@@ -1983,7 +1974,7 @@ const AppContent: React.FC = () => {
 
                   }} className="w-full bg-[#3395ff] text-white py-5 rounded-2xl font-black text-xl shadow-lg hover:bg-[#2b84e6] active:scale-95 transition-all flex items-center justify-center gap-3 mb-4 group relative overflow-hidden">
                     <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                    <span className="relative z-10 flex items-center gap-2">Pay â‚¹{cartValues.finalTotal} <ArrowRight size={20} /></span>
+                    <span className="relative z-10 flex items-center gap-2">Pay ₹{cartValues.finalTotal} <ArrowRight size={20} /></span>
                   </button>
 
                   {/* Cash on Delivery (COD) Button */}
@@ -2023,7 +2014,7 @@ const AppContent: React.FC = () => {
                         </>
                       ) : (
                         <>
-                          ðŸ’µ {lang === 'hi' ? 'à¤•à¥ˆà¤¶ à¤‘à¤¨ à¤¡à¤¿à¤²à¥€à¤µà¤°à¥€' : 'Cash on Delivery'}
+                          💵 {lang === 'hi' ? 'कैश ऑन डिलीवरी' : 'Cash on Delivery'}
                         </>
                       )}
                     </span>
@@ -2066,10 +2057,10 @@ const AppContent: React.FC = () => {
                 {/* Security Note */}
                 <div className="bg-red-50 border border-red-100 rounded-xl p-4 mb-6 text-left">
                   <p className="text-red-700 font-bold text-sm leading-relaxed mb-2">
-                    âš ï¸ Important: It is mandatory to send WhatsApp confirmation for security and authenticity verification.
+                    ⚠️ Important: It is mandatory to send WhatsApp confirmation for security and authenticity verification.
                   </p>
                   <p className="text-red-700 font-bold text-sm leading-relaxed hindi-font">
-                    âš ï¸ à¤®à¤¹à¤¤à¥à¤µà¤ªà¥‚à¤°à¥à¤£: à¤¸à¥à¤°à¤•à¥à¤·à¤¾ à¤”à¤° à¤ªà¥à¤°à¤®à¤¾à¤£à¤¿à¤•à¤¤à¤¾ à¤•à¥‡ à¤²à¤¿à¤ à¤µà¥à¤¹à¤¾à¤Ÿà¥à¤¸à¤à¤ª à¤ªà¤° à¤ªà¥à¤·à¥à¤Ÿà¤¿ à¤­à¥‡à¤œà¤¨à¤¾ à¤…à¤¨à¤¿à¤µà¤¾à¤°à¥à¤¯ à¤¹à¥ˆà¥¤
+                    ⚠️ महत्वपूर्ण: सुरक्षा और प्रमाणिकता के लिए व्हाट्सएप पर पुष्टि भेजना अनिवार्य है।
                   </p>
                 </div>
 
@@ -2106,7 +2097,7 @@ const AppContent: React.FC = () => {
                       <p className="text-xs text-orange-200 mb-6 font-medium">Manage orders and store settings.</p>
                       <div className="grid grid-cols-2 gap-3">
                         <div className="bg-white/10 p-3 rounded-xl text-center"><p className="text-2xl font-black text-amber-400">{orders.length}</p><p className="text-xs uppercase tracking-wider">Orders</p></div>
-                        <div className="bg-white/10 p-3 rounded-xl text-center"><p className="text-2xl font-black text-amber-400">â‚¹{orders.reduce((a, b) => a + b.totalAmount, 0)}</p><p className="text-xs uppercase tracking-wider">Revenue</p></div>
+                        <div className="bg-white/10 p-3 rounded-xl text-center"><p className="text-2xl font-black text-amber-400">₹{orders.reduce((a, b) => a + b.totalAmount, 0)}</p><p className="text-xs uppercase tracking-wider">Revenue</p></div>
                       </div>
                       <button onClick={() => setView('ADMIN')} className="w-full mt-6 py-3 bg-white text-orange-950 rounded-xl font-black text-sm hover:bg-amber-50 transition-colors">Open Dashboard</button>
                     </div>
@@ -2127,7 +2118,7 @@ const AppContent: React.FC = () => {
                             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4 pb-4 border-b border-stone-100">
                               <div>
                                 <p className="font-black text-lg text-orange-950">#{order.id}</p>
-                                <p className="text-sm font-bold text-stone-400">{new Date(order.date).toLocaleDateString()} â€¢ {new Date(order.date).toLocaleTimeString()}</p>
+                                <p className="text-sm font-bold text-stone-400">{new Date(order.date).toLocaleDateString()} • {new Date(order.date).toLocaleTimeString()}</p>
                               </div>
                               <div className={`px-4 py-1.5 rounded-lg text-sm font-black uppercase tracking-widest border ${getStatusColor(order.status)}`}>
                                 {order.status.replace('_', ' ')}
@@ -2137,12 +2128,12 @@ const AppContent: React.FC = () => {
                               {order.items.map((item, idx) => (
                                 <div key={idx} className="flex justify-between text-base font-medium text-stone-600">
                                   <span>{item.productName} x{item.quantity} ({item.size})</span>
-                                  <span className="font-bold">â‚¹{item.price * item.quantity}</span>
+                                  <span className="font-bold">₹{item.price * item.quantity}</span>
                                 </div>
                               ))}
                             </div>
                             <div className="flex flex-col sm:flex-row justify-between items-center pt-4 border-t border-stone-100 gap-4">
-                              <p className="font-black text-xl text-orange-900">Total: â‚¹{order.totalAmount}</p>
+                              <p className="font-black text-xl text-orange-900">Total: ₹{order.totalAmount}</p>
                               <a href={generateWhatsAppLink(order)} target="_blank" rel="noreferrer" className="text-sm font-black text-[#25D366] hover:underline flex items-center gap-1"><WhatsAppIcon size={16} /> Track on WhatsApp</a>
                             </div>
                           </div>
@@ -2187,7 +2178,7 @@ const AppContent: React.FC = () => {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-black text-orange-900 mb-4 font-serif">
-                {lang === 'hi' ? 'à¤…à¤•à¥à¤¸à¤° à¤ªà¥‚à¤›à¥‡ à¤œà¤¾à¤¨à¥‡ à¤µà¤¾à¤²à¥‡ à¤ªà¥à¤°à¤¶à¥à¤¨' : 'Frequently Asked Questions'}
+                {lang === 'hi' ? 'अक्सर पूछे जाने वाले प्रश्न' : 'Frequently Asked Questions'}
               </h2>
               <div className="w-24 h-1 bg-orange-500 mx-auto rounded-full"></div>
             </div>
@@ -2197,26 +2188,26 @@ const AppContent: React.FC = () => {
                 {
                   q: "Is Babaji Achar 100% Organic?",
                   a: "Yes! We use only organic, farm-fresh ingredients grown without harmful chemicals. Our pickles are made using traditional methods to preserve natural nutrition.",
-                  bs: "à¤•à¥à¤¯à¤¾ à¤¬à¤¾à¤¬à¤¾à¤œà¥€ à¤…à¤šà¤¾à¤° 100% à¤‘à¤°à¥à¤—à¥‡à¤¨à¤¿à¤• à¤¹à¥ˆ?",
-                  ba: "à¤¹à¤¾à¤! à¤¹à¤® à¤•à¥‡à¤µà¤² à¤‘à¤°à¥à¤—à¥‡à¤¨à¤¿à¤• à¤”à¤° à¤–à¥‡à¤¤ à¤¸à¥‡ à¤¤à¤¾à¤œà¤¼à¤¾ à¤¸à¤¾à¤®à¤—à¥à¤°à¥€ à¤•à¤¾ à¤‰à¤ªà¤¯à¥‹à¤— à¤•à¤°à¤¤à¥‡ à¤¹à¥ˆà¤‚à¥¤ à¤¹à¤®à¤¾à¤°à¥‡ à¤…à¤šà¤¾à¤° à¤ªà¤¾à¤°à¤‚à¤ªà¤°à¤¿à¤• à¤µà¤¿à¤§à¤¿à¤¯à¥‹à¤‚ à¤¸à¥‡ à¤¬à¤¨à¤¾à¤ à¤œà¤¾à¤¤à¥‡ à¤¹à¥ˆà¤‚à¥¤"
+                  bs: "क्या बाबाजी अचार 100% ऑर्गेनिक है?",
+                  ba: "हाँ! हम केवल ऑर्गेनिक और खेत से ताज़ा सामग्री का उपयोग करते हैं। हमारे अचार पारंपरिक विधियों से बनाए जाते हैं।"
                 },
                 {
                   q: "Do you use preservatives?",
                   a: "No artificial preservatives are used. Typical preservatives like oil, salt, and spices act as natural preservatives in our traditional recipes.",
-                  bs: "à¤•à¥à¤¯à¤¾ à¤†à¤ª à¤ªà¥à¤°à¤¿à¤œà¤¼à¤°à¥à¤µà¥‡à¤Ÿà¤¿à¤µà¥à¤¸ à¤•à¤¾ à¤‰à¤ªà¤¯à¥‹à¤— à¤•à¤°à¤¤à¥‡ à¤¹à¥ˆà¤‚?",
-                  ba: "à¤¨à¤¹à¥€à¤‚à¥¤ à¤¤à¥‡à¤², à¤¨à¤®à¤• à¤”à¤° à¤®à¤¸à¤¾à¤²à¥‡ à¤¹à¥€ à¤¹à¤®à¤¾à¤°à¥‡ à¤…à¤šà¤¾à¤° à¤®à¥‡à¤‚ à¤ªà¥à¤°à¤¾à¤•à¥ƒà¤¤à¤¿à¤• à¤ªà¥à¤°à¤¿à¤œà¤¼à¤°à¥à¤µà¥‡à¤Ÿà¤¿à¤µ à¤•à¤¾ à¤•à¤¾à¤® à¤•à¤°à¤¤à¥‡ à¤¹à¥ˆà¤‚à¥¤"
+                  bs: "क्या आप प्रिज़र्वेटिव्स का उपयोग करते हैं?",
+                  ba: "नहीं। तेल, नमक और मसाले ही हमारे अचार में प्राकृतिक प्रिज़र्वेटिव का काम करते हैं।"
                 },
                 {
                   q: "How long does shipping take?",
                   a: "We usually dispatch within 24 hours. Delivery takes 3-7 business days depending on your location in India.",
-                  bs: "à¤¶à¤¿à¤ªà¤¿à¤‚à¤— à¤®à¥‡à¤‚ à¤•à¤¿à¤¤à¤¨à¤¾ à¤¸à¤®à¤¯ à¤²à¤—à¤¤à¤¾ à¤¹à¥ˆ?",
-                  ba: "à¤¹à¤® à¤†à¤®à¤¤à¥Œà¤° à¤ªà¤° 24 à¤˜à¤‚à¤Ÿà¥‡ à¤•à¥‡ à¤­à¥€à¤¤à¤° à¤¡à¤¿à¤¸à¥à¤ªà¥ˆà¤š à¤•à¤°à¤¤à¥‡ à¤¹à¥ˆà¤‚à¥¤ à¤¡à¤¿à¤²à¥€à¤µà¤°à¥€ à¤®à¥‡à¤‚ 3-7 à¤•à¤¾à¤°à¥à¤¯ à¤¦à¤¿à¤µà¤¸ à¤²à¤—à¤¤à¥‡ à¤¹à¥ˆà¤‚à¥¤"
+                  bs: "शिपिंग में कितना समय लगता है?",
+                  ba: "हम आमतौर पर 24 घंटे के भीतर डिस्पैच करते हैं। डिलीवरी में 3-7 कार्य दिवस लगते हैं।"
                 },
                 {
                   q: "What is the shelf life?",
                   a: "Our pickles have a shelf life of 12 months when stored in a cool, dry place and handled with a dry spoon.",
-                  bs: "à¤¶à¥‡à¤²à¥à¤« à¤²à¤¾à¤‡à¤« à¤•à¥à¤¯à¤¾ à¤¹à¥ˆ?",
-                  ba: "à¤¹à¤®à¤¾à¤°à¥‡ à¤…à¤šà¤¾à¤° à¤•à¥€ à¤¶à¥‡à¤²à¥à¤« à¤²à¤¾à¤‡à¤« 12 à¤®à¤¹à¥€à¤¨à¥‡ à¤¹à¥ˆ à¤à¤—à¤° à¤‰à¤¨à¥à¤¹à¥‡à¤‚ à¤¸à¥‚à¤–à¥€ à¤œà¤—à¤¹ à¤ªà¤° à¤°à¤–à¤¾ à¤œà¤¾à¤à¥¤"
+                  bs: "शेल्फ लाइफ क्या है?",
+                  ba: "हमारे अचार की शेल्फ लाइफ 12 महीने है एगर उन्हें सूखी जगह पर रखा जाए।"
                 }
               ].map((faq, idx) => (
                 <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
@@ -2281,7 +2272,7 @@ const AppContent: React.FC = () => {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-black text-orange-900 mb-4 font-serif">
-                {lang === 'hi' ? 'à¤…à¤•à¥à¤¸à¤° à¤ªà¥‚à¤›à¥‡ à¤œà¤¾à¤¨à¥‡ à¤µà¤¾à¤²à¥‡ à¤ªà¥à¤°à¤¶à¥à¤¨' : 'Frequently Asked Questions'}
+                {lang === 'hi' ? 'अक्सर पूछे जाने वाले प्रश्न' : 'Frequently Asked Questions'}
               </h2>
               <div className="w-24 h-1 bg-orange-500 mx-auto rounded-full"></div>
             </div>
@@ -2291,26 +2282,26 @@ const AppContent: React.FC = () => {
                 {
                   q: "Is Babaji Achar 100% Organic?",
                   a: "Yes! We use only organic, farm-fresh ingredients grown without harmful chemicals. Our pickles are made using traditional methods to preserve natural nutrition.",
-                  bs: "à¤•à¥à¤¯à¤¾ à¤¬à¤¾à¤¬à¤¾à¤œà¥€ à¤…à¤šà¤¾à¤° 100% à¤‘à¤°à¥à¤—à¥‡à¤¨à¤¿à¤• à¤¹à¥ˆ?",
-                  ba: "à¤¹à¤¾à¤! à¤¹à¤® à¤•à¥‡à¤µà¤² à¤‘à¤°à¥à¤—à¥‡à¤¨à¤¿à¤• à¤”à¤° à¤–à¥‡à¤¤ à¤¸à¥‡ à¤¤à¤¾à¤œà¤¼à¤¾ à¤¸à¤¾à¤®à¤—à¥à¤°à¥€ à¤•à¤¾ à¤‰à¤ªà¤¯à¥‹à¤— à¤•à¤°à¤¤à¥‡ à¤¹à¥ˆà¤‚à¥¤ à¤¹à¤®à¤¾à¤°à¥‡ à¤…à¤šà¤¾à¤° à¤ªà¤¾à¤°à¤‚à¤ªà¤°à¤¿à¤• à¤µà¤¿à¤§à¤¿à¤¯à¥‹à¤‚ à¤¸à¥‡ à¤¬à¤¨à¤¾à¤ à¤œà¤¾à¤¤à¥‡ à¤¹à¥ˆà¤‚à¥¤"
+                  bs: "क्या बाबाजी अचार 100% ऑर्गेनिक है?",
+                  ba: "हाँ! हम केवल ऑर्गेनिक और खेत से ताज़ा सामग्री का उपयोग करते हैं। हमारे अचार पारंपरिक विधियों से बनाए जाते हैं।"
                 },
                 {
                   q: "Do you use preservatives?",
                   a: "No artificial preservatives are used. Typical preservatives like oil, salt, and spices act as natural preservatives in our traditional recipes.",
-                  bs: "à¤•à¥à¤¯à¤¾ à¤†à¤ª à¤ªà¥à¤°à¤¿à¤œà¤¼à¤°à¥à¤µà¥‡à¤Ÿà¤¿à¤µà¥à¤¸ à¤•à¤¾ à¤‰à¤ªà¤¯à¥‹à¤— à¤•à¤°à¤¤à¥‡ à¤¹à¥ˆà¤‚?",
-                  ba: "à¤¨à¤¹à¥€à¤‚à¥¤ à¤¤à¥‡à¤², à¤¨à¤®à¤• à¤”à¤° à¤®à¤¸à¤¾à¤²à¥‡ à¤¹à¥€ à¤¹à¤®à¤¾à¤°à¥‡ à¤…à¤šà¤¾à¤° à¤®à¥‡à¤‚ à¤ªà¥à¤°à¤¾à¤•à¥ƒà¤¤à¤¿à¤• à¤ªà¥à¤°à¤¿à¤œà¤¼à¤°à¥à¤µà¥‡à¤Ÿà¤¿à¤µ à¤•à¤¾ à¤•à¤¾à¤® à¤•à¤°à¤¤à¥‡ à¤¹à¥ˆà¤‚à¥¤"
+                  bs: "क्या आप प्रिज़र्वेटिव्स का उपयोग करते हैं?",
+                  ba: "नहीं। तेल, नमक और मसाले ही हमारे अचार में प्राकृतिक प्रिज़र्वेटिव का काम करते हैं।"
                 },
                 {
                   q: "How long does shipping take?",
                   a: "We usually dispatch within 24 hours. Delivery takes 3-7 business days depending on your location in India.",
-                  bs: "à¤¶à¤¿à¤ªà¤¿à¤‚à¤— à¤®à¥‡à¤‚ à¤•à¤¿à¤¤à¤¨à¤¾ à¤¸à¤®à¤¯ à¤²à¤—à¤¤à¤¾ à¤¹à¥ˆ?",
-                  ba: "à¤¹à¤® à¤†à¤®à¤¤à¥Œà¤° à¤ªà¤° 24 à¤˜à¤‚à¤Ÿà¥‡ à¤•à¥‡ à¤­à¥€à¤¤à¤° à¤¡à¤¿à¤¸à¥à¤ªà¥ˆà¤š à¤•à¤°à¤¤à¥‡ à¤¹à¥ˆà¤‚à¥¤ à¤¡à¤¿à¤²à¥€à¤µà¤°à¥€ à¤®à¥‡à¤‚ 3-7 à¤•à¤¾à¤°à¥à¤¯ à¤¦à¤¿à¤µà¤¸ à¤²à¤—à¤¤à¥‡ à¤¹à¥ˆà¤‚à¥¤"
+                  bs: "शिपिंग में कितना समय लगता है?",
+                  ba: "हम आमतौर पर 24 घंटे के भीतर डिस्पैच करते हैं। डिलीवरी में 3-7 कार्य दिवस लगते हैं।"
                 },
                 {
                   q: "What is the shelf life?",
                   a: "Our pickles have a shelf life of 12 months when stored in a cool, dry place and handled with a dry spoon.",
-                  bs: "à¤¶à¥‡à¤²à¥à¤« à¤²à¤¾à¤‡à¤« à¤•à¥à¤¯à¤¾ à¤¹à¥ˆ?",
-                  ba: "à¤¹à¤®à¤¾à¤°à¥‡ à¤…à¤šà¤¾à¤° à¤•à¥€ à¤¶à¥‡à¤²à¥à¤« à¤²à¤¾à¤‡à¤« 12 à¤®à¤¹à¥€à¤¨à¥‡ à¤¹à¥ˆ à¤à¤—à¤° à¤‰à¤¨à¥à¤¹à¥‡à¤‚ à¤¸à¥‚à¤–à¥€ à¤œà¤—à¤¹ à¤ªà¤° à¤°à¤–à¤¾ à¤œà¤¾à¤à¥¤"
+                  bs: "शेल्फ लाइफ क्या है?",
+                  ba: "हमारे अचार की शेल्फ लाइफ 12 महीने है एगर उन्हें सूखी जगह पर रखा जाए।"
                 }
               ].map((faq, idx) => (
                 <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
@@ -2378,7 +2369,7 @@ const AppContent: React.FC = () => {
         <div className="bg-orange-900 py-12 sm:py-16 relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
           <div className="max-w-7xl mx-auto px-4 relative z-10 text-center">
-            <h3 className="hindi-font text-3xl sm:text-5xl font-black text-amber-100 mb-4">à¤¸à¥à¤µà¤¾à¤¦ à¤œà¥‹ à¤¦à¤¿à¤² à¤œà¥€à¤¤ à¤²à¥‡</h3>
+            <h3 className="hindi-font text-3xl sm:text-5xl font-black text-amber-100 mb-4">स्वाद जो दिल जीत ले</h3>
             <p className="text-orange-200 text-base sm:text-lg mb-8 max-w-2xl mx-auto font-medium">Join our family to get exclusive offers, new flavor alerts, and traditional recipes delivered to your inbox.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
               <input type="email" placeholder="Enter your email address" className="bg-white/10 backdrop-blur-sm border-2 border-orange-400/30 text-white placeholder-orange-200 px-6 py-3 rounded-xl focus:border-amber-300 outline-none flex-grow font-bold" />
