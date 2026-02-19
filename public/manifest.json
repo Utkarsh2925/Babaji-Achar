@@ -1,0 +1,27 @@
+{
+    "name": "Babaji Achar",
+    "short_name": "Babaji Achar",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#ea580c",
+    "icons": [
+        {
+            "src": "/images/logo.jpg",
+            "sizes": "192x192 512x512",
+            "type": "image/jpeg"
+        },
+        {
+            "src": "/images/logo.jpg",
+            "sizes": "192x192 512x512",
+            "type": "image/jpeg",
+            "purpose": "maskable"
+        }
+    ],
+    "orientation": "portrait",
+    "description": "Authentic homemade Indian pickles from Prayagraj.",
+    "categories": [
+        "food",
+        "shopping"
+    ]
+}

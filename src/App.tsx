@@ -102,9 +102,33 @@ const AppContent: React.FC = () => {
   // --- PWA INSTALL BANNER STATE ---
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+
   useEffect(() => {
-    const handler = (e: any) => { e.preventDefault(); setDeferredPrompt(e); setShowInstallBanner(true); };
+    // Detect iOS
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
+    setIsIOS(isIosDevice);
+
+    // Detect Standalone (Installed)
+    const isStandAlone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+    setIsStandalone(isStandAlone);
+
+    // Handle Install Prompt (Android/Chrome)
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      if (!isStandAlone) setShowInstallBanner(true);
+    };
     window.addEventListener('beforeinstallprompt', handler);
+
+    // Check if we should show banner for iOS or others who don't fire beforeinstallprompt
+    if (!isStandAlone && isIosDevice) {
+      // Small delay to not be annoying immediately
+      setTimeout(() => setShowInstallBanner(true), 2000);
+    }
+
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
   // Removed paymentProofType as requested
@@ -1026,31 +1050,49 @@ const AppContent: React.FC = () => {
     <div className="min-h-screen flex flex-col font-sans selection:bg-amber-200">
       <Analytics />
       {/* PWA Install Banner */}
-      {showInstallBanner && (
-        <div className="bg-orange-900/95 backdrop-blur-md text-white px-4 py-3 shadow-lg flex items-center justify-between relative z-[100] border-b border-orange-800">
-          <div className="flex items-center gap-3">
-            <div className="bg-white p-1.5 rounded-lg shadow-sm">
+      {/* PWA Install Banner */}
+      {showInstallBanner && !isStandalone && (
+        <div className="bg-orange-900/95 backdrop-blur-md text-white px-4 py-3 shadow-lg flex flex-col sm:flex-row items-center justify-between relative z-[100] border-b border-orange-800 gap-3 transition-all animate-in slide-in-from-top duration-500">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="bg-white p-1.5 rounded-lg shadow-sm shrink-0">
               <img src={BRAND_CONFIG.LOGO_URL} alt="Logo" className="w-8 h-8 object-contain" />
             </div>
             <div className="flex flex-col">
               <span className="font-black text-sm uppercase tracking-wider text-orange-50">Install App</span>
-              <span className="text-xs opacity-90 font-medium">Faster experience, work offline</span>
+              <span className="text-xs opacity-90 font-medium">
+                {isIOS ? 'Tap Share → Add to Home Screen' : 'Faster experience, work offline'}
+              </span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={async () => {
-                if (deferredPrompt) {
-                  deferredPrompt.prompt();
-                  const { outcome } = await deferredPrompt.userChoice;
-                  if (outcome === 'accepted') setShowInstallBanner(false);
-                  setDeferredPrompt(null);
-                }
-              }}
-              className="bg-white text-orange-900 px-5 py-2 rounded-full font-black text-xs shadow-md hover:bg-orange-50 active:scale-95 transition-all uppercase tracking-widest"
-            >
-              Install
-            </button>
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+            {deferredPrompt ? (
+              <button
+                onClick={async () => {
+                  if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') setShowInstallBanner(false);
+                    setDeferredPrompt(null);
+                  }
+                }}
+                className="bg-white text-orange-900 px-5 py-2 rounded-full font-black text-xs shadow-md hover:bg-orange-50 active:scale-95 transition-all uppercase tracking-widest whitespace-nowrap"
+              >
+                Install Now
+              </button>
+            ) : isIOS ? (
+              <div className="bg-white/10 px-3 py-1.5 rounded-lg border border-white/20 text-xs font-bold flex items-center gap-2">
+                <span>Tap <Share2 size={12} className="inline mb-0.5" /> then "Add to Home Screen"</span>
+                <span className="text-lg leading-none">+</span>
+              </div>
+            ) : (
+              // Fallback for desktop/others without prompt
+              <button
+                onClick={() => alert("To install: Click the split-arrow icon in your address bar (Chrome) or Share -> Add to Home Screen (Mobile).")}
+                className="bg-white text-orange-900 px-5 py-2 rounded-full font-black text-xs shadow-md hover:bg-orange-50 active:scale-95 transition-all uppercase tracking-widest whitespace-nowrap"
+              >
+                How to Install?
+              </button>
+            )}
             <button
               onClick={() => setShowInstallBanner(false)}
               className="text-white/60 hover:text-white transition-colors p-1"
