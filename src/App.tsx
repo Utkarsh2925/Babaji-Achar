@@ -34,7 +34,7 @@ const ImageWithFallback = ({ src, alt, className = "", fallbackSrc = BRAND_CONFI
   }, [src]);
 
   return (
-    <div className={`relative overflow-hidden ${className} bg-stone-100`}>
+    <div className={`relative overflow-hidden ${className} bg-white/50`}>
       {isLoading && !hasError && (
         <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-stone-100 to-stone-200 flex items-center justify-center">
           <ImageIcon className="text-stone-300" size={24} />
@@ -1051,15 +1051,16 @@ const AppContent: React.FC = () => {
       <Analytics />
       {/* PWA Install Banner */}
       {/* PWA Install Banner */}
+      {/* PWA Install Banner */}
       {showInstallBanner && !isStandalone && (
-        <div className="bg-orange-900/95 backdrop-blur-md text-white px-4 py-3 shadow-lg flex flex-col sm:flex-row items-center justify-between relative z-[100] border-b border-orange-800 gap-3 transition-all animate-in slide-in-from-top duration-500">
+        <div className="fixed bottom-0 left-0 right-0 sm:relative sm:bottom-auto z-[100] bg-orange-900/95 backdrop-blur-md text-white px-4 py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.2)] sm:shadow-lg flex flex-row items-center justify-between border-t sm:border-t-0 sm:border-b border-orange-800 gap-3 transition-all animate-in slide-in-from-bottom sm:slide-in-from-top duration-500">
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <div className="bg-white p-1.5 rounded-lg shadow-sm shrink-0">
               <img src={BRAND_CONFIG.LOGO_URL} alt="Logo" className="w-8 h-8 object-contain" />
             </div>
             <div className="flex flex-col">
-              <span className="font-black text-sm uppercase tracking-wider text-orange-50">Install App</span>
-              <span className="text-xs opacity-90 font-medium">
+              <span className="font-black text-sm uppercase tracking-wider text-orange-50 line-clamp-1">Install App</span>
+              <span className="text-xs opacity-90 font-medium line-clamp-1">
                 {isIOS ? 'Tap Share → Add to Home Screen' : 'Faster experience, work offline'}
               </span>
             </div>
@@ -2536,7 +2537,7 @@ const AppContent: React.FC = () => {
         )}`}
         target="_blank"
         rel="noreferrer"
-        className="fixed bottom-6 right-6 z-50 bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform hover:shadow-green-900/30 active:scale-95 flex items-center gap-3 group border-4 border-white animate-in zoom-in duration-500"
+        className={`fixed right-6 z-50 bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-all hover:shadow-green-900/30 active:scale-95 flex items-center gap-3 group border-4 border-white animate-in zoom-in duration-500 ${showInstallBanner && !isStandalone ? 'bottom-24 sm:bottom-6' : 'bottom-6'}`}
       >
         <WhatsAppIcon size={32} />
         <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 font-bold whitespace-nowrap text-sm">
