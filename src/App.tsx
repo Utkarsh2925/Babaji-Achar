@@ -73,6 +73,54 @@ import LocateStores from './components/LocateStores';
 import type { Store } from './types';
 // Firebase imports - UNCOMMENT after configuring firebase.config.ts
 // import {setupRecaptcha, sendPhoneOTP, verifyPhoneOTP, sendEmailMagicLink} from './firebaseAuth';
+
+// --- PWA Install Button (Profile-Only, Safe) ---
+const InstallAppButton: React.FC = () => {
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [installed, setInstalled] = useState(false);
+  const isIOS = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+
+  useEffect(() => {
+    const handler = (e: any) => { e.preventDefault(); setDeferredPrompt(e); };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  if (isStandalone || installed) {
+    return (
+      <div className="w-full py-3 bg-green-50 text-green-700 rounded-xl font-bold text-sm flex items-center justify-center gap-2 border border-green-200">
+        <CheckCircle2 size={16} /> App Installed ✓
+      </div>
+    );
+  }
+
+  if (isIOS) {
+    return (
+      <div className="w-full py-3 px-4 bg-blue-50 text-blue-800 rounded-xl font-bold text-xs flex items-start gap-2 border border-blue-100">
+        <Share2 size={14} className="mt-0.5 shrink-0 text-blue-600" />
+        <span>Tap <strong>Share</strong> then <strong>"Add to Home Screen"</strong> to install</span>
+      </div>
+    );
+  }
+
+  if (deferredPrompt) {
+    return (
+      <button
+        onClick={async () => {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === 'accepted') { setInstalled(true); setDeferredPrompt(null); }
+        }}
+        className="w-full py-3 bg-orange-900 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-orange-800 active:scale-95 transition-all"
+      >
+        ⬇ Install App
+      </button>
+    );
+  }
+
+  return null; // Not installable right now
+};
 // import type {RecaptchaVerifier, ConfirmationResult} from 'firebase/auth';
 
 
@@ -99,33 +147,7 @@ const AppContent: React.FC = () => {
   const [lang, setLang] = useState<'hi' | 'en'>('hi');
   const [view, setView] = useState<'HOME' | 'DETAILS' | 'CART' | 'CHECKOUT' | 'SUCCESS' | 'PROFILE' | 'EDIT_PROFILE' | 'LOGIN' | 'ADMIN' | 'STORES' | 'PRIVACY' | 'REFUND' | 'TERMS' | 'DISCLAIMER'>('HOME');
 
-  // --- PWA INSTALL BANNER STATE ---
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [showInstallBanner, setShowInstallBanner] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
 
-  useEffect(() => {
-    // Detect iOS
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
-    setIsIOS(isIosDevice);
-
-    // Detect Standalone (Installed)
-    const isStandAlone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
-    setIsStandalone(isStandAlone);
-
-    // Handle Install Prompt - ONLY show banner when browser fires this event (Chrome/Android)
-    // This prevents layout disruption on iOS or browsers that don't support it
-    const handler = (e: any) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      if (!isStandAlone) setShowInstallBanner(true);
-    };
-    window.addEventListener('beforeinstallprompt', handler);
-
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
   // Removed paymentProofType as requested
 
   type Coupon = { code: string; type: 'FLAT' | 'PERCENTAGE'; value: number; freeDelivery?: boolean; description?: string; };
@@ -1044,58 +1066,7 @@ const AppContent: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col font-sans selection:bg-amber-200">
       <Analytics />
-      {/* PWA Install Banner - only show when browser fires install prompt or on iOS */}
-      {showInstallBanner && !isStandalone && (
-        <div className="bg-orange-900/95 backdrop-blur-md text-white px-4 py-3 shadow-lg flex flex-row items-center justify-between relative z-[100] border-b border-orange-800 gap-2">
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="bg-white p-1.5 rounded-lg shadow-sm shrink-0">
-              <img src={BRAND_CONFIG.LOGO_URL} alt="Logo" className="w-8 h-8 object-contain" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-black text-sm uppercase tracking-wider text-orange-50 line-clamp-1">Install App</span>
-              <span className="text-xs opacity-90 font-medium line-clamp-1">
-                {isIOS ? 'Tap Share → Add to Home Screen' : 'Faster experience, work offline'}
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-            {deferredPrompt ? (
-              <button
-                onClick={async () => {
-                  if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') setShowInstallBanner(false);
-                    setDeferredPrompt(null);
-                  }
-                }}
-                className="bg-white text-orange-900 px-5 py-2 rounded-full font-black text-xs shadow-md hover:bg-orange-50 active:scale-95 transition-all uppercase tracking-widest whitespace-nowrap"
-              >
-                Install Now
-              </button>
-            ) : isIOS ? (
-              <div className="bg-white/10 px-3 py-1.5 rounded-lg border border-white/20 text-xs font-bold flex items-center gap-2">
-                <span>Tap <Share2 size={12} className="inline mb-0.5" /> then "Add to Home Screen"</span>
-                <span className="text-lg leading-none">+</span>
-              </div>
-            ) : (
-              // Fallback for desktop/others without prompt
-              <button
-                onClick={() => alert("To install: Click the split-arrow icon in your address bar (Chrome) or Share -> Add to Home Screen (Mobile).")}
-                className="bg-white text-orange-900 px-5 py-2 rounded-full font-black text-xs shadow-md hover:bg-orange-50 active:scale-95 transition-all uppercase tracking-widest whitespace-nowrap"
-              >
-                How to Install?
-              </button>
-            )}
-            <button
-              onClick={() => setShowInstallBanner(false)}
-              className="text-white/60 hover:text-white transition-colors p-1"
-            >
-              <XCircle size={22} />
-            </button>
-          </div>
-        </div>
-      )}
+
       {/* FESTIVAL TOP BANNER */}
       {/* FESTIVAL TOP BANNER */}
       {/* FESTIVAL TOP BANNER */}
@@ -2210,6 +2181,8 @@ const AppContent: React.FC = () => {
                     <p className="text-base font-bold text-stone-400 mb-6">{user.phone}</p>
                     <div className="space-y-3">
                       <button onClick={() => setView('EDIT_PROFILE')} className="w-full py-3 bg-orange-50 text-orange-900 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><Settings size={16} /> Edit Profile</button>
+                      {/* Install App Button - PWA */}
+                      <InstallAppButton />
                       <button onClick={handleLogout} className="w-full py-3 bg-stone-100 text-stone-600 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-red-50 hover:text-red-500 transition-colors"><LogIn size={16} className="rotate-180" /> Logout</button>
                     </div>
                   </div>
