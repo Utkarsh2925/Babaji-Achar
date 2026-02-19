@@ -115,19 +115,14 @@ const AppContent: React.FC = () => {
     const isStandAlone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
     setIsStandalone(isStandAlone);
 
-    // Handle Install Prompt (Android/Chrome)
+    // Handle Install Prompt - ONLY show banner when browser fires this event (Chrome/Android)
+    // This prevents layout disruption on iOS or browsers that don't support it
     const handler = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
       if (!isStandAlone) setShowInstallBanner(true);
     };
     window.addEventListener('beforeinstallprompt', handler);
-
-    // Check if we should show banner for iOS or others who don't fire beforeinstallprompt
-    if (!isStandAlone && isIosDevice) {
-      // Small delay to not be annoying immediately
-      setTimeout(() => setShowInstallBanner(true), 2000);
-    }
 
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
@@ -1049,11 +1044,9 @@ const AppContent: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col font-sans selection:bg-amber-200">
       <Analytics />
-      {/* PWA Install Banner */}
-      {/* PWA Install Banner */}
-      {/* PWA Install Banner */}
+      {/* PWA Install Banner - only show when browser fires install prompt or on iOS */}
       {showInstallBanner && !isStandalone && (
-        <div className="fixed bottom-0 left-0 right-0 sm:relative sm:bottom-auto z-[100] bg-orange-900/95 backdrop-blur-md text-white px-4 py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.2)] sm:shadow-lg flex flex-row items-center justify-between border-t sm:border-t-0 sm:border-b border-orange-800 gap-3 transition-all animate-in slide-in-from-bottom sm:slide-in-from-top duration-500">
+        <div className="bg-orange-900/95 backdrop-blur-md text-white px-4 py-3 shadow-lg flex flex-row items-center justify-between relative z-[100] border-b border-orange-800 gap-2">
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <div className="bg-white p-1.5 rounded-lg shadow-sm shrink-0">
               <img src={BRAND_CONFIG.LOGO_URL} alt="Logo" className="w-8 h-8 object-contain" />
@@ -2537,10 +2530,10 @@ const AppContent: React.FC = () => {
         )}`}
         target="_blank"
         rel="noreferrer"
-        className={`fixed right-6 z-50 bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-all hover:shadow-green-900/30 active:scale-95 flex items-center gap-3 group border-4 border-white animate-in zoom-in duration-500 ${showInstallBanner && !isStandalone ? 'bottom-24 sm:bottom-6' : 'bottom-6'}`}
+        className="fixed bottom-6 right-6 z-50 bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform hover:shadow-green-900/30 active:scale-95 flex items-center gap-3 group border-4 border-white"
       >
         <WhatsAppIcon size={32} />
-        <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 font-bold whitespace-nowrap text-sm">
+        <span className="hidden sm:inline max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 font-bold whitespace-nowrap text-sm">
           {(view === 'DETAILS' && selectedProduct) ? 'Enquire Now' : 'Chat with us'}
         </span>
       </a>
