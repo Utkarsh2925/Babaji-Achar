@@ -72,8 +72,8 @@ import AdminDashboard from './components/Admin/AdminDashboard';
 import LocateStores from './components/LocateStores';
 import type { Store } from './types';
 // Firebase imports - UNCOMMENT after configuring firebase.config.ts
-// import { setupRecaptcha, sendPhoneOTP, verifyPhoneOTP, sendEmailMagicLink } from './firebaseAuth';
-// import type { RecaptchaVerifier, ConfirmationResult } from 'firebase/auth';
+// import {setupRecaptcha, sendPhoneOTP, verifyPhoneOTP, sendEmailMagicLink} from './firebaseAuth';
+// import type {RecaptchaVerifier, ConfirmationResult} from 'firebase/auth';
 
 
 import LegalPage from './components/Legal/LegalPage';
@@ -98,6 +98,15 @@ const AppContent: React.FC = () => {
 
   const [lang, setLang] = useState<'hi' | 'en'>('hi');
   const [view, setView] = useState<'HOME' | 'DETAILS' | 'CART' | 'CHECKOUT' | 'SUCCESS' | 'PROFILE' | 'EDIT_PROFILE' | 'LOGIN' | 'ADMIN' | 'STORES' | 'PRIVACY' | 'REFUND' | 'TERMS' | 'DISCLAIMER'>('HOME');
+
+  // --- PWA INSTALL BANNER STATE ---
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+  useEffect(() => {
+    const handler = (e: any) => { e.preventDefault(); setDeferredPrompt(e); setShowInstallBanner(true); };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
   // Removed paymentProofType as requested
 
   type Coupon = { code: string; type: 'FLAT' | 'PERCENTAGE'; value: number; freeDelivery?: boolean; description?: string; };
@@ -1016,6 +1025,41 @@ const AppContent: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col font-sans selection:bg-amber-200">
       <Analytics />
+      {/* PWA Install Banner */}
+      {showInstallBanner && (
+        <div className="bg-orange-900/95 backdrop-blur-md text-white px-4 py-3 shadow-lg flex items-center justify-between relative z-[100] border-b border-orange-800">
+          <div className="flex items-center gap-3">
+            <div className="bg-white p-1.5 rounded-lg shadow-sm">
+              <img src={BRAND_CONFIG.LOGO_URL} alt="Logo" className="w-8 h-8 object-contain" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-black text-sm uppercase tracking-wider text-orange-50">Install App</span>
+              <span className="text-xs opacity-90 font-medium">Faster experience, work offline</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={async () => {
+                if (deferredPrompt) {
+                  deferredPrompt.prompt();
+                  const { outcome } = await deferredPrompt.userChoice;
+                  if (outcome === 'accepted') setShowInstallBanner(false);
+                  setDeferredPrompt(null);
+                }
+              }}
+              className="bg-white text-orange-900 px-5 py-2 rounded-full font-black text-xs shadow-md hover:bg-orange-50 active:scale-95 transition-all uppercase tracking-widest"
+            >
+              Install
+            </button>
+            <button
+              onClick={() => setShowInstallBanner(false)}
+              className="text-white/60 hover:text-white transition-colors p-1"
+            >
+              <XCircle size={22} />
+            </button>
+          </div>
+        </div>
+      )}
       {/* FESTIVAL TOP BANNER */}
       {/* FESTIVAL TOP BANNER */}
       {/* FESTIVAL TOP BANNER */}
@@ -1471,8 +1515,18 @@ const AppContent: React.FC = () => {
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        <div className="absolute top-3 left-3 z-10">
+                        <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
                           <span className="bg-amber-600 text-white shadow-lg px-3 py-1.5 rounded-full text-xs sm:text-sm font-black uppercase tracking-widest">{p.category}</span>
+                          {p.isFeatured && !isAllOutOfStock && (
+                            <span className="bg-orange-600 text-white shadow-lg px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-1">
+                              🔥 {lang === 'hi' ? 'बेस्ट सेलर' : 'Best Seller'}
+                            </span>
+                          )}
+                          {isAllOutOfStock && (
+                            <span className="bg-stone-700 text-white shadow-lg px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest">
+                              ⚡ {lang === 'hi' ? 'जल्द आएगा' : 'Coming Soon'}
+                            </span>
+                          )}
                         </div>
 
                         {/* 100% Natural Stamp */}
@@ -2299,98 +2353,6 @@ const AppContent: React.FC = () => {
         </section>
 
 
-        {/* FAQ Section with Schema */}
-        <section className="py-16 px-4 bg-orange-50/50" id="faq">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-black text-orange-900 mb-4 font-serif">
-                {lang === 'hi' ? 'अक्सर पूछे जाने वाले प्रश्न' : 'Frequently Asked Questions'}
-              </h2>
-              <div className="w-24 h-1 bg-orange-500 mx-auto rounded-full"></div>
-            </div>
-
-            <div className="grid gap-6">
-              {[
-                {
-                  q: "Is Babaji Achar 100% Organic?",
-                  a: "Yes! We use only organic, farm-fresh ingredients grown without harmful chemicals. Our pickles are made using traditional methods to preserve natural nutrition.",
-                  bs: "क्या बाबाजी अचार 100% ऑर्गेनिक है?",
-                  ba: "हाँ! हम केवल ऑर्गेनिक और खेत से ताज़ा सामग्री का उपयोग करते हैं। हमारे अचार पारंपरिक विधियों से बनाए जाते हैं।"
-                },
-                {
-                  q: "Do you use preservatives?",
-                  a: "No artificial preservatives are used. Typical preservatives like oil, salt, and spices act as natural preservatives in our traditional recipes.",
-                  bs: "क्या आप प्रिज़र्वेटिव्स का उपयोग करते हैं?",
-                  ba: "नहीं। तेल, नमक और मसाले ही हमारे अचार में प्राकृतिक प्रिज़र्वेटिव का काम करते हैं।"
-                },
-                {
-                  q: "How long does shipping take?",
-                  a: "We usually dispatch within 24 hours. Delivery takes 3-7 business days depending on your location in India.",
-                  bs: "शिपिंग में कितना समय लगता है?",
-                  ba: "हम आमतौर पर 24 घंटे के भीतर डिस्पैच करते हैं। डिलीवरी में 3-7 कार्य दिवस लगते हैं।"
-                },
-                {
-                  q: "What is the shelf life?",
-                  a: "Our pickles have a shelf life of 12 months when stored in a cool, dry place and handled with a dry spoon.",
-                  bs: "शेल्फ लाइफ क्या है?",
-                  ba: "हमारे अचार की शेल्फ लाइफ 12 महीने है एगर उन्हें सूखी जगह पर रखा जाए।"
-                }
-              ].map((faq, idx) => (
-                <div key={idx} className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
-                  <h3 className="text-lg font-bold text-stone-800 mb-2 flex items-start gap-3">
-                    <span className="text-orange-500 mt-1"><MessageCircle size={20} /></span>
-                    {lang === 'hi' ? faq.bs : faq.q}
-                  </h3>
-                  <p className="text-stone-600 ml-8 leading-relaxed">
-                    {lang === 'hi' ? faq.ba : faq.a}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {/* JSON-LD Schema for FAQ */}
-            <script type="application/ld+json">
-              {JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "FAQPage",
-                "mainEntity": [
-                  {
-                    "@type": "Question",
-                    "name": "Is Babaji Achar 100% Organic?",
-                    "acceptedAnswer": {
-                      "@type": "Answer",
-                      "text": "Yes! We use only organic, farm-fresh ingredients grown without harmful chemicals. Our pickles are made using traditional methods to preserve natural nutrition."
-                    }
-                  },
-                  {
-                    "@type": "Question",
-                    "name": "Do you use preservatives?",
-                    "acceptedAnswer": {
-                      "@type": "Answer",
-                      "text": "No artificial preservatives are used. Typical preservatives like oil, salt, and spices act as natural preservatives in our traditional recipes."
-                    }
-                  },
-                  {
-                    "@type": "Question",
-                    "name": "How long does shipping take?",
-                    "acceptedAnswer": {
-                      "@type": "Answer",
-                      "text": "We usually dispatch within 24 hours. Delivery takes 3-7 business days depending on your location in India."
-                    }
-                  },
-                  {
-                    "@type": "Question",
-                    "name": "What is the shelf life?",
-                    "acceptedAnswer": {
-                      "@type": "Answer",
-                      "text": "Our pickles have a shelf life of 12 months when stored in a cool, dry place and handled with a dry spoon."
-                    }
-                  }
-                ]
-              })}
-            </script>
-          </div>
-        </section>
 
       </main >
 
@@ -2523,14 +2485,21 @@ const AppContent: React.FC = () => {
       </footer>
 
       {/* Floating WhatsApp Button */}
+      {/* Floating WhatsApp Button */}
       <a
-        href={`https://wa.me/${BRAND_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent("Namaste! I'm interested in Baba Ji Achar products. Can you please help me?")}`}
+        href={`https://wa.me/${BRAND_CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(
+          (view === 'DETAILS' && selectedProduct)
+            ? `Hello Babaji Achar, I am viewing "${selectedProduct.name[lang]}". I have a query about this product.`
+            : "Namaste! I'm interested in Baba Ji Achar products. Can you please help me?"
+        )}`}
         target="_blank"
         rel="noreferrer"
         className="fixed bottom-6 right-6 z-50 bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform hover:shadow-green-900/30 active:scale-95 flex items-center gap-3 group border-4 border-white animate-in zoom-in duration-500"
       >
         <WhatsAppIcon size={32} />
-        <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 font-bold whitespace-nowrap text-sm">Chat with us</span>
+        <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 font-bold whitespace-nowrap text-sm">
+          {(view === 'DETAILS' && selectedProduct) ? 'Enquire Now' : 'Chat with us'}
+        </span>
       </a>
     </div >
   );
