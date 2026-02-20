@@ -15,4 +15,16 @@ root.render(
     </React.StrictMode>
 );
 
-// Service worker explicitly removed to stop ghost caching
+// Register the Kill Switch Service Worker so older devices fetch it,
+// execute its self-destruct sequence, and purge their broken caches.
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+                console.log('Kill Switch SW registered: ', registration);
+            })
+            .catch(registrationError => {
+                console.log('Kill Switch SW registration failed: ', registrationError);
+            });
+    });
+}
