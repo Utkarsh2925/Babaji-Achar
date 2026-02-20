@@ -1,53 +1,32 @@
-// Version: v3 - bump to force old cache deletion
-const CACHE_NAME = 'babaji-achar-v3';
-const STATIC_ASSETS = [
-    '/',
-    '/index.html',
-    '/manifest.json',
-    '/images/logo.jpg'
-];
+// --- EMERGENCY SERVICE WORKER KILL SWITCH ---
+// This file replaces the previous SW to forcefully rescue users from ghost caches.
+// It instantly activates, deletes ALL caches, unregisters itself, and reloads the page.
 
-// INSTALL: cache static assets
-self.addEventListener('install', (event) => {
-    self.skipWaiting(); // activate immediately
-    event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+self.addEventListener('install', (e) => {
+    self.skipWaiting();
+});
+
+self.addEventListener('activate', (e) => {
+    e.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cacheName) => {
+                    console.log('[SW Kill Switch] Deleting cache:', cacheName);
+                    return caches.delete(cacheName);
+                })
+            );
+        }).then(() => {
+            return self.registration.unregister();
+        }).then(() => {
+            return self.clients.matchAll({ type: 'window' });
+        }).then((clients) => {
+            for (const client of clients) {
+                client.navigate(client.url);
+            }
+        })
     );
 });
 
-// ACTIVATE: delete ALL old caches so users always get new JS/CSS
-self.addEventListener('activate', (event) => {
-    event.waitUntil(
-        caches.keys().then((cacheNames) =>
-            Promise.all(
-                cacheNames
-                    .filter((name) => name !== CACHE_NAME)
-                    .map((name) => caches.delete(name))
-            )
-        ).then(() => self.clients.claim()) // take control immediately
-    );
-});
-
-// FETCH: Network-first strategy — always try network first
-// Falls back to cache only when offline
-self.addEventListener('fetch', (event) => {
-    // Skip non-GET and cross-origin requests
-    if (event.request.method !== 'GET') return;
-    if (!event.request.url.startsWith(self.location.origin)) return;
-
-    event.respondWith(
-        fetch(event.request)
-            .then((response) => {
-                // Update cache with fresh response
-                if (response.ok) {
-                    const responseClone = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
-                }
-                return response;
-            })
-            .catch(() => {
-                // Offline fallback: serve from cache
-                return caches.match(event.request).then((cached) => cached || caches.match('/'));
-            })
-    );
+self.addEventListener('fetch', (e) => {
+    e.respondWith(fetch(e.request));
 });

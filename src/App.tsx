@@ -74,53 +74,7 @@ import type { Store } from './types';
 // Firebase imports - UNCOMMENT after configuring firebase.config.ts
 // import {setupRecaptcha, sendPhoneOTP, verifyPhoneOTP, sendEmailMagicLink} from './firebaseAuth';
 
-// --- PWA Install Button (Profile-Only, Safe) ---
-const InstallAppButton: React.FC = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [installed, setInstalled] = useState(false);
-  const isIOS = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
-
-  useEffect(() => {
-    const handler = (e: any) => { e.preventDefault(); setDeferredPrompt(e); };
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
-
-  if (isStandalone || installed) {
-    return (
-      <div className="w-full py-3 bg-green-50 text-green-700 rounded-xl font-bold text-sm flex items-center justify-center gap-2 border border-green-200">
-        <CheckCircle2 size={16} /> App Installed ✓
-      </div>
-    );
-  }
-
-  if (isIOS) {
-    return (
-      <div className="w-full py-3 px-4 bg-blue-50 text-blue-800 rounded-xl font-bold text-xs flex items-start gap-2 border border-blue-100">
-        <Share2 size={14} className="mt-0.5 shrink-0 text-blue-600" />
-        <span>Tap <strong>Share</strong> then <strong>"Add to Home Screen"</strong> to install</span>
-      </div>
-    );
-  }
-
-  if (deferredPrompt) {
-    return (
-      <button
-        onClick={async () => {
-          deferredPrompt.prompt();
-          const { outcome } = await deferredPrompt.userChoice;
-          if (outcome === 'accepted') { setInstalled(true); setDeferredPrompt(null); }
-        }}
-        className="w-full py-3 bg-orange-900 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-orange-800 active:scale-95 transition-all"
-      >
-        ⬇ Install App
-      </button>
-    );
-  }
-
-  return null; // Not installable right now
-};
+// --- PWA Feature Fully Removed ---
 // import type {RecaptchaVerifier, ConfirmationResult} from 'firebase/auth';
 
 
