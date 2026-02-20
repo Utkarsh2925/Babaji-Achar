@@ -1439,8 +1439,10 @@ const AppContent: React.FC = () => {
                     {BRAND_CONFIG.PRODUCT_BRAND} <span className="text-orange-500 italic ml-2">अचार</span>
                   </h1>
                   <p className="text-base sm:text-3xl text-stone-200 font-medium max-w-2xl mx-auto leading-relaxed hindi-font px-4">पीढ़ियों की परंपरा से बना शुद्ध देसी अचार</p>
-                  <h2 className="text-[11px] sm:text-sm text-amber-200/50 font-black uppercase tracking-[0.3em] max-w-4xl mx-auto mt-6 leading-none whitespace-nowrap">
-                    100% Organic Traditional Natural Pickles by Bhojnamrit Foods | Made in Prayagraj
+                  <h2 className="text-[11px] sm:text-sm text-amber-200/50 font-black uppercase tracking-[0.3em] max-w-4xl mx-auto mt-6 leading-relaxed text-center px-4">
+                    <span className="block sm:inline">100% Organic Traditional Natural Pickles by Bhojnamrit Foods</span>
+                    <span className="sm:inline hidden"> | </span>
+                    <span className="block sm:inline">Made in Prayagraj</span>
                   </h2>
                 </div>
                 <div className="flex flex-col gap-4 w-full max-w-xl items-center px-4">
