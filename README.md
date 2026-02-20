@@ -1,18 +1,14 @@
-# Babaji Achar - Source Code Repository
+# Babaji Achar
 
-> **This repository contains the source code only.**
-
-## 🌐 Official Website
-
-**Visit the official website:** [https://babaji-achar.vercel.app](https://babaji-achar.vercel.app)
-
-This is a **code repository** for development purposes. For product information, ordering authentic pickles, store locations, and all official content, please visit the **official website** linked above.
+> **OFFICIAL WEBSITE: [babaji-achar.vercel.app](https://babaji-achar.vercel.app)**
+> 
+> *Note: This is merely a code repository for development purposes. If you are looking for the official Babaji Achar website to purchase products, explore our catalog, or contact us, please visit the live site linked above.*
 
 ---
 
-## About Babaji Achar
+## Project Source Code
 
-Babaji Achar is a premium food brand specializing in **100% organic, natural, and preservative-free traditional Indian pickles**. Handmade in Prayagraj using heritage recipes passed down through generations.
+This repository contains the frontend React codebase for the application.
 
 ### Official Channels
 - **Website:** [babaji-achar.vercel.app](https://babaji-achar.vercel.app)
@@ -30,8 +26,6 @@ Babaji Achar is a premium food brand specializing in **100% organic, natural, an
 - **Authentication:** Firebase Auth
 - **Payments:** Razorpay
 - **Deployment:** Vercel
-- **Maps:** Leaflet
-- **Animations:** GSAP
 
 ---
 
