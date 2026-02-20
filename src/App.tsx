@@ -47,6 +47,11 @@ const ImageWithFallback = ({ src, alt, className = "", fallbackSrc = BRAND_CONFI
         decoding="async"
         className={`w-full h-full object-cover transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
         onLoad={() => setIsLoading(false)}
+        ref={(img) => {
+          if (img && img.complete && img.naturalHeight !== 0) {
+            setIsLoading(false);
+          }
+        }}
         onError={() => {
           setImgSrc(fallbackSrc);
           setHasError(true);
