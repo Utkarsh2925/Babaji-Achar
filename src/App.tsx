@@ -2135,8 +2135,6 @@ const AppContent: React.FC = () => {
                     <p className="text-base font-bold text-stone-400 mb-6">{user.phone}</p>
                     <div className="space-y-3">
                       <button onClick={() => setView('EDIT_PROFILE')} className="w-full py-3 bg-orange-50 text-orange-900 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><Settings size={16} /> Edit Profile</button>
-                      {/* Install App Button - PWA */}
-                      <InstallAppButton />
                       <button onClick={handleLogout} className="w-full py-3 bg-stone-100 text-stone-600 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-red-50 hover:text-red-500 transition-colors"><LogIn size={16} className="rotate-180" /> Logout</button>
                     </div>
                   </div>
