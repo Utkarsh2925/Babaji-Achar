@@ -1014,6 +1014,7 @@ const AppContent: React.FC = () => {
   const categories = [
     { id: 'All', label: t.all },
     { id: 'RedChilliLink', label: lang === 'hi' ? 'भरवा लाल मिर्च' : 'Bharwa Lal Mirch' },
+    { id: 'Garlic', label: lang === 'hi' ? 'लहसुन' : 'Garlic' },
     { id: 'Mix', label: t.mix },
     { id: 'Mango', label: t.mango },
     { id: 'Aawla', label: t.aawla },

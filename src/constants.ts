@@ -144,6 +144,25 @@ export const INITIAL_PRODUCTS = [
         ]
     },
     {
+        id: "garlic-pickle-01",
+        category: "Garlic",
+        name: { hi: "लहसुन का अचार", en: "Garlic Pickle" },
+        description: {
+            hi: "लहसुन की कलियो और शुद्ध मसालों से बना खास अचार। सेहत और स्वाद का बेहतरीन मेल।",
+            en: "Baba Ji Garlic Pickle from Bhojnamrit Foods is a premium Prayagraj famous achar made from fresh garlic cloves. Preserved in pure mustard oil, this 100% organic achar delivers a pungent, savory punch true to the natural achar taste of Prayagraj."
+        },
+        tagline: { hi: "सेहत और स्वाद का जोरदार तड़का", en: "A Powerful Punch of Health and Taste" },
+        mainImage: "/images/garlic.jpg",
+        galleryImages: ["/images/garlic.jpg"],
+        ingredients: ["Garlic Cloves", "Mustard Oil", "Fennel Seeds", "Yellow Mustard Seeds", "Fenugreek Seeds", "Nigella Seeds", "Turmeric Powder", "Red Chilli Powder", "Asafoetida", "Iodized Salt"],
+        isFeatured: true,
+        isActive: true,
+        variants: [
+            { id: "v-250", size: "250g", mrp: 150, stock: 50 },
+            { id: "v-500", size: "500g", mrp: 280, stock: 30 }
+        ]
+    },
+    {
         id: "aawla-pickle-01",
         category: "Aawla",
         name: { hi: "आंवला का अचार", en: "Aawla Pickle" },
