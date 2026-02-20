@@ -44,7 +44,8 @@ const ImageWithFallback = ({ src, alt, className = "", fallbackSrc = BRAND_CONFI
         src={imgSrc}
         alt={alt}
         loading="lazy"
-        className={`w-full h-full object-cover transition-opacity duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
+        decoding="async"
+        className={`w-full h-full object-cover transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
         onLoad={() => setIsLoading(false)}
         onError={() => {
           setImgSrc(fallbackSrc);
@@ -1062,10 +1063,13 @@ const AppContent: React.FC = () => {
         {/* Floating Culinary Doodles - ALWAYS VEGETABLES (As requested) */}
         <div className="absolute inset-0 z-0 pointer-events-none opacity-70 select-none overflow-hidden">
           {['🌶️', '🍋', '🧄', '🥬', '🌿', '🎋', '🍅', '🧂', '🥜', '🧅', '🥕', '🥭'].map((icon, i) => (
-            <div key={i} className={`absolute animate-[float_${4 + (i % 5)}s_ease-in-out_infinite] text-${i % 3 === 0 ? '3xl' : '2xl'} opacity-${i % 2 === 0 ? '80' : '60'}`} style={{
+            <div key={i} className="absolute" style={{
               top: `${(i * 23) % 90}%`,
               left: `${(i * 19) % 90}%`,
-              animationDelay: `${i * 200}ms`
+              fontSize: i % 3 === 0 ? '1.8rem' : '1.4rem',
+              opacity: i % 2 === 0 ? 0.8 : 0.6,
+              animation: `float ${4 + (i % 5)}s ease-in-out infinite`,
+              animationDelay: `${i * 200}ms`,
             }}>
               {icon}
             </div>
