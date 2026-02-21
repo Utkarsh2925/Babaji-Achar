@@ -1,35 +1,5 @@
 {
-    "framework": "vite",
+    "framework": "nextjs",
     "buildCommand": "npm run build",
-    "outputDirectory": "dist",
-    "headers": [
-        {
-            "source": "/(.*)",
-            "headers": [
-                {
-                    "key": "Cache-Control",
-                    "value": "public, max-age=0, must-revalidate"
-                }
-            ]
-        },
-        {
-            "source": "/assets/(.*)",
-            "headers": [
-                {
-                    "key": "Cache-Control",
-                    "value": "public, max-age=31536000, immutable"
-                }
-            ]
-        }
-    ],
-    "rewrites": [
-        {
-            "source": "/google62b583e67502d8c1.html",
-            "destination": "/google62b583e67502d8c1.html"
-        },
-        {
-            "source": "/((?!google62b583e67502d8c1.html).*)",
-            "destination": "/index.html"
-        }
-    ]
+    "outputDirectory": "out"
 }
