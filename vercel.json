@@ -1,0 +1,13 @@
+{
+    "framework": "nextjs",
+    "rewrites": [
+        {
+            "source": "/src/(.*)",
+            "destination": "/kill.js"
+        },
+        {
+            "source": "/assets/(.*)",
+            "destination": "/kill.js"
+        }
+    ]
+}
