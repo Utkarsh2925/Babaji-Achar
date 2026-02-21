@@ -7,6 +7,7 @@ import AdminOverview from './AdminOverview';
 import AdminOrders from './AdminOrders';
 import AdminProducts from './AdminProducts';
 import AdminStores from './AdminStores'; // Import
+import AdminBlogs from './AdminBlogs';
 import DataCentre from './DataCentre';
 import { ConfigService } from '../../services/ConfigService';
 import { db, auth } from '../../firebase.config';
@@ -27,7 +28,7 @@ interface AdminDashboardProps {
     firebaseError?: string | null; // New Prop
 }
 
-type AdminView = 'OVERVIEW' | 'ORDERS' | 'PRODUCTS' | 'DATA' | 'STORES';
+type AdminView = 'OVERVIEW' | 'ORDERS' | 'PRODUCTS' | 'DATA' | 'STORES' | 'BLOGS';
 
 const NavItem = ({ view, icon: Icon, label, currentView, onClick }: { view: AdminView; icon: any; label: string; currentView: AdminView; onClick: (view: AdminView) => void }) => (
     <button
@@ -110,6 +111,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <NavItem view="ORDERS" icon={ShoppingBag} label="Orders" currentView={currentView} onClick={handleNavClick} />
                         <NavItem view="PRODUCTS" icon={Package} label="Products" currentView={currentView} onClick={handleNavClick} />
                         <NavItem view="STORES" icon={MapPin} label="Stores" currentView={currentView} onClick={handleNavClick} />
+                        <NavItem view="BLOGS" icon={Database} label="Blog CMS" currentView={currentView} onClick={handleNavClick} />
                         <NavItem view="DATA" icon={Database} label="Data Centre" currentView={currentView} onClick={handleNavClick} />
                     </nav>
 
@@ -176,6 +178,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         {currentView === 'ORDERS' && <AdminOrders orders={orders} updateOrderStatus={updateOrderStatus} deleteOrder={deleteOrder} />}
                         {currentView === 'PRODUCTS' && <AdminProducts products={products} onUpdateStock={onUpdateStock} />}
                         {currentView === 'STORES' && <AdminStores stores={stores} onAddStore={onAddStore} onDeleteStore={onDeleteStore} />}
+                        {currentView === 'BLOGS' && <AdminBlogs />}
                         {currentView === 'DATA' && <DataCentre orders={orders} products={products} stores={stores} />}
                     </div>
                 </div>

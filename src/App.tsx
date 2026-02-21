@@ -13,6 +13,9 @@ import { WhatsAppService } from './services/WhatsAppService';
 import { OrderService } from './services/OrderService';
 import { NotificationService } from './services/NotificationService';
 import { UserProfileService } from './services/UserProfileService';
+import { ReviewService } from './services/ReviewService';
+import { InventoryService } from './services/InventoryService';
+import { AnalyticsService } from './services/AnalyticsService';
 // Firebase Auth Imports
 import { signInWithPopup, signInAnonymously } from 'firebase/auth';
 import { auth, googleProvider } from './firebase.config';
@@ -120,6 +123,22 @@ const AppContent: React.FC = () => {
   }, [view]);
   const [viewStack, setViewStack] = useState<string[]>(['HOME']);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  // Fetch reviews dynamically when viewing a product
+  useEffect(() => {
+    if (view === 'DETAILS' && selectedProduct) {
+      ReviewService.getProductReviews(selectedProduct.id).then(reviews => {
+        if (reviews.length > 0) {
+          setSelectedProduct(prev => prev ? { ...prev, reviews } : prev);
+
+          // Also sync to global product array
+          setProducts(prevProducts => prevProducts.map(p =>
+            p.id === selectedProduct.id ? { ...p, reviews } : p
+          ));
+        }
+      }).catch(console.error);
+    }
+  }, [view, selectedProduct?.id]);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -151,6 +170,8 @@ const AppContent: React.FC = () => {
   // Review state
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewText, setReviewText] = useState('');
+  const [reviewPhotos, setReviewPhotos] = useState<File[]>([]);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   // Firebase Auth state - UNCOMMENT after configuring Firebase
   // const [otpSent, setOtpSent] = useState(false);
@@ -329,6 +350,11 @@ const AppContent: React.FC = () => {
             razorpayPaymentId: response.razorpay_payment_id
           };
 
+          // 3. Decrement Firebase Inventory in real-time
+          InventoryService.decrementStock(successOrder.items);
+
+          AnalyticsService.purchase(successOrder);
+
           setCurrentOrder(successOrder);
           setOrders([successOrder, ...orders]);
           setCart([]);
@@ -482,7 +508,11 @@ const AppContent: React.FC = () => {
       syncWithRestApi();
 
       console.log('✅ COD: Proceeding immediately...');
-      // console.log('✅ COD: Firebase save successful!');
+
+      // Decrement Firebase Inventory instantly
+      InventoryService.decrementStock(cart);
+
+      AnalyticsService.purchase(newOrder);
 
       // Update local state
       const updatedOrders = [newOrder, ...orders];
@@ -874,33 +904,46 @@ const AppContent: React.FC = () => {
     );
   };
 
-  const handleSubmitReview = (e: React.FormEvent) => {
+  const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedProduct || !user) return;
     if (!reviewText.trim()) return alert(lang === 'hi' ? "कृपया अपनी समीक्षा लिखें" : "Please write your review");
 
-    const newReview: Review = {
-      id: `rev-${Date.now()}`,
-      userId: user.id,
-      userName: user.name,
-      rating: reviewRating,
-      comment: reviewText,
-      date: new Date().toISOString()
-    };
+    setIsSubmittingReview(true);
+    try {
+      const newReviewData = {
+        userId: user.id,
+        userName: user.name,
+        rating: reviewRating,
+        comment: reviewText,
+        isVerifiedBuyer: true,
+        productId: selectedProduct.id
+      };
 
-    const updatedProducts = products.map(p => {
-      if (p.id === selectedProduct.id) {
-        const reviews = p.reviews ? [newReview, ...p.reviews] : [newReview];
-        return { ...p, reviews };
-      }
-      return p;
-    });
+      const addedReview = await ReviewService.addReview(newReviewData, reviewPhotos);
 
-    setProducts(updatedProducts);
-    setSelectedProduct({ ...selectedProduct, reviews: selectedProduct.reviews ? [newReview, ...selectedProduct.reviews] : [newReview] });
-    localStorage.setItem('bj_products', JSON.stringify(updatedProducts));
-    setReviewText('');
-    setReviewRating(5);
+      const updatedProducts = products.map(p => {
+        if (p.id === selectedProduct.id) {
+          const reviews = p.reviews ? [addedReview, ...p.reviews] : [addedReview];
+          return { ...p, reviews };
+        }
+        return p;
+      });
+
+      setProducts(updatedProducts);
+      setSelectedProduct({ ...selectedProduct, reviews: selectedProduct.reviews ? [addedReview, ...selectedProduct.reviews] : [addedReview] });
+      localStorage.setItem('bj_products', JSON.stringify(updatedProducts));
+
+      setReviewText('');
+      setReviewRating(5);
+      setReviewPhotos([]);
+      addToast('success', lang === 'hi' ? 'समीक्षा सबमिट की गई!' : 'Review submitted successfully!');
+    } catch (error) {
+      console.error("Failed to submit review", error);
+      addToast('error', lang === 'hi' ? 'समीक्षा सबमिट विफल रही' : 'Failed to submit review');
+    } finally {
+      setIsSubmittingReview(false);
+    }
   };
 
   // Save user profile
@@ -1524,7 +1567,7 @@ const AppContent: React.FC = () => {
                             <button
                               disabled={isAllOutOfStock}
                               aria-label={`Add ${p.name[lang]} to cart`}
-                              onClick={(e) => { e.stopPropagation(); if (!user) return navigate('LOGIN'); setCart(prev => [...prev, { productId: p.id, variantId: inStockVariant.id, quantity: 1, productName: p.name[lang], size: inStockVariant.size, price: inStockVariant.mrp, image: p.mainImage }]); alert('Added to cart!'); }}
+                              onClick={(e) => { e.stopPropagation(); if (!user) return navigate('LOGIN'); setCart(prev => [...prev, { productId: p.id, variantId: inStockVariant.id, quantity: 1, productName: p.name[lang], size: inStockVariant.size, price: inStockVariant.mrp, image: p.mainImage }]); AnalyticsService.addToCart(p, inStockVariant, 1); alert('Added to cart!'); }}
                               className={`py-6 sm:py-8 rounded-2xl text-xl sm:text-2xl font-black transition-all active:scale-95 flex items-center justify-center gap-3 shadow-sm ${isAllOutOfStock ? 'bg-stone-100 text-stone-400 cursor-not-allowed border-2 border-stone-200' : 'bg-white border-2 border-amber-200 text-amber-900 hover:bg-amber-50 hover:border-amber-300'}`}
                             >
                               <ShoppingCart size={24} />
@@ -1540,6 +1583,7 @@ const AppContent: React.FC = () => {
                                   setSelectedProduct(p);
                                   setActiveImage(null);
                                   setSelectedVariantId(inStockVariant.id);
+                                  AnalyticsService.viewItem(p, inStockVariant);
                                   navigate('DETAILS');
                                 }
                               }}
@@ -1619,6 +1663,51 @@ const AppContent: React.FC = () => {
 
         {view === 'DETAILS' && selectedProduct && (
           <div className="max-w-7xl mx-auto px-4 py-8 sm:py-16 animate-in slide-in-from-right duration-500">
+            {/* 🔥 SEO JSON-LD INJECTION: Product & Reviews 🔥 */}
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{
+                __html: JSON.stringify({
+                  "@context": "https://schema.org/",
+                  "@type": "Product",
+                  "name": selectedProduct.name.en,
+                  "image": [
+                    `https://babaji-achar.vercel.app${selectedProduct.mainImage}`
+                  ],
+                  "description": selectedProduct.description.en,
+                  "sku": selectedProduct.id,
+                  "offers": {
+                    "@type": "AggregateOffer",
+                    "url": `https://babaji-achar.vercel.app/?product=${selectedProduct.id}`,
+                    "priceCurrency": "INR",
+                    "lowPrice": Math.min(...selectedProduct.variants.map(v => v.mrp)),
+                    "highPrice": Math.max(...selectedProduct.variants.map(v => v.mrp)),
+                    "availability": selectedProduct.variants.some(v => v.stock > 0) ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+                  },
+                  ...(selectedProduct.reviews && selectedProduct.reviews.length > 0 ? {
+                    "aggregateRating": {
+                      "@type": "AggregateRating",
+                      "ratingValue": (selectedProduct.reviews.reduce((acc, r) => acc + r.rating, 0) / selectedProduct.reviews.length).toFixed(1),
+                      "reviewCount": selectedProduct.reviews.length
+                    },
+                    "review": selectedProduct.reviews.map(r => ({
+                      "@type": "Review",
+                      "reviewRating": {
+                        "@type": "Rating",
+                        "ratingValue": r.rating,
+                        "bestRating": "5"
+                      },
+                      "author": {
+                        "@type": "Person",
+                        "name": r.userName
+                      },
+                      "datePublished": r.date,
+                      "reviewBody": r.comment
+                    }))
+                  } : {})
+                })
+              }}
+            />
             <div className="flex items-center justify-between mb-6 sm:mb-12">
               <button onClick={goBack} className="flex items-center gap-2 text-orange-900 font-black uppercase text-sm tracking-widest hover:gap-3 transition-all">
                 <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md border border-orange-50"><ArrowLeft size={18} /></div>
@@ -1666,9 +1755,17 @@ const AppContent: React.FC = () => {
                   <h3 className="font-black text-orange-950 mb-6 uppercase tracking-[0.2em] text-lg flex items-center gap-3">Select Pack Size</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {selectedProduct.variants.map(v => (
-                      <button key={v.id} onClick={() => setSelectedVariantId(v.id)} className={`h-24 sm:h-28 w-full rounded-2xl sm:rounded-3xl border-4 transition-all flex flex-col items-center justify-center ${selectedVariantId === v.id ? 'border-orange-700 bg-orange-700 text-white shadow-md' : 'border-orange-50 bg-white text-orange-950'}`}>
+                      <button key={v.id} onClick={() => setSelectedVariantId(v.id)} className={`h-24 sm:h-28 w-full rounded-2xl sm:rounded-3xl border-4 transition-all flex flex-col items-center justify-center relative ${selectedVariantId === v.id ? 'border-orange-700 bg-orange-700 text-white shadow-md' : 'border-orange-50 bg-white text-orange-950'}`}>
                         <span className="font-black text-xl sm:text-2xl mb-1">{v.size}</span>
                         {v.stock > 0 && <span className={`font-black text-lg sm:text-xl ${selectedVariantId === v.id ? 'text-amber-200' : 'text-orange-700'}`}>₹{v.mrp}</span>}
+                        {v.stock > 0 && v.stock <= 10 && (
+                          <span className={`absolute -top-3 -right-3 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm animate-pulse ${selectedVariantId === v.id ? 'bg-amber-300 text-orange-900 border-2 border-orange-700' : 'bg-red-500 text-white border-2 border-white'}`}>
+                            Only {v.stock} left!
+                          </span>
+                        )}
+                        {v.stock <= 0 && (
+                          <span className="absolute inset-0 flex items-center justify-center rounded-2xl sm:rounded-3xl bg-stone-100/80 backdrop-blur-[1px] font-black text-stone-500 text-sm uppercase tracking-widest border border-stone-200 z-10">Out of Stock</span>
+                        )}
                       </button>
                     ))}
                   </div>
@@ -1686,7 +1783,7 @@ const AppContent: React.FC = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <button
                       disabled={(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0}
-                      onClick={() => { if (!user) return navigate('LOGIN'); const v = selectedProduct.variants.find(x => x.id === selectedVariantId); if (v) { setCart(prev => [...prev, { productId: selectedProduct.id, variantId: v.id, quantity: qty, productName: selectedProduct.name[lang], size: v.size, price: v.mrp, image: activeImage || selectedProduct.mainImage }]); alert('Added to cart!'); } }}
+                      onClick={() => { if (!user) return navigate('LOGIN'); const v = selectedProduct.variants.find(x => x.id === selectedVariantId); if (v) { setCart(prev => [...prev, { productId: selectedProduct.id, variantId: v.id, quantity: qty, productName: selectedProduct.name[lang], size: v.size, price: v.mrp, image: activeImage || selectedProduct.mainImage }]); AnalyticsService.addToCart(selectedProduct, v, qty); alert('Added to cart!'); } }}
                       className={`h-24 sm:h-28 border-4 rounded-2xl sm:rounded-3xl font-black text-xl sm:text-2xl shadow-lg flex flex-col sm:flex-row items-center justify-center gap-2 active:scale-95 transition-all whitespace-nowrap ${(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? 'bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed' : 'bg-white text-orange-950 border-orange-200 hover:bg-orange-50 hover:border-orange-300'}`}
                     >
                       <ShoppingCart size={32} /> {(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? (lang === 'hi' ? 'स्टॉक खत्म' : 'Out of Stock') : t.add}
@@ -1702,6 +1799,8 @@ const AppContent: React.FC = () => {
                         }
                         if (!user) return navigate('LOGIN');
                         setCart(prev => [...prev, { productId: selectedProduct.id, variantId: v.id, quantity: qty, productName: selectedProduct.name[lang], size: v.size, price: v.mrp, image: activeImage || selectedProduct.mainImage }]);
+                        AnalyticsService.addToCart(selectedProduct, v, qty);
+                        AnalyticsService.beginCheckout([{ productId: selectedProduct.id, variantId: v.id, quantity: qty, productName: selectedProduct.name[lang], size: v.size, price: v.mrp, image: activeImage || selectedProduct.mainImage }], v.mrp * qty);
                         navigate('CHECKOUT');
                       }}
                       className={`h-24 sm:h-28 border-4 rounded-2xl sm:rounded-3xl font-black text-xl sm:text-2xl shadow-lg flex flex-col sm:flex-row items-center justify-center gap-2 active:scale-95 transition-all whitespace-nowrap ${(selectedProduct.variants.find(x => x.id === selectedVariantId)?.stock ?? 0) <= 0 ? 'bg-amber-100 text-amber-900 border-amber-200 hover:bg-amber-200' : 'bg-orange-50 text-orange-900 border-orange-200 hover:bg-orange-100 hover:border-orange-300'}`}
@@ -1802,8 +1901,23 @@ const AppContent: React.FC = () => {
                           required
                         />
                       </div>
-                      <button type="submit" className="bg-orange-800 text-white px-10 py-4 rounded-xl font-black text-lg shadow-lg hover:bg-orange-950 active:scale-95 transition-all w-full sm:w-auto">
-                        {t.submitReview}
+                      <div>
+                        <label className="text-sm font-black text-stone-400 uppercase tracking-widest mb-3 block">{lang === 'hi' ? 'तस्वीरें जोड़ें (वैकल्पिक)' : 'Add Photos (Optional)'}</label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={(e) => {
+                            if (e.target.files) {
+                              setReviewPhotos(Array.from(e.target.files).slice(0, 3));
+                            }
+                          }}
+                          className="w-full text-stone-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 outline-none"
+                        />
+                        {reviewPhotos.length > 0 && <p className="text-xs text-orange-600 mt-2">{reviewPhotos.length} {lang === 'hi' ? 'तस्वीरें चुनी गईं (अधिकतम 3)' : 'photos selected (Max 3)'}</p>}
+                      </div>
+                      <button type="submit" disabled={isSubmittingReview} className="bg-orange-800 text-white px-10 py-4 rounded-xl font-black text-lg shadow-lg hover:bg-orange-950 active:scale-95 transition-all w-full sm:w-auto disabled:opacity-50">
+                        {isSubmittingReview ? (lang === 'hi' ? "सबमिट हो रहा है..." : "Submitting...") : t.submitReview}
                       </button>
                     </form>
                   </div>
@@ -1844,6 +1958,15 @@ const AppContent: React.FC = () => {
                           </div>
                         </div>
                         <p className="text-stone-600 font-medium leading-relaxed italic">"{review.comment}"</p>
+                        {review.photos && review.photos.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-stone-100">
+                            {review.photos.map((photoUrl, idx) => (
+                              <a href={photoUrl} target="_blank" rel="noreferrer" key={idx}>
+                                <img src={photoUrl} alt="Review" className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl border border-stone-200" />
+                              </a>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))
                   )}
@@ -1933,7 +2056,7 @@ const AppContent: React.FC = () => {
                   {cartValues.bulkDiscount === 0 && (
                     <p className="text-xs text-stone-400 mb-4 text-center">{t.tipBulk}</p>
                   )}
-                  <button onClick={() => navigate('CHECKOUT')} className="w-full bg-white text-orange-950 py-4 rounded-xl font-black shadow-lg active:scale-95 transition-all">{t.checkout}</button>
+                  <button onClick={() => { AnalyticsService.beginCheckout(cart, getCartTotal()); navigate('CHECKOUT'); }} className="w-full bg-white text-orange-950 py-4 rounded-xl font-black shadow-lg active:scale-95 transition-all">{t.checkout}</button>
                 </div>
               </div>
             )}

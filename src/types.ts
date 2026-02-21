@@ -103,6 +103,9 @@ export interface Review {
     rating: number;
     comment: string;
     date: string;
+    photos?: string[];
+    isVerifiedBuyer: boolean;
+    productId: string;
 }
 
 export interface Store {
@@ -112,4 +115,19 @@ export interface Store {
     lat: number;
     lng: number;
     isActive: boolean;
+}
+
+export interface BlogPost {
+    id: string;
+    slug: string;
+    title: string;
+    excerpt: string;
+    content: string; // HTML or Markdown
+    author: string;
+    featuredImage: string;
+    publishedDate: string;
+    isPublished: boolean;
+    seoTitle: string;
+    seoDescription: string;
+    tags: string[];
 }
