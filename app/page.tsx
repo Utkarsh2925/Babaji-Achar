@@ -22,6 +22,23 @@ export default function Page() {
                     });
             });
         }
+
+        // Gracefully remove the instant splash screen once React is mounted
+        const timer1 = setTimeout(() => {
+            const splash = document.getElementById('splash-screen');
+            if (splash) {
+                splash.style.opacity = '0';
+
+                // Wait for CSS opacity transition to finish before removing DOM node
+                setTimeout(() => {
+                    splash.remove();
+                    const splashStyles = document.getElementById('splash-styles');
+                    if (splashStyles) splashStyles.remove();
+                }, 500);
+            }
+        }, 300);
+
+        return () => clearTimeout(timer1);
     }, []);
 
     return <App />;
