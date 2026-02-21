@@ -1,7 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
-    // We removed static export so Vercel's native zero-config deployment builds perfectly.
+    // Output as a pure static SPA
+    output: 'export',
+    images: {
+        unoptimized: true
+    },
     trailingSlash: true,
 };
 
