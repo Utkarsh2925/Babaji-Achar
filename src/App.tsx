@@ -75,7 +75,8 @@ import { NotificationProvider, useNotification } from './components/Notification
 import Analytics from './components/Analytics';
 import { ConfigService } from './services/ConfigService';
 import AdminDashboard from './components/Admin/AdminDashboard';
-import LocateStores from './components/LocateStores';
+import dynamic from 'next/dynamic';
+const LocateStores = dynamic(() => import('./components/LocateStores'), { ssr: false });
 import type { Store } from './types';
 // Firebase imports - UNCOMMENT after configuring firebase.config.ts
 // import {setupRecaptcha, sendPhoneOTP, verifyPhoneOTP, sendEmailMagicLink} from './firebaseAuth';
@@ -293,7 +294,7 @@ const AppContent: React.FC = () => {
       setCurrentOrder(pendingOrder);
 
       // 4. Get Razorpay Key ID
-      const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY_ID;
+      const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
       if (!razorpayKeyId) throw new Error("Payment config missing");
 
       // 5. Open Checkout

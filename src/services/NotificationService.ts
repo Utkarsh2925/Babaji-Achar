@@ -1,7 +1,7 @@
 // NotificationService.ts - Frontend client for communication bot
 import type { Order } from '../types';
 
-const API_BASE = import.meta.env.PROD ? '' : 'http://localhost:3000';
+const API_BASE = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000';
 
 export const NotificationService = {
     /**
