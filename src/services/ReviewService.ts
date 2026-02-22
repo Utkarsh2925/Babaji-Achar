@@ -1,9 +1,9 @@
-import { collection, addDoc, query, where, getDocs, orderBy, serverTimestamp } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { firestore, storage } from '../firebase.config';
+import { ref, push, set, get } from 'firebase/database';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '../firebase.config';
 import type { Review } from '../types';
 
-const REVIEWS_COLLECTION = 'reviews';
+const REVIEWS_PATH = 'reviews';
 
 export const ReviewService = {
     /**
@@ -12,9 +12,9 @@ export const ReviewService = {
     uploadPhotos: async (files: File[], productId: string): Promise<string[]> => {
         const uploadPromises = files.map(async (file) => {
             const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}_${file.name}`;
-            const storageRef = ref(storage, `reviews/${productId}/${fileName}`);
-            await uploadBytes(storageRef, file);
-            return await getDownloadURL(storageRef);
+            const sRef = storageRef(storage, `reviews/${productId}/${fileName}`);
+            await uploadBytes(sRef, file);
+            return await getDownloadURL(sRef);
         });
 
         return Promise.all(uploadPromises);
@@ -32,20 +32,20 @@ export const ReviewService = {
                 photoUrls = await ReviewService.uploadPhotos(files, reviewData.productId);
             }
 
+            const newReviewRef = push(ref(db, REVIEWS_PATH));
+            const id = newReviewRef.key!;
+
             const newReview = {
                 ...reviewData,
+                id,
                 photos: photoUrls,
-                createdAt: serverTimestamp(),
-            };
-
-            const docRef = await addDoc(collection(firestore, REVIEWS_COLLECTION), newReview);
-
-            return {
-                id: docRef.id,
-                ...reviewData,
-                photos: photoUrls,
+                createdAt: new Date().toISOString(),
                 date: new Date().toISOString()
             };
+
+            await set(newReviewRef, newReview);
+
+            return newReview as Review;
         } catch (error) {
             console.error("Error adding review: ", error);
             throw new Error("Failed to submit review");
@@ -57,29 +57,26 @@ export const ReviewService = {
      */
     getProductReviews: async (productId: string): Promise<Review[]> => {
         try {
-            const q = query(
-                collection(firestore, REVIEWS_COLLECTION),
-                where('productId', '==', productId)
-                // Cannot use orderBy with where on different fields without a compound index easily in the default setup, 
-                // so we will sort client side for now to prevent index required errors
-            );
+            const reviewsSnap = await get(ref(db, REVIEWS_PATH));
+            if (!reviewsSnap.exists()) return [];
 
-            const querySnapshot = await getDocs(q);
             const reviews: Review[] = [];
 
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                reviews.push({
-                    id: doc.id,
-                    userId: data.userId,
-                    userName: data.userName,
-                    rating: data.rating,
-                    comment: data.comment,
-                    photos: data.photos || [],
-                    isVerifiedBuyer: data.isVerifiedBuyer || false,
-                    productId: data.productId,
-                    date: data.createdAt ? new Date(data.createdAt.toMillis()).toISOString() : new Date().toISOString()
-                } as Review);
+            reviewsSnap.forEach((child) => {
+                const data = child.val();
+                if (data.productId === productId) {
+                    reviews.push({
+                        id: child.key,
+                        userId: data.userId,
+                        userName: data.userName,
+                        rating: data.rating,
+                        comment: data.comment,
+                        photos: data.photos || [],
+                        isVerifiedBuyer: data.isVerifiedBuyer || false,
+                        productId: data.productId,
+                        date: data.date || data.createdAt || new Date().toISOString()
+                    } as Review);
+                }
             });
 
             // Sort by latest first

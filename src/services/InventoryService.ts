@@ -1,17 +1,18 @@
-import { collection, doc, getDoc, getDocs, setDoc, updateDoc, writeBatch } from 'firebase/firestore';
-import { firestore } from '../firebase.config';
+import { ref, get, set, update } from 'firebase/database';
+import { db } from '../firebase.config';
 import type { Product, CartItem } from '../types';
 
-const INVENTORY_COLLECTION = 'inventory';
+const INVENTORY_PATH = 'inventory';
 
 export const InventoryService = {
     /**
-     * Sync local products array with real-time stock from Firestore
+     * Sync local products array with real-time stock from RTDB
      */
     syncProductsWithInventory: async (localProducts: Product[]): Promise<Product[]> => {
         try {
-            const querySnapshot = await getDocs(collection(firestore, INVENTORY_COLLECTION));
-            if (querySnapshot.empty) {
+            const inventorySnap = await get(ref(db, INVENTORY_PATH));
+
+            if (!inventorySnap.exists()) {
                 // If inventory is completely empty, we should run the seed automatically
                 console.log("Empty inventory, seeding from constants...");
                 await InventoryService.seedInventory(localProducts);
@@ -19,9 +20,9 @@ export const InventoryService = {
             }
 
             const inventoryMap = new Map<string, number>();
-            querySnapshot.forEach(doc => {
+            inventorySnap.forEach(child => {
                 // Doc ID is variantId, value has stock
-                inventoryMap.set(doc.id, doc.data().stock);
+                inventoryMap.set(child.key as string, child.val().stock);
             });
 
             // Merge stock back into products list
@@ -41,51 +42,52 @@ export const InventoryService = {
     },
 
     /**
-     * Seeds the Firestore inventory collection from constants.ts
+     * Seeds the RTDB inventory collection from constants.ts
      * Will overwrite existing stock. Use carefully.
      */
     seedInventory: async (localProducts: Product[]) => {
         try {
-            const batch = writeBatch(firestore);
+            const updates: Record<string, any> = {};
 
             localProducts.forEach(product => {
                 product.variants.forEach(variant => {
-                    const docRef = doc(firestore, INVENTORY_COLLECTION, variant.id);
-                    batch.set(docRef, {
+                    updates[`${INVENTORY_PATH}/${variant.id}`] = {
                         productId: product.id,
                         size: variant.size,
                         stock: variant.stock
-                    });
+                    };
                 });
             });
 
-            await batch.commit();
-            console.log("Firebase Inventory successfully seeded!");
+            await update(ref(db), updates);
+            console.log("Firebase RTDB Inventory successfully seeded!");
         } catch (error) {
             console.error("Error seeding inventory:", error);
         }
     },
 
     /**
-     * Decrements stock in Firestore when an order is placed
+     * Decrements stock in RTDB when an order is placed
      */
     decrementStock: async (items: CartItem[]) => {
         try {
-            const batch = writeBatch(firestore);
+            const updates: Record<string, any> = {};
 
             for (const item of items) {
-                const docRef = doc(firestore, INVENTORY_COLLECTION, item.variantId);
-                const docSnap = await getDoc(docRef);
+                const itemRef = ref(db, `${INVENTORY_PATH}/${item.variantId}`);
+                const docSnap = await get(itemRef);
 
                 if (docSnap.exists()) {
-                    const currentStock = docSnap.data().stock;
+                    const currentStock = docSnap.val().stock;
                     const newStock = Math.max(0, currentStock - item.quantity); // Prevent negative stock
-                    batch.update(docRef, { stock: newStock });
+                    updates[`${INVENTORY_PATH}/${item.variantId}/stock`] = newStock;
                 }
             }
 
-            await batch.commit();
-            console.log("Stock successfully decremented for order.");
+            if (Object.keys(updates).length > 0) {
+                await update(ref(db), updates);
+                console.log("Stock successfully decremented for order.");
+            }
         } catch (error) {
             console.error("Failed to decrement stock:", error);
         }

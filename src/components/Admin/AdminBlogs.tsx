@@ -68,9 +68,13 @@ const AdminBlogs = () => {
         return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
     };
 
+    const [submitStatus, setSubmitStatus] = useState<string | null>(null);
+
+    // ...
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsSubmitting(true);
+        setSubmitStatus('Preparing data...');
         try {
             if (!currentPost.slug && currentPost.title) {
                 currentPost.slug = generateSlug(currentPost.title);
@@ -81,24 +85,26 @@ const AdminBlogs = () => {
             if (!currentPost.seoDescription) currentPost.seoDescription = currentPost.excerpt || '';
 
             if (currentPost.id) {
-                // Update existing
+                setSubmitStatus('Updating document...');
                 await BlogService.updatePost(currentPost.id, currentPost as BlogPost, coverImageFile || undefined);
             } else {
-                // Create new
                 if (!coverImageFile) {
                     alert("Please select a cover image for the new post.");
-                    setIsSubmitting(false);
+                    setSubmitStatus(null);
                     return;
                 }
+                setSubmitStatus('Uploading cover image to Storage...');
                 await BlogService.createPost(currentPost as Omit<BlogPost, 'id' | 'publishedDate'>, coverImageFile);
             }
 
+            setSubmitStatus('Success! Refreshing...');
             setIsEditing(false);
             loadPosts();
         } catch (error: any) {
-            alert(error.message);
+            console.error("🔥 Blog CMS Save Error:", error);
+            alert("Failed to save article: " + (error?.message || "Check console for details."));
         } finally {
-            setIsSubmitting(false);
+            setSubmitStatus(null);
         }
     };
 
@@ -231,10 +237,10 @@ const AdminBlogs = () => {
 
                             <button
                                 type="submit"
-                                disabled={isSubmitting}
+                                disabled={!!submitStatus}
                                 className="w-full bg-orange-800 text-white font-black py-4 rounded-xl shadow-lg hover:bg-orange-950 active:scale-95 transition-all disabled:opacity-50"
                             >
-                                {isSubmitting ? 'Saving...' : 'Save Article'}
+                                {submitStatus || 'Save Article'}
                             </button>
                         </div>
                     </div>
