@@ -31,14 +31,17 @@ export const BlogService = {
                 createdAt: new Date().toISOString()
             };
 
+            // RTDB intensely rejects any 'undefined' property, so we must scrub them out
+            const cleanPost = JSON.parse(JSON.stringify(newPost));
+
             console.log("🔥 [BlogService] Adding document to RTDB...");
-            await set(newPostRef, newPost);
+            await set(newPostRef, cleanPost);
             console.log("🔥 [BlogService] Document added successfully with ID:", id);
 
-            return newPost as BlogPost;
-        } catch (error) {
-            console.error("Error creating blog post:", error);
-            throw new Error("Failed to create blog post");
+            return cleanPost as BlogPost;
+        } catch (error: any) {
+            console.error("Error creating blog post", error);
+            throw new Error(`Failed to create blog post: ${error.message || error}`);
         }
     },
 
@@ -55,10 +58,11 @@ export const BlogService = {
                 updatedData.featuredImage = newImageUrl;
             }
 
-            await update(postRef, updatedData);
-        } catch (error) {
+            const cleanUpdates = JSON.parse(JSON.stringify(updatedData));
+            await update(postRef, cleanUpdates);
+        } catch (error: any) {
             console.error("Error updating blog post:", error);
-            throw new Error("Failed to update blog post");
+            throw new Error(`Failed to update blog post: ${error.message || error}`);
         }
     },
 
