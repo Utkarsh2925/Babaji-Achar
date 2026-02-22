@@ -5,21 +5,7 @@ import { Metadata } from 'next';
 import { ArrowLeft, Calendar, User } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
-// Generate static params for static export
-export async function generateStaticParams() {
-    try {
-        const posts = await BlogService.getPublishedPosts();
-        if (!posts || posts.length === 0) {
-            return [{ slug: 'welcome-to-babaji-achar-blog' }]; // Dummy fallback to prevent export crash
-        }
-        return posts.map((post) => ({
-            slug: post.slug,
-        }));
-    } catch (error) {
-        console.warn('Firebase error during generateStaticParams, providing fallback param.', error);
-        return [{ slug: 'welcome-to-babaji-achar-blog' }];
-    }
-}
+export const dynamic = 'force-dynamic';
 
 // Dynamic SEO Metadata per post
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
