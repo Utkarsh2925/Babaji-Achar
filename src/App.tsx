@@ -1180,15 +1180,15 @@ const AppContent: React.FC = () => {
               {/* Mobile Brand Name (Visible only on small screens) */}
               <div className="block lg:hidden leading-none">
                 <h1 className="hindi-font text-2xl font-black text-amber-900 tracking-tight">{BRAND_CONFIG.PRODUCT_BRAND}</h1>
-                <p className="text-[10px] text-amber-700 font-bold uppercase tracking-widest opacity-80">{BRAND_CONFIG.PARENT_BRAND}</p>
+                <a href="/blog" className="block text-[10px] text-amber-700 hover:text-orange-600 font-bold uppercase tracking-widest opacity-80 cursor-pointer transition-colors mt-0.5">{BRAND_CONFIG.PARENT_BRAND}</a>
               </div>
             </div>
 
             {/* 2. Center: Brand Name (Desktop Only - Absolute Center) */}
             <div className="absolute inset-0 hidden lg:flex items-center justify-center pointer-events-none z-10">
-              <div className="text-center">
+              <div className="text-center pointer-events-auto">
                 <h1 className="hindi-font text-3xl sm:text-5xl font-black text-amber-900 tracking-tight leading-none drop-shadow-sm">{BRAND_CONFIG.PRODUCT_BRAND}</h1>
-                <p className="text-xs sm:text-sm text-amber-700 font-bold uppercase tracking-widest opacity-80 mt-1">{BRAND_CONFIG.PARENT_BRAND}</p>
+                <a href="/blog" className="inline-block text-xs sm:text-sm text-amber-700 hover:text-orange-600 font-bold uppercase tracking-widest opacity-80 mt-1 cursor-pointer transition-colors">{BRAND_CONFIG.PARENT_BRAND}</a>
               </div>
             </div>
 
