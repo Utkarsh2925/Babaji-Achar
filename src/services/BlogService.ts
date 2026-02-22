@@ -1,9 +1,24 @@
 import { ref, push, set, get, update, remove } from 'firebase/database';
-import { db } from '../firebase.config';
+import { signInAnonymously } from 'firebase/auth';
+import { db, auth } from '../firebase.config';
 import type { BlogPost } from '../types';
 import { compressImageToBase64 } from '../utils/imageUtils';
 
 const BLOGS_PATH = 'blogs';
+
+/**
+ * Ensures the user is signed in before making any authenticated RTDB writes.
+ * The Firebase RTDB security rules require auth != null.
+ */
+const ensureAuth = async (): Promise<void> => {
+    if (!auth.currentUser) {
+        console.log("🔐 [BlogService] Not authenticated. Signing in anonymously...");
+        await signInAnonymously(auth);
+        console.log("🔐 [BlogService] Anonymous sign-in successful:", auth.currentUser?.uid);
+    } else {
+        console.log("🔐 [BlogService] Already authenticated:", auth.currentUser.uid);
+    }
+};
 
 export const BlogService = {
     /**
@@ -11,8 +26,11 @@ export const BlogService = {
      */
     createPost: async (postData: Omit<BlogPost, 'id' | 'publishedDate'>, coverImage?: File): Promise<BlogPost> => {
         try {
+            // STEP 0: Ensure we are authenticated before writing
+            await ensureAuth();
+
             console.log("🔥 [BlogService] Starting createPost...");
-            let featuredImageUrl = postData.featuredImage;
+            let featuredImageUrl = postData.featuredImage || '';
 
             if (coverImage) {
                 console.log("🔥 [BlogService] Compressing cover image...");
@@ -25,13 +43,16 @@ export const BlogService = {
 
             const newPost = {
                 ...postData,
-                id, // Embedding RTDB Push Key
-                featuredImage: featuredImageUrl || '',
+                id,
+                featuredImage: featuredImageUrl,
                 publishedDate: new Date().toISOString(),
-                createdAt: new Date().toISOString()
+                createdAt: new Date().toISOString(),
+                tags: postData.tags || [],
+                seoTitle: postData.seoTitle || '',
+                seoDescription: postData.seoDescription || ''
             };
 
-            // RTDB intensely rejects any 'undefined' property, so we must scrub them out
+            // RTDB rejects undefined properties — scrub them all out
             const cleanPost = JSON.parse(JSON.stringify(newPost));
 
             console.log("🔥 [BlogService] Adding document to RTDB...");
@@ -40,7 +61,7 @@ export const BlogService = {
 
             return cleanPost as BlogPost;
         } catch (error: any) {
-            console.error("Error creating blog post", error);
+            console.error("❌ Error creating blog post:", error);
             throw new Error(`Failed to create blog post: ${error.message || error}`);
         }
     },
@@ -50,10 +71,12 @@ export const BlogService = {
      */
     updatePost: async (id: string, updates: Partial<BlogPost>, newCoverImage?: File): Promise<void> => {
         try {
+            await ensureAuth();
+
             const postRef = ref(db, `${BLOGS_PATH}/${id}`);
             let updatedData = { ...updates, updatedAt: new Date().toISOString() };
 
-            if (newCoverImage && updates.slug) {
+            if (newCoverImage) {
                 const newImageUrl = await compressImageToBase64(newCoverImage);
                 updatedData.featuredImage = newImageUrl;
             }
@@ -67,16 +90,15 @@ export const BlogService = {
     },
 
     /**
-     * Delete a blog post and its associated image
+     * Delete a blog post
      */
     deletePost: async (id: string, imageUrl?: string): Promise<void> => {
         try {
-            // Note: Since images are now Base64 strings in the record,
-            // deleting the record naturally deletes the image data as well.
+            await ensureAuth();
             await remove(ref(db, `${BLOGS_PATH}/${id}`));
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error deleting blog post:", error);
-            throw new Error("Failed to delete blog post");
+            throw new Error(`Failed to delete blog post: ${error.message || error}`);
         }
     },
 
