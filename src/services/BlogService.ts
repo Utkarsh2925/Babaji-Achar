@@ -1,47 +1,11 @@
-import { ref, set, push, get, update, remove } from 'firebase/database';
-import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { db, storage } from '../firebase.config';
+import { ref, push, set, get, update, remove } from 'firebase/database';
+import { db } from '../firebase.config';
 import type { BlogPost } from '../types';
+import { compressImageToBase64 } from '../utils/imageUtils';
 
 const BLOGS_PATH = 'blogs';
 
 export const BlogService = {
-    /**
-     * Upload an article cover image to Firebase Storage
-     */
-    uploadFeaturedImage: async (file: File, slug: string): Promise<string> => {
-        try {
-            console.log("🔥 [BlogService] Preparing to upload image...");
-            const fileName = `${Date.now()}_${slug}_${file.name}`;
-            const sRef = storageRef(storage, `blogs/${fileName}`);
-
-            console.log("🔥 [BlogService] Calling uploadBytes...");
-            await uploadBytes(sRef, file);
-
-            console.log("🔥 [BlogService] Calling getDownloadURL...");
-            const url = await getDownloadURL(sRef);
-
-            console.log("🔥 [BlogService] Upload complete. URL:", url);
-            return url;
-        } catch (error) {
-            console.error("🔥 [BlogService] Error uploading featured image:", error);
-            throw new Error("Failed to upload image. Verify Firebase Storage rules.");
-        }
-    },
-
-    /**
-     * Delete an image from storage
-     */
-    deleteImage: async (url: string) => {
-        if (!url || !url.includes('firebase')) return;
-        try {
-            const sRef = storageRef(storage, url);
-            await deleteObject(sRef);
-        } catch (error) {
-            console.error("Error deleting image:", error);
-        }
-    },
-
     /**
      * Create a new blog post
      */
@@ -51,9 +15,9 @@ export const BlogService = {
             let featuredImageUrl = postData.featuredImage;
 
             if (coverImage) {
-                console.log("🔥 [BlogService] Uploading cover image...");
-                featuredImageUrl = await BlogService.uploadFeaturedImage(coverImage, postData.slug);
-                console.log("🔥 [BlogService] Image uploaded successfully:", featuredImageUrl);
+                console.log("🔥 [BlogService] Compressing cover image...");
+                featuredImageUrl = await compressImageToBase64(coverImage);
+                console.log("🔥 [BlogService] Image compressed successfully.");
             }
 
             const newPostRef = push(ref(db, BLOGS_PATH));
@@ -87,13 +51,7 @@ export const BlogService = {
             let updatedData = { ...updates, updatedAt: new Date().toISOString() };
 
             if (newCoverImage && updates.slug) {
-                // If there's an existing image, delete it first
-                const existingPostSnap = await get(postRef);
-                if (existingPostSnap.exists() && existingPostSnap.val().featuredImage) {
-                    await BlogService.deleteImage(existingPostSnap.val().featuredImage);
-                }
-
-                const newImageUrl = await BlogService.uploadFeaturedImage(newCoverImage, updates.slug);
+                const newImageUrl = await compressImageToBase64(newCoverImage);
                 updatedData.featuredImage = newImageUrl;
             }
 
@@ -109,9 +67,8 @@ export const BlogService = {
      */
     deletePost: async (id: string, imageUrl?: string): Promise<void> => {
         try {
-            if (imageUrl) {
-                await BlogService.deleteImage(imageUrl);
-            }
+            // Note: Since images are now Base64 strings in the record,
+            // deleting the record naturally deletes the image data as well.
             await remove(ref(db, `${BLOGS_PATH}/${id}`));
         } catch (error) {
             console.error("Error deleting blog post:", error);

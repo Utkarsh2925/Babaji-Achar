@@ -1,20 +1,18 @@
 import { ref, push, set, get } from 'firebase/database';
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../firebase.config';
+import { db } from '../firebase.config';
 import type { Review } from '../types';
+import { compressImageToBase64 } from '../utils/imageUtils';
 
 const REVIEWS_PATH = 'reviews';
 
 export const ReviewService = {
     /**
-     * Upload photos to Firebase Storage and get their URLs
+     * Compress photos and convert to Base64 to bypass Firebase Storage
      */
     uploadPhotos: async (files: File[], productId: string): Promise<string[]> => {
         const uploadPromises = files.map(async (file) => {
-            const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}_${file.name}`;
-            const sRef = storageRef(storage, `reviews/${productId}/${fileName}`);
-            await uploadBytes(sRef, file);
-            return await getDownloadURL(sRef);
+            // Compress heavily for reviews Since there can be multiple photos
+            return await compressImageToBase64(file, 800, 800, 0.6);
         });
 
         return Promise.all(uploadPromises);
