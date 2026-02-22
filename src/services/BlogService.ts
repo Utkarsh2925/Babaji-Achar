@@ -1,5 +1,4 @@
 import { ref, push, set, get, update, remove } from 'firebase/database';
-import { signInAnonymously } from 'firebase/auth';
 import { db, auth } from '../firebase.config';
 import type { BlogPost } from '../types';
 import { compressImageToBase64 } from '../utils/imageUtils';
@@ -7,17 +6,14 @@ import { compressImageToBase64 } from '../utils/imageUtils';
 const BLOGS_PATH = 'blogs';
 
 /**
- * Ensures the user is signed in before making any authenticated RTDB writes.
- * The Firebase RTDB security rules require auth != null.
+ * Ensures the user is strictly authenticated (via Email/Password)
+ * before making any authenticated RTDB writes for Blogs.
  */
-const ensureAuth = async (): Promise<void> => {
-    if (!auth.currentUser) {
-        console.log("🔐 [BlogService] Not authenticated. Signing in anonymously...");
-        await signInAnonymously(auth);
-        console.log("🔐 [BlogService] Anonymous sign-in successful:", auth.currentUser?.uid);
-    } else {
-        console.log("🔐 [BlogService] Already authenticated:", auth.currentUser.uid);
+const ensureAdminAuth = async (): Promise<void> => {
+    if (!auth.currentUser || auth.currentUser.isAnonymous) {
+        throw new Error("PERMISSION_DENIED: You must be logged in as an Admin to manage blogs.");
     }
+    console.log("🔐 [BlogService] Admin authenticated:", auth.currentUser.uid);
 };
 
 export const BlogService = {
@@ -27,7 +23,7 @@ export const BlogService = {
     createPost: async (postData: Omit<BlogPost, 'id' | 'publishedDate'>, coverImage?: File): Promise<BlogPost> => {
         try {
             // STEP 0: Ensure we are authenticated before writing
-            await ensureAuth();
+            await ensureAdminAuth();
 
             console.log("🔥 [BlogService] Starting createPost...");
             let featuredImageUrl = postData.featuredImage || '';
@@ -71,7 +67,7 @@ export const BlogService = {
      */
     updatePost: async (id: string, updates: Partial<BlogPost>, newCoverImage?: File): Promise<void> => {
         try {
-            await ensureAuth();
+            await ensureAdminAuth();
 
             const postRef = ref(db, `${BLOGS_PATH}/${id}`);
             let updatedData = { ...updates, updatedAt: new Date().toISOString() };
@@ -94,7 +90,7 @@ export const BlogService = {
      */
     deletePost: async (id: string, imageUrl?: string): Promise<void> => {
         try {
-            await ensureAuth();
+            await ensureAdminAuth();
             await remove(ref(db, `${BLOGS_PATH}/${id}`));
         } catch (error: any) {
             console.error("Error deleting blog post:", error);

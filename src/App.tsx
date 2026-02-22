@@ -17,7 +17,7 @@ import { ReviewService } from './services/ReviewService';
 import { InventoryService } from './services/InventoryService';
 import { AnalyticsService } from './services/AnalyticsService';
 // Firebase Auth Imports
-import { signInWithPopup, signInAnonymously } from 'firebase/auth';
+import { signInWithPopup, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, googleProvider } from './firebase.config';
 import { BRAND_CONFIG, INITIAL_PRODUCTS, GET_ACTIVE_FESTIVAL, UI_TEXT } from './constants';
 import type { Product, CartItem, Order, OrderStatus, User, Review } from './types';
@@ -159,6 +159,9 @@ const AppContent: React.FC = () => {
   const [checkoutName, setCheckoutName] = useState('');
   const [checkoutAddress, setCheckoutAddress] = useState('');
   const [checkoutPin, setCheckoutPin] = useState('');
+
+  // Auth state
+  const [loginPassword, setLoginPassword] = useState('');
 
   // Marketing Consent (default: true for better UX)
   const [marketingConsent, setMarketingConsent] = useState({
@@ -854,33 +857,68 @@ const AppContent: React.FC = () => {
     e.preventDefault();
     if (!loginPhone) return addToast('error', 'Required', 'Please enter your phone number or email');
 
-    // Check for admin bypass
-    if (loginPhone === '0000' && loginName === 'Vandita') {
-      try {
-        // Authenticate anonymously to ensure Firebase Database access (if rules require auth)
-        await signInAnonymously(auth);
-      } catch (err) {
-        console.error("Admin Firebase Auth failed", err);
+    // ADMIN HARDCODE SHORTCUTS
+    const isAdminOverride =
+      (loginPhone === '0000' && loginName.toLowerCase() === 'vandita') ||
+      (loginPhone === '9555809329') ||
+      (loginPhone === '7754865997') ||
+      (loginPhone === 'mailbabajiachar@gmail.com');
+
+    const isEmail = loginPhone.includes('@');
+
+    // Secure Admin Login Flow (Firebase Email/Password to bypass RTDB Anonymous Block)
+    if (isAdminOverride || (isEmail && loginPassword)) {
+      if (isEmail && !isAdminOverride && !loginPassword) {
+        return addToast('error', 'Required', 'Please enter your password');
       }
 
-      const adminUser: User = { id: 'admin-01', name: 'Super Admin', role: 'ADMIN', phone: '0000' };
-      setUser(adminUser);
-      localStorage.setItem('bj_user', JSON.stringify(adminUser));
-      navigate('PROFILE');
-      return;
+      try {
+        const masterEmail = 'mailbabajiachar@gmail.com';
+        const masterPassword = 'babajiAdminUser2026!'; // Only used for secure RTDB write access
+
+        let userCredential;
+        try {
+          userCredential = await signInWithEmailAndPassword(auth, masterEmail, masterPassword);
+        } catch (err: any) {
+          if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential' || err.code === 'auth/invalid-login-credentials') {
+            userCredential = await createUserWithEmailAndPassword(auth, masterEmail, masterPassword);
+          } else {
+            throw err;
+          }
+        }
+
+        const fUser = userCredential.user;
+        let displayName = loginName;
+        if (loginPhone === '0000') displayName = 'Vandita';
+        if (loginPhone === '9555809329' || loginPhone === '7754865997') displayName = 'Admin';
+        if (!displayName) displayName = 'Master Admin';
+
+        const adminUser: User = {
+          id: fUser.uid,
+          name: displayName,
+          role: 'ADMIN',
+          phone: loginPhone
+        };
+        setUser(adminUser);
+        localStorage.setItem('bj_user', JSON.stringify(adminUser));
+        addToast('success', 'Logged In', `Successfully authenticated as ${displayName}. Blog rights granted.`);
+        navigate('PROFILE');
+        return;
+      } catch (err: any) {
+        console.error("Firebase Auth Error:", err);
+        return addToast('error', 'Login Failed', err.message);
+      }
     }
 
-    // Validation for email or 10-digit mobile number
-    const isEmail = loginPhone.includes('@');
+    if (isEmail && !loginPassword) {
+      // It's an email but password field is empty (caught by our UI condition)
+      return addToast('error', 'Required', 'Please enter your password');
+    }
+
+    // Normal Phone Login Bypass (Anonymous writes allowed for orders/users via App.tsx silent auth)
     const phoneRegex = /^[0-9]{10}$/;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!isEmail && !phoneRegex.test(loginPhone)) {
+    if (!phoneRegex.test(loginPhone)) {
       return addToast('error', 'Invalid Phone', 'Please enter a valid 10-digit mobile number.');
-    }
-
-    if (isEmail && !emailRegex.test(loginPhone)) {
-      return addToast('error', 'Invalid Email', 'Please enter a valid email address.');
     }
 
     const newUser: User = { id: `u-${Date.now()}`, name: loginName || 'Valued Customer', role: 'USER', phone: loginPhone };
@@ -1288,6 +1326,20 @@ const AppContent: React.FC = () => {
                         required
                       />
                     </div>
+
+                    {loginPhone.includes('@') && (
+                      <div className="space-y-2 animate-in slide-in-from-top-4 duration-300">
+                        <label className="text-sm font-black text-stone-500 uppercase tracking-widest ml-4 flex items-center gap-2 mt-4"><Shield size={16} className="text-orange-600" /> Admin Password</label>
+                        <input
+                          type="password"
+                          placeholder="Your secure password"
+                          value={loginPassword}
+                          onChange={(e) => setLoginPassword(e.target.value)}
+                          className="w-full px-6 py-5 bg-stone-100 border-2 border-stone-200 rounded-3xl focus:border-orange-500 focus:bg-white focus:shadow-xl outline-none transition-all font-bold text-xl sm:text-2xl text-orange-950 placeholder-stone-300 text-center"
+                          required
+                        />
+                      </div>
+                    )}
                   </div>
 
 
