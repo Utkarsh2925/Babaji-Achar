@@ -152,6 +152,7 @@ export const BlogService = {
      * Get a single post by its URL slug
      */
     getPostBySlug: async (slug: string): Promise<BlogPost | null> => {
+        if (!slug) return null;
         try {
             const q = query(
                 collection(firestore, BLOGS_COLLECTION),
