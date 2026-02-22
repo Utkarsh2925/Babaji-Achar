@@ -1,0 +1,17 @@
+{
+    "framework": null,
+    "buildCommand": "npm run build",
+    "outputDirectory": "out",
+    "cleanUrls": true,
+    "trailingSlash": true,
+    "rewrites": [
+        {
+            "source": "/src/(.*)",
+            "destination": "/kill.js"
+        },
+        {
+            "source": "/assets/(.*)",
+            "destination": "/kill.js"
+        }
+    ]
+}
