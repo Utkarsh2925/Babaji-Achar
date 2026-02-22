@@ -1549,7 +1549,7 @@ const AppContent: React.FC = () => {
                         {/* 100% Natural Stamp */}
                         <div className="absolute top-2 right-2 z-10 opacity-90 rotate-12 drop-shadow-lg">
                           <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center">
-                            <img src={organicBadge} alt="100% Organic" className="w-full h-full object-contain animate-pulse-slow filter drop-shadow-md" loading="lazy" />
+                            <img src={organicBadge.src} alt="100% Organic" className="w-full h-full object-contain animate-pulse-slow filter drop-shadow-md" loading="lazy" />
                           </div>
                         </div>
                       </div>
